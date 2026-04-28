@@ -1,9 +1,13 @@
 slug: loewenbraeu
 name: Löwenbräu-Festzelt
-booking_url: https://www.loewenbraeuzelt.de/reservierungen/
-mode: manual
-enabled: false
+booking_url: https://reservierung.loewenbraeuzelt.de/reservierung
+mode: html
+enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Landing page links to a Festzelt-OS portal. Follow the booking button,
-  capture availability XHR via DevTools, and switch booking_url + api.
+  Server-rendered Festzelt-OS portal. As of 2026-04-28, Mo–Do only plus
+  Fri 02.10. No Fri 25 / Sat 26 / Sun.
+html:
+  url_template: https://reservierung.loewenbraeuzelt.de/reservierung
+  match_html: true
+  available_regex: 'value="{date}"'

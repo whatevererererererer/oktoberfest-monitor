@@ -20,8 +20,9 @@ class ApiConfig(BaseModel):
 class HtmlConfig(BaseModel):
     url_template: str
     selector: str | None = None
-    unavailable_regex: str = r"ausgebucht|leider belegt|nicht verf[üu]gbar|keine\s+tische"
+    unavailable_regex: str | None = None
     available_regex: str | None = None
+    match_html: bool = False  # if true, regex against raw HTML; else against stripped text
 
 
 class HashConfig(BaseModel):

@@ -21,20 +21,27 @@ def _render(template: str, iso_date: str) -> str:
 
 
 def fetch(cfg: HtmlConfig, iso_date: str, client: httpx.Client) -> Availability:
+    if cfg.available_regex is None and cfg.unavailable_regex is None:
+        raise ValueError("html config must define available_regex or unavailable_regex")
+
     r = client.get(_render(cfg.url_template, iso_date), headers=DEFAULT_HEADERS)
     r.raise_for_status()
-    tree = HTMLParser(r.text)
 
-    if cfg.selector:
-        node = tree.css_first(cfg.selector)
-        if node is None:
-            return "unknown"
-        text = node.text(strip=True)
+    if cfg.match_html:
+        haystack = r.text
     else:
-        text = tree.body.text(strip=True) if tree.body else r.text
+        tree = HTMLParser(r.text)
+        if cfg.selector:
+            node = tree.css_first(cfg.selector)
+            if node is None:
+                return "unknown"
+            haystack = node.text(strip=True)
+        else:
+            haystack = tree.body.text(strip=True) if tree.body else r.text
 
-    if cfg.available_regex and re.search(cfg.available_regex, text, re.IGNORECASE):
-        return "available"
-    if re.search(cfg.unavailable_regex, text, re.IGNORECASE):
-        return "unavailable"
-    return "available" if cfg.available_regex is None else "unavailable"
+    if cfg.available_regex:
+        pattern = _render(cfg.available_regex, iso_date)
+        return "available" if re.search(pattern, haystack, re.IGNORECASE) else "unavailable"
+
+    pattern = _render(cfg.unavailable_regex, iso_date)
+    return "unavailable" if re.search(pattern, haystack, re.IGNORECASE) else "available"

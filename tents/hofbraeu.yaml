@@ -1,18 +1,19 @@
 slug: hofbraeu
 name: Hofbräu-Festzelt
 booking_url: https://reservierung.hb-festzelt.de/reservierung
-mode: manual
-enabled: false
+mode: html
+enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  JS SPA. Open the booking page in Chrome/Safari with DevTools → Network,
-  pick a date in late September, capture the XHR returning availability JSON,
-  then switch to mode=api with the captured endpoint, payload and JSONPath.
-# Example once filled in:
-# mode: api
-# enabled: true
-# api:
-#   endpoint: https://reservierung.hb-festzelt.de/api/availability
-#   method: POST
-#   payload_template: '{"date":"{date}"}'
-#   unavailable_when: '$.status'   # truthy when sold out
+  Reservation page is server-rendered; the date dropdown is baked into the
+  initial HTML as <option value="YYYY-MM-DD">. Detection: regex for
+  value="{date}" in the raw HTML. If that string appears, the tent has added
+  the date to its public reservation form.
+
+  Currently Hofbräu only offers Mo–Do across both Wiesn weeks; Fri/Sat/Sun
+  do not appear and historically don't get released on this portal. We watch
+  anyway in case policy changes.
+html:
+  url_template: https://reservierung.hb-festzelt.de/reservierung
+  match_html: true
+  available_regex: 'value="{date}"'
