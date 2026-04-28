@@ -1,0 +1,18 @@
+slug: hofbraeu
+name: Hofbräu-Festzelt
+booking_url: https://reservierung.hb-festzelt.de/reservierung
+mode: manual
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  JS SPA. Open the booking page in Chrome/Safari with DevTools → Network,
+  pick a date in late September, capture the XHR returning availability JSON,
+  then switch to mode=api with the captured endpoint, payload and JSONPath.
+# Example once filled in:
+# mode: api
+# enabled: true
+# api:
+#   endpoint: https://reservierung.hb-festzelt.de/api/availability
+#   method: POST
+#   payload_template: '{"date":"{date}"}'
+#   unavailable_when: '$.status'   # truthy when sold out

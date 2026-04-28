@@ -1,0 +1,9 @@
+slug: hacker
+name: Hacker-Festzelt
+booking_url: https://reservierung.derhimmelderbayern.de/
+mode: manual
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  JS SPA hosted at reservierung.derhimmelderbayern.de (linked from
+  hacker-festzelt.de/reservierung/). Capture availability XHR via DevTools.

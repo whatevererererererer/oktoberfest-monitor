@@ -1,0 +1,10 @@
+slug: braeurosl
+name: Bräurosl
+booking_url: https://www.braeurosl.de/reservieren
+mode: manual
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  Landing page links to a Festzelt-OS portal (festzelt-os.com platform).
+  Follow the "Reservierungsanfrage" button, then capture availability XHR
+  on that portal via DevTools and switch booking_url + api accordingly.

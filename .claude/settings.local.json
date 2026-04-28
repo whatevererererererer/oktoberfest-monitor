@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(py --version)",
+      "Bash(python -m py_compile src/state.py src/config.py src/notify.py src/main.py src/fetchers/api.py src/fetchers/html.py src/fetchers/hash.py)",
+      "Bash(python -c ' *)",
+      "Bash(python -m pip install --quiet pyyaml pydantic httpx selectolax jsonpath-ng)",
+      "Bash(python -m src.main --dry-run)",
+      "Bash(git --version)",
+      "Bash(gh --version)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git -c user.email=\"nils.roelke@gmail.com\" -c user.name=\"Nils Roelke\" commit -m \"Initial commit: Oktoberfest 2026 reservation monitor\")"
+    ]
+  }
+}

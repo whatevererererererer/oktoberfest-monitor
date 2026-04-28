@@ -1,0 +1,9 @@
+slug: marstall
+name: Marstall
+booking_url: https://www.marstall-oktoberfest.de/musik.html
+mode: manual
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  Reservation flow goes via a Festzelt-OS portal linked from the main site.
+  Follow the booking button, capture availability XHR via DevTools, switch to api.

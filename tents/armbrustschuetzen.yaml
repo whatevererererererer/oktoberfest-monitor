@@ -1,0 +1,14 @@
+slug: armbrustschuetzen
+name: Armbrustschützen-Festhalle
+booking_url: https://www.armbrustschuetzenzelt.de/reservierung/reservierungsanfrage/
+mode: html
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  Server-rendered Reservierungsanfrage form. The form may always be present;
+  if so, html mode will report "available" continuously. Validate behavior
+  with a `--dry-run` first; if too noisy, switch to mode=manual and rely on
+  the tent's email confirmation flow.
+html:
+  url_template: https://www.armbrustschuetzenzelt.de/reservierung/reservierungsanfrage/
+  unavailable_regex: "ausgebucht|leider belegt|nicht verf[üu]gbar|keine\\s+pl(ä|a)tze"

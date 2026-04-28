@@ -1,0 +1,8 @@
+slug: paulaner
+name: Paulaner Festzelt (Winzerer Fähndl)
+booking_url: https://reservierung.paulanerfestzelt.de/reservierung
+mode: manual
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  JS SPA. Capture availability XHR via DevTools and switch to mode=api.

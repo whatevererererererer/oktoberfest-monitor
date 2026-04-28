@@ -1,0 +1,10 @@
+slug: kaefer
+name: Käfer Wiesn-Schänke
+booking_url: https://www.feinkost-kaefer.de/wiesn-schaenke
+mode: manual
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  Käfer reservations are predominantly via email/phone. There is no public
+  online availability calendar. Keep this tent in `mode: manual` unless an
+  online booking flow appears in a given year.

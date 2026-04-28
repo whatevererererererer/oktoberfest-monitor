@@ -1,0 +1,8 @@
+slug: schuetzen
+name: Schützen-Festzelt
+booking_url: https://reservierung.schuetzenfestzelt.com/reservation/
+mode: manual
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  JS SPA — raw HTML returns "Loading...". Capture availability XHR via DevTools.

@@ -1,0 +1,13 @@
+slug: augustiner
+name: Augustiner-Festhalle
+booking_url: https://www.festhalle-augustiner.com/reservierung/
+mode: html
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  Augustiner is mostly Stammgast/email reservations and rarely opens public
+  online slots. Expect noise. Page is server-rendered — html mode tries a
+  simple regex match. Disable (enabled: false) if it produces false alerts.
+html:
+  url_template: https://www.festhalle-augustiner.com/reservierung/
+  unavailable_regex: "ausgebucht|leider belegt|nicht verf[üu]gbar|stammg(a|ä)st"
