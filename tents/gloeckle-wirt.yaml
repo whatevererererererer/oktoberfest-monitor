@@ -1,0 +1,10 @@
+slug: gloeckle-wirt
+name: Glöckle Wirt
+booking_url: https://www.gloeckle-wirt.de/platzreservierung-oktoberfest-gloeckle-wirt
+mode: manual
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  Static info page. Reservation flow appears to be email/contact form,
+  no online date selector. Excluded from monitoring; reach out by email
+  if interested.

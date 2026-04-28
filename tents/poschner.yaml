@@ -1,0 +1,14 @@
+slug: poschner
+name: Poschner's Hühner- und Entenbraterei
+booking_url: https://reservierung.poschners.de/reservierung
+mode: html
+enabled: true
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  Mid-size tent, Festzelt-OS server-rendered portal. As of 2026-04-28
+  offers all days except both Saturdays (19, 26, 03 missing).
+  Fri 25.09 is currently in the dropdown.
+html:
+  url_template: https://reservierung.poschners.de/reservierung
+  match_html: true
+  available_regex: 'value="{date}"'

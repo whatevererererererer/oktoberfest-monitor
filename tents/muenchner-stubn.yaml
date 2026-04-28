@@ -1,0 +1,10 @@
+slug: muenchner-stubn
+name: Münchner Stubn
+booking_url: https://muenchner-stubn.de/reservierung/
+mode: manual
+enabled: false
+dates: ["2026-09-25", "2026-09-26"]
+notes: |
+  Reservations go through OpenTable widget embedded in the page. Different
+  platform from Festzelt-OS — needs a separate fetcher that talks to
+  OpenTable's availability API or uses Playwright to drive the widget.
