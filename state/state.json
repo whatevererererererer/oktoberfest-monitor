@@ -5,103 +5,103 @@
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-28T10:44:23+00:00",
-          "last_check": "2026-04-29T05:15:30+00:00",
+          "last_check": "2026-04-29T05:30:35+00:00",
           "status": "available"
         },
         "2026-09-26": {
           "last_change": "2026-04-28T10:44:24+00:00",
-          "last_check": "2026-04-29T05:15:30+00:00",
+          "last_check": "2026-04-29T05:30:35+00:00",
           "status": "unavailable"
         }
       },
       "last_error": null,
-      "last_success_at": "2026-04-29T05:15:30+00:00"
+      "last_success_at": "2026-04-29T05:30:35+00:00"
     },
     "fischer-vroni": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-28T10:44:27+00:00",
-          "last_check": "2026-04-29T05:15:32+00:00",
+          "last_check": "2026-04-29T05:30:38+00:00",
           "status": "available"
         },
         "2026-09-26": {
           "last_change": "2026-04-28T10:44:27+00:00",
-          "last_check": "2026-04-29T05:15:33+00:00",
+          "last_check": "2026-04-29T05:30:39+00:00",
           "status": "unavailable"
         }
       },
       "last_error": null,
-      "last_success_at": "2026-04-29T05:15:33+00:00"
+      "last_success_at": "2026-04-29T05:30:39+00:00"
     },
     "hofbraeu": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-28T10:44:29+00:00",
-          "last_check": "2026-04-29T05:15:36+00:00",
+          "last_check": "2026-04-29T05:30:41+00:00",
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-04-28T10:44:30+00:00",
-          "last_check": "2026-04-29T05:15:36+00:00",
+          "last_check": "2026-04-29T05:30:41+00:00",
           "status": "unavailable"
         }
       },
       "last_error": null,
-      "last_success_at": "2026-04-29T05:15:36+00:00"
+      "last_success_at": "2026-04-29T05:30:41+00:00"
     },
     "loewenbraeu": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-28T10:44:32+00:00",
-          "last_check": "2026-04-29T05:15:40+00:00",
+          "last_check": "2026-04-29T05:30:43+00:00",
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-04-28T10:44:33+00:00",
-          "last_check": "2026-04-29T05:15:40+00:00",
+          "last_check": "2026-04-29T05:30:43+00:00",
           "status": "unavailable"
         }
       },
       "last_error": null,
-      "last_success_at": "2026-04-29T05:15:40+00:00"
+      "last_success_at": "2026-04-29T05:30:43+00:00"
     },
     "paulaner": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-28T10:44:36+00:00",
-          "last_check": "2026-04-29T05:15:43+00:00",
+          "last_check": "2026-04-29T05:30:46+00:00",
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-04-28T10:44:36+00:00",
-          "last_check": "2026-04-29T05:15:43+00:00",
+          "last_check": "2026-04-29T05:30:47+00:00",
           "status": "unavailable"
         }
       },
       "last_error": null,
-      "last_success_at": "2026-04-29T05:15:43+00:00"
+      "last_success_at": "2026-04-29T05:30:47+00:00"
     },
     "poschner": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-28T10:44:38+00:00",
-          "last_check": "2026-04-29T05:15:47+00:00",
+          "last_check": "2026-04-29T05:30:49+00:00",
           "status": "available"
         },
         "2026-09-26": {
           "last_change": "2026-04-28T10:44:39+00:00",
-          "last_check": "2026-04-29T05:15:47+00:00",
+          "last_check": "2026-04-29T05:30:49+00:00",
           "status": "unavailable"
         }
       },
       "last_error": null,
-      "last_success_at": "2026-04-29T05:15:47+00:00"
+      "last_success_at": "2026-04-29T05:30:49+00:00"
     }
   },
-  "workflow_last_run_at": "2026-04-29T05:15:26+00:00"
+  "workflow_last_run_at": "2026-04-29T05:30:32+00:00"
 }
