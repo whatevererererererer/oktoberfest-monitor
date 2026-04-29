@@ -11,6 +11,7 @@ import httpx
 
 from .config import TentConfig, load_tents
 from .fetchers import api as api_fetcher
+from .fetchers import festzelt_os as festzelt_os_fetcher
 from .fetchers import hash as hash_fetcher
 from .fetchers import headless as headless_fetcher
 from .fetchers import html as html_fetcher
@@ -48,6 +49,71 @@ def _check_one(cfg: TentConfig, iso_date: str, client: httpx.Client, prev_hash: 
     raise ValueError(f"unknown mode {cfg.mode}")
 
 
+def _process_result(
+    cfg: TentConfig,
+    tent_state: TentState,
+    iso_date: str,
+    new_status: str,
+    new_shifts: list[str] | None,
+    *,
+    dry_run: bool,
+    aggregate_errors: list,
+) -> None:
+    """Update state for one (tent, date), fire Pushover on transitions or shift changes."""
+    ds = tent_state.dates.setdefault(iso_date, TentDateState())
+    prev_status = ds.status
+    prev_shifts = list(ds.shifts)
+
+    ds.last_check = now_iso()
+
+    if new_status != prev_status:
+        log.info("%s/%s: %s -> %s", cfg.slug, iso_date, prev_status, new_status)
+        if cfg.mode != "hash":
+            ds.last_change = now_iso()
+    ds.status = new_status
+    if new_shifts is not None:
+        ds.shifts = list(new_shifts)
+
+    became_available = new_status == "available" and prev_status in ("unavailable", "unknown")
+    shifts_added: list[str] = []
+    # Only consider shift changes when we have a non-empty prior baseline,
+    # otherwise the first post-migration run would spuriously alert.
+    if (
+        not became_available
+        and new_status == "available"
+        and prev_status == "available"
+        and new_shifts is not None
+        and prev_shifts
+    ):
+        added = [s for s in new_shifts if s not in prev_shifts]
+        if added:
+            shifts_added = added
+            log.info("%s/%s: shifts added %s (now %s)", cfg.slug, iso_date, added, new_shifts)
+
+    if became_available or shifts_added:
+        reason = "shifts_added" if shifts_added and not became_available else "available"
+        log.info("%s/%s: notifying (%s)", cfg.slug, iso_date, reason)
+        if dry_run:
+            log.info(
+                "dry-run: would notify %s/%s reason=%s shifts=%s new=%s",
+                cfg.slug, iso_date, reason, new_shifts, shifts_added,
+            )
+            return
+        try:
+            alert_available(
+                tent_name=cfg.name,
+                tent_slug=cfg.slug,
+                iso_date=iso_date,
+                booking_url=cfg.booking_url,
+                shifts=new_shifts or [],
+                new_shifts=shifts_added or None,
+                reason=reason,
+            )
+        except Exception as e:
+            log.error("pushover failed for %s/%s: %s", cfg.slug, iso_date, e)
+            aggregate_errors.append(f"pushover: {e}")
+
+
 def run(*, dry_run: bool = False) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     state = load(STATE_PATH)
@@ -57,10 +123,10 @@ def run(*, dry_run: bool = False) -> int:
     log.info("checking %d tents", len(tents))
 
     aggregate_errors: list[str] = []
-    needs_headless = any(t.mode == "headless" for t in tents)
+    needs_browser = any(t.mode in ("headless", "festzelt_os") for t in tents)
     pw_ctx = None
     browser = None
-    if needs_headless:
+    if needs_browser:
         try:
             pw_ctx, browser = headless_fetcher.launch_browser()
         except Exception as e:
@@ -71,56 +137,50 @@ def run(*, dry_run: bool = False) -> int:
         for cfg in tents:
             tent_state = state.tents.setdefault(cfg.slug, TentState())
             time.sleep(random.uniform(1.0, 3.0))
-
             tent_failed_this_run = False
-            for iso_date in cfg.dates:
-                ds = tent_state.dates.setdefault(iso_date, TentDateState())
-                prev_status = ds.status
 
-                # For mode=hash we stash the previous hash in last_change misuse-free:
-                # use a dedicated field on TentDateState would be cleaner, but mode=hash
-                # is a fallback — store the hash in last_change as "hash:<sha>".
-                prev_hash = None
-                if cfg.mode == "hash" and ds.last_change and ds.last_change.startswith("hash:"):
-                    prev_hash = ds.last_change[5:]
-
-                try:
-                    new_status, new_hash = _check_one(cfg, iso_date, client, prev_hash, browser=browser)
-                except Exception as e:
-                    log.warning("%s/%s: fetch failed: %s", cfg.slug, iso_date, e)
-                    ds.status = "error"
-                    ds.last_check = now_iso()
+            if cfg.mode == "festzelt_os":
+                assert cfg.festzelt_os, f"{cfg.slug}: mode=festzelt_os requires block"
+                if browser is None:
+                    log.warning("%s: no browser available, skipping", cfg.slug)
                     tent_failed_this_run = True
-                    aggregate_errors.append(f"{cfg.slug}/{iso_date}: {e}")
-                    continue
-
-                ds.last_check = now_iso()
-                if cfg.mode == "hash" and new_hash:
-                    ds.last_change = f"hash:{new_hash}"
-
-                if new_status != prev_status:
-                    log.info("%s/%s: %s -> %s", cfg.slug, iso_date, prev_status, new_status)
-                    if cfg.mode != "hash":
-                        ds.last_change = now_iso()
-
-                ds.status = new_status
-
-                # Trigger: transition into "available"
-                if new_status == "available" and prev_status in ("unavailable", "unknown"):
-                    log.info("%s/%s: notifying", cfg.slug, iso_date)
-                    if dry_run:
-                        log.info("dry-run: would notify %s/%s", cfg.slug, iso_date)
-                    else:
-                        try:
-                            alert_available(
-                                tent_name=cfg.name,
-                                tent_slug=cfg.slug,
-                                iso_date=iso_date,
-                                booking_url=cfg.booking_url,
+                else:
+                    try:
+                        results = festzelt_os_fetcher.fetch(cfg.festzelt_os, cfg.dates, browser)
+                        for iso_date, (status, shifts) in results.items():
+                            if status == "error":
+                                tent_failed_this_run = True
+                                aggregate_errors.append(f"{cfg.slug}/{iso_date}: shift probe error")
+                                continue
+                            _process_result(
+                                cfg, tent_state, iso_date, status, shifts,
+                                dry_run=dry_run, aggregate_errors=aggregate_errors,
                             )
-                        except Exception as e:
-                            log.error("pushover failed for %s/%s: %s", cfg.slug, iso_date, e)
-                            aggregate_errors.append(f"pushover: {e}")
+                    except Exception as e:
+                        log.warning("%s: fetch failed: %s", cfg.slug, e)
+                        tent_failed_this_run = True
+                        aggregate_errors.append(f"{cfg.slug}: {e}")
+            else:
+                for iso_date in cfg.dates:
+                    ds = tent_state.dates.setdefault(iso_date, TentDateState())
+                    prev_hash = None
+                    if cfg.mode == "hash" and ds.last_change and ds.last_change.startswith("hash:"):
+                        prev_hash = ds.last_change[5:]
+                    try:
+                        new_status, new_hash = _check_one(cfg, iso_date, client, prev_hash, browser=browser)
+                    except Exception as e:
+                        log.warning("%s/%s: fetch failed: %s", cfg.slug, iso_date, e)
+                        ds.status = "error"
+                        ds.last_check = now_iso()
+                        tent_failed_this_run = True
+                        aggregate_errors.append(f"{cfg.slug}/{iso_date}: {e}")
+                        continue
+                    if cfg.mode == "hash" and new_hash:
+                        ds.last_change = f"hash:{new_hash}"
+                    _process_result(
+                        cfg, tent_state, iso_date, new_status, None,
+                        dry_run=dry_run, aggregate_errors=aggregate_errors,
+                    )
 
             if tent_failed_this_run:
                 tent_state.consecutive_failures += 1
@@ -142,7 +202,6 @@ def run(*, dry_run: bool = False) -> int:
 
     save(STATE_PATH, state)
 
-    # Aggregate-failure alert: tents that have failed FAILURE_THRESHOLD+ times in a row.
     persistently_broken = [
         slug for slug, ts in state.tents.items() if ts.consecutive_failures >= FAILURE_THRESHOLD
     ]

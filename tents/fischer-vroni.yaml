@@ -1,14 +1,10 @@
 slug: fischer-vroni
 name: Fischer-Vroni
 booking_url: https://reservierung.fischer-vroni.de/reservation
-mode: html
+mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Server-rendered dropdown. As of 2026-04-28, Fischer-Vroni is the ONLY
-  big tent we've checked that lists Fri 25.09.2026 as a selectable date.
-  Sat 26.09 still not offered.
-html:
+  Festzelt-OS server-rendered. Offers Fr 25.09 (Mittag only as of 2026-04-29).
+festzelt_os:
   url_template: https://reservierung.fischer-vroni.de/reservation
-  match_html: true
-  available_regex: 'value="{date}"'

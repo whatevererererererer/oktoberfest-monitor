@@ -1,13 +1,13 @@
 slug: weinzelt
 name: Kuffler Weinzelt
 booking_url: https://reservierung.weinzelt.com/reservation
-mode: headless
+mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Nuxt.js SPA (different platform from Festzelt-OS). Currently Mo–Do
-  both weeks. No Fr 25, no Sa 26.
-headless:
+  Nuxt.js SPA. Different platform from Festzelt-OS but same select-based
+  UI — date <select> with German weekday options + shift <select>.
+  Mo–Do both weeks; Mo/Di week 1 + Mo week 2 have Nachmittag.
+festzelt_os:
   url_template: https://reservierung.weinzelt.com/reservation
-  wait_extra_ms: 6000
-  available_regex: '{de_date}'
+  wait_extra_ms: 7000

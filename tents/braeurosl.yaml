@@ -1,13 +1,10 @@
 slug: braeurosl
 name: Bräurosl
 booking_url: https://reservierung.braeurosl.de/reservation/
-mode: html
+mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Server-rendered Festzelt-OS portal. As of 2026-04-28, Bräurosl lists
-  Fri 25.09.2026 as a selectable date. Sat 26.09 not offered.
-html:
+  Festzelt-OS server-rendered. Offers Fr 25.09 (Mittag only as of 2026-04-29).
+festzelt_os:
   url_template: https://reservierung.braeurosl.de/reservation/
-  match_html: true
-  available_regex: 'value="{date}"'

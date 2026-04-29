@@ -1,19 +1,10 @@
 slug: hofbraeu
 name: Hofbräu-Festzelt
 booking_url: https://reservierung.hb-festzelt.de/reservierung
-mode: html
+mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Reservation page is server-rendered; the date dropdown is baked into the
-  initial HTML as <option value="YYYY-MM-DD">. Detection: regex for
-  value="{date}" in the raw HTML. If that string appears, the tent has added
-  the date to its public reservation form.
-
-  Currently Hofbräu only offers Mo–Do across both Wiesn weeks; Fri/Sat/Sun
-  do not appear and historically don't get released on this portal. We watch
-  anyway in case policy changes.
-html:
+  Festzelt-OS server-rendered. Currently Mo–Do only, Mittag only.
+festzelt_os:
   url_template: https://reservierung.hb-festzelt.de/reservierung
-  match_html: true
-  available_regex: 'value="{date}"'

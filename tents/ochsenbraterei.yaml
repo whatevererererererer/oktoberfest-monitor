@@ -1,13 +1,11 @@
 slug: ochsenbraterei
 name: Ochsenbraterei
 booking_url: https://reservierung.ochsenbraterei.de/
-mode: headless
+mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  SPA. Currently only So 04.10 in dropdown — likely most reservations
-  not yet released, or strict Stammgast policy.
-headless:
+  SPA. Currently only So 04.10 in dropdown. No Fr 25 / Sa 26.
+festzelt_os:
   url_template: https://reservierung.ochsenbraterei.de/
-  wait_extra_ms: 6000
-  available_regex: '{de_date}'
+  wait_extra_ms: 7000

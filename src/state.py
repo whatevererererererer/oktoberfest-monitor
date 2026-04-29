@@ -14,6 +14,7 @@ class TentDateState(BaseModel):
     status: Availability = "unknown"
     last_check: str | None = None
     last_change: str | None = None
+    shifts: list[str] = Field(default_factory=list)
 
 
 class TentState(BaseModel):

@@ -1,13 +1,11 @@
 slug: marstall
 name: Marstall
 booking_url: https://reservierung.marstall-oktoberfest.de/reservation
-mode: headless
+mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  SPA. Currently So 20, Mo–Mi 21–23, So 27, Mo–Mi 28–30, So 04.10 —
-  Sundays + Mo-Mi. No Do/Fr/Sa offered. No Fr 25, no Sa 26.
-headless:
+  Festzelt-OS SPA. So + Mo–Mi pattern; Mi 23 & Mi 30 have Nachmittag.
+festzelt_os:
   url_template: https://reservierung.marstall-oktoberfest.de/reservation
-  wait_extra_ms: 5000
-  available_regex: '{de_date}'
+  wait_extra_ms: 6000

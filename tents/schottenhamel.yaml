@@ -1,14 +1,12 @@
 slug: schottenhamel
 name: Schottenhamel-Festhalle
 booking_url: https://reservierung.festhalle-schottenhamel.de/reservation/
-mode: headless
+mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Festzelt-OS SPA. Page explicitly states no Abendreservierungen
-  ("aufgrund unserer vorgemerkten Stammkunden keine Abendreservierungen").
-  As of 2026-04-29 dropdown shows Mo–Do + So 27. No Fr 25, no Sa 26.
-headless:
+  Festzelt-OS SPA. Page states no Abendreservierungen. Offers Mittag +
+  Nachmittag on Mo–Mi both weeks. No Fr 25 / Sa 26.
+festzelt_os:
   url_template: https://reservierung.festhalle-schottenhamel.de/reservation/
-  wait_extra_ms: 5000
-  available_regex: '{de_date}'
+  wait_extra_ms: 6000

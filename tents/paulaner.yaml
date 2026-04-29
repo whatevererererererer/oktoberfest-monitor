@@ -1,13 +1,10 @@
 slug: paulaner
 name: Paulaner Festzelt (Winzerer Fähndl)
 booking_url: https://reservierung.paulanerfestzelt.de/reservierung
-mode: html
+mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Same Festzelt-OS pattern as Hofbräu — date dropdown server-rendered as
-  <option value="YYYY-MM-DD">. Currently Mo–Do only across both weeks.
-html:
+  Festzelt-OS server-rendered. Currently Mo–Do only, Mittag only.
+festzelt_os:
   url_template: https://reservierung.paulanerfestzelt.de/reservierung
-  match_html: true
-  available_regex: 'value="{date}"'

@@ -34,16 +34,24 @@ class HeadlessConfig(BaseModel):
     url_template: str
     wait_until: Literal["load", "domcontentloaded", "networkidle"] = "domcontentloaded"
     wait_extra_ms: int = 4000
-    selector: str | None = None  # if set, use innerText of this element instead of body
-    available_regex: str | None = None  # supports {date} (ISO) and {de_date} (German "25. September 2026")
+    selector: str | None = None
+    available_regex: str | None = None
     unavailable_regex: str | None = None
+
+
+class FestzeltOsConfig(BaseModel):
+    """Tent-level batch fetcher: detects per-date status + shift options."""
+    url_template: str
+    wait_until: Literal["load", "domcontentloaded", "networkidle"] = "domcontentloaded"
+    wait_extra_ms: int = 5000
+    shift_wait_ms: int = 2500
 
 
 class TentConfig(BaseModel):
     slug: str
     name: str
     booking_url: str
-    mode: Literal["api", "html", "hash", "headless", "manual"]
+    mode: Literal["api", "html", "hash", "headless", "festzelt_os", "manual"]
     dates: list[str]
     enabled: bool = True
     notes: str | None = None
@@ -51,6 +59,7 @@ class TentConfig(BaseModel):
     html: HtmlConfig | None = None
     hash: HashConfig | None = None
     headless: HeadlessConfig | None = None
+    festzelt_os: FestzeltOsConfig | None = None
 
 
 def load_tents(tents_dir: Path) -> list[TentConfig]:

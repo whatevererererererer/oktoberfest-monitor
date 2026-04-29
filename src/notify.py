@@ -36,13 +36,23 @@ def alert_available(
     tent_slug: str,
     iso_date: str,
     booking_url: str,
+    shifts: list[str] | None = None,
+    new_shifts: list[str] | None = None,
+    reason: str = "available",
 ) -> None:
     token = os.environ["PUSHOVER_TOKEN"]
     user = os.environ["PUSHOVER_USER"]
     when = datetime.now().strftime("%H:%M")
+    shifts_str = f" [{', '.join(shifts)}]" if shifts else ""
+    if reason == "shifts_added" and new_shifts:
+        title = f"Wiesn NEU: {tent_name} — {_format_german_date(iso_date)} +{', '.join(new_shifts)}"
+        message = f"Neue Schicht erkannt {when}: {', '.join(new_shifts)}. Bestand: {', '.join(shifts or [])}. Tippen zum Buchen."
+    else:
+        title = f"Wiesn FREI: {tent_name} — {_format_german_date(iso_date)}{shifts_str}"
+        message = f"Verfügbarkeit erkannt {when}. Tippen zum Buchen."
     payload = {
-        "title": f"Wiesn FREI: {tent_name} — {_format_german_date(iso_date)}",
-        "message": f"Verfügbarkeit erkannt {when}. Tippen zum Buchen.",
+        "title": title,
+        "message": message,
         "url": _booking_url_with_date(booking_url, iso_date),
         "url_title": "Jetzt reservieren",
         "priority": 1,
