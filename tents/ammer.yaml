@@ -1,11 +1,9 @@
 slug: ammer
-name: Ammer Hühner- und Entenbraterei
+name: Ammer Hühner- und Entenbraterei (Oide Wiesn)
 booking_url: https://www.ammer-wiesn.de/reservierung
 mode: manual
 enabled: false
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Ammer's reservation page loads but contains no Wiesn 2026 dates as of
-  2026-04-28 (only generic 2026-02/03 references — likely a JS calendar
-  widget that hasn't been initialized for September yet, or 2026 dates
-  not yet released). Re-probe in May/June. May need Playwright.
+  EXCLUDED — Ammer is on the Oide Wiesn. User opted out of all Oide
+  Wiesn tents per original scope. Do not enable.
