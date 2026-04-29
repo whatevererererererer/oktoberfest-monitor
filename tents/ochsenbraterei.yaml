@@ -1,8 +1,13 @@
 slug: ochsenbraterei
 name: Ochsenbraterei
 booking_url: https://reservierung.ochsenbraterei.de/
-mode: manual
-enabled: false
+mode: headless
+enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  JS SPA. Capture availability XHR via DevTools and switch to mode=api.
+  SPA. Currently only So 04.10 in dropdown — likely most reservations
+  not yet released, or strict Stammgast policy.
+headless:
+  url_template: https://reservierung.ochsenbraterei.de/
+  wait_extra_ms: 6000
+  available_regex: '{de_date}'

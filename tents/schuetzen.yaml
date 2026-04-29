@@ -1,8 +1,13 @@
 slug: schuetzen
 name: Schützen-Festzelt
 booking_url: https://reservierung.schuetzenfestzelt.com/reservation/
-mode: manual
-enabled: false
+mode: headless
+enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  JS SPA — raw HTML returns "Loading...". Capture availability XHR via DevTools.
+  Festzelt-OS SPA. Currently only Di 22, Mi 23, Mo 28 in dropdown
+  (very sparse — most slots reserved for Stammgäste). No Fr 25, no Sa 26.
+headless:
+  url_template: https://reservierung.schuetzenfestzelt.com/reservation/
+  wait_extra_ms: 5000
+  available_regex: '{de_date}'

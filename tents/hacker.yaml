@@ -5,5 +5,7 @@ mode: manual
 enabled: false
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  JS SPA hosted at reservierung.derhimmelderbayern.de (linked from
-  hacker-festzelt.de/reservierung/). Capture availability XHR via DevTools.
+  Plain HTTP returns 403 (anti-bot). Playwright also rendered no dates
+  during probe — likely additional Cloudflare Turnstile/JS challenge
+  blocks headless browsers too. Park; revisit with stealth plugin or
+  by reverse-engineering API with proper headers from real browser.

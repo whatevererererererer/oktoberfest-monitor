@@ -30,17 +30,27 @@ class HashConfig(BaseModel):
     selector: str | None = None
 
 
+class HeadlessConfig(BaseModel):
+    url_template: str
+    wait_until: Literal["load", "domcontentloaded", "networkidle"] = "domcontentloaded"
+    wait_extra_ms: int = 4000
+    selector: str | None = None  # if set, use innerText of this element instead of body
+    available_regex: str | None = None  # supports {date} (ISO) and {de_date} (German "25. September 2026")
+    unavailable_regex: str | None = None
+
+
 class TentConfig(BaseModel):
     slug: str
     name: str
     booking_url: str
-    mode: Literal["api", "html", "hash", "manual"]
+    mode: Literal["api", "html", "hash", "headless", "manual"]
     dates: list[str]
     enabled: bool = True
     notes: str | None = None
     api: ApiConfig | None = None
     html: HtmlConfig | None = None
     hash: HashConfig | None = None
+    headless: HeadlessConfig | None = None
 
 
 def load_tents(tents_dir: Path) -> list[TentConfig]:

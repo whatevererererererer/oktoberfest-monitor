@@ -1,11 +1,13 @@
 slug: marstall
 name: Marstall
 booking_url: https://reservierung.marstall-oktoberfest.de/reservation
-mode: manual
-enabled: false
+mode: headless
+enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  True SPA — initial HTML contains no <option value="...">; the date list
-  is rendered client-side via Livewire after page load. Plain HTTP can't
-  see it. Needs Playwright headless to monitor. Park until we ship the
-  headless fetcher.
+  SPA. Currently So 20, Mo–Mi 21–23, So 27, Mo–Mi 28–30, So 04.10 —
+  Sundays + Mo-Mi. No Do/Fr/Sa offered. No Fr 25, no Sa 26.
+headless:
+  url_template: https://reservierung.marstall-oktoberfest.de/reservation
+  wait_extra_ms: 5000
+  available_regex: '{de_date}'

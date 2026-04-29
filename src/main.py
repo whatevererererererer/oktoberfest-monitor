@@ -12,6 +12,7 @@ import httpx
 from .config import TentConfig, load_tents
 from .fetchers import api as api_fetcher
 from .fetchers import hash as hash_fetcher
+from .fetchers import headless as headless_fetcher
 from .fetchers import html as html_fetcher
 from .notify import alert_available, alert_error
 from .state import State, TentDateState, TentState, load, now_iso, save
@@ -25,7 +26,7 @@ FAILURE_THRESHOLD = 3
 log = logging.getLogger("wiesn")
 
 
-def _check_one(cfg: TentConfig, iso_date: str, client: httpx.Client, prev_hash: str | None):
+def _check_one(cfg: TentConfig, iso_date: str, client: httpx.Client, prev_hash: str | None, browser=None):
     if cfg.mode == "api":
         assert cfg.api, f"{cfg.slug}: mode=api requires api block"
         return api_fetcher.fetch(cfg.api, iso_date, client), None
@@ -38,6 +39,10 @@ def _check_one(cfg: TentConfig, iso_date: str, client: httpx.Client, prev_hash: 
         if prev_hash is None:
             return "unknown", h
         return ("available" if h != prev_hash else "unavailable"), h
+    if cfg.mode == "headless":
+        assert cfg.headless, f"{cfg.slug}: mode=headless requires headless block"
+        assert browser is not None, "headless mode requires a Playwright browser"
+        return headless_fetcher.fetch(cfg.headless, iso_date, browser), None
     if cfg.mode == "manual":
         return "unknown", None
     raise ValueError(f"unknown mode {cfg.mode}")
@@ -52,6 +57,15 @@ def run(*, dry_run: bool = False) -> int:
     log.info("checking %d tents", len(tents))
 
     aggregate_errors: list[str] = []
+    needs_headless = any(t.mode == "headless" for t in tents)
+    pw_ctx = None
+    browser = None
+    if needs_headless:
+        try:
+            pw_ctx, browser = headless_fetcher.launch_browser()
+        except Exception as e:
+            log.error("could not launch playwright browser: %s", e)
+            aggregate_errors.append(f"playwright launch: {e}")
 
     with httpx.Client(timeout=15, follow_redirects=True) as client:
         for cfg in tents:
@@ -71,7 +85,7 @@ def run(*, dry_run: bool = False) -> int:
                     prev_hash = ds.last_change[5:]
 
                 try:
-                    new_status, new_hash = _check_one(cfg, iso_date, client, prev_hash)
+                    new_status, new_hash = _check_one(cfg, iso_date, client, prev_hash, browser=browser)
                 except Exception as e:
                     log.warning("%s/%s: fetch failed: %s", cfg.slug, iso_date, e)
                     ds.status = "error"
@@ -114,6 +128,17 @@ def run(*, dry_run: bool = False) -> int:
             else:
                 tent_state.consecutive_failures = 0
                 tent_state.last_success_at = now_iso()
+
+    if browser is not None:
+        try:
+            browser.close()
+        except Exception:
+            pass
+    if pw_ctx is not None:
+        try:
+            pw_ctx.stop()
+        except Exception:
+            pass
 
     save(STATE_PATH, state)
 
