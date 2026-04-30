@@ -53,7 +53,17 @@ jobs:
           git add state/state.json
           if git diff --cached --quiet; then
             echo "no state change"
-          else
-            git commit -m "state: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            git push
+            exit 0
           fi
+          git commit -m "state: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "pushed on attempt $i"
+              exit 0
+            fi
+            echo "push rejected, rebasing and retrying ($i/5)..."
+            git pull --rebase origin main || git rebase --abort || true
+            sleep $((RANDOM % 5 + 1))
+          done
+          echo "push failed after 5 attempts; next run will pick up"
+          exit 0
