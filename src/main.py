@@ -214,7 +214,12 @@ def run(*, dry_run: bool = False) -> int:
         except Exception as e:
             log.error("error-pushover failed: %s", e)
 
-    return 0 if not aggregate_errors else 1
+    # Always return 0 for transient tent-level errors. Persistent failures are
+    # escalated via the Pushover error app (consecutive_failures >= threshold).
+    # Returning 1 only when nothing succeeded would still cause spam, so 0 always.
+    if aggregate_errors:
+        log.info("run had %d non-fatal errors; exiting 0 anyway", len(aggregate_errors))
+    return 0
 
 
 def main() -> int:
