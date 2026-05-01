@@ -11,9 +11,12 @@ PUSHOVER_API = "https://api.pushover.net/1/messages.json"
 WEEKDAY_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
 
-def _format_german_date(iso_date: str) -> str:
-    d = date_type.fromisoformat(iso_date)
-    return f"{WEEKDAY_DE[d.weekday()]} {d.strftime('%d.%m.%Y')}"
+def _weekday_short(iso_date: str) -> str:
+    return WEEKDAY_DE[date_type.fromisoformat(iso_date).weekday()]
+
+
+def _de_numeric_date(iso_date: str) -> str:
+    return date_type.fromisoformat(iso_date).strftime("%d.%m.%Y")
 
 
 def _booking_url_with_date(booking_url: str, iso_date: str) -> str:
@@ -43,12 +46,19 @@ def alert_available(
     token = os.environ["PUSHOVER_TOKEN"]
     user = os.environ["PUSHOVER_USER"]
     when = datetime.now().strftime("%H:%M")
-    shifts_str = f" [{', '.join(shifts)}]" if shifts else ""
+    weekday = _weekday_short(iso_date)
+    de_date = _de_numeric_date(iso_date)
+
     if reason == "shifts_added" and new_shifts:
-        title = f"Wiesn NEU: {tent_name} — {_format_german_date(iso_date)} +{', '.join(new_shifts)}"
-        message = f"Neue Schicht erkannt {when}: {', '.join(new_shifts)}. Bestand: {', '.join(shifts or [])}. Tippen zum Buchen."
+        # Mark newly added shifts with a leading "+", keep order: new first, then existing
+        new_set = set(new_shifts)
+        ordered = [f"+{s}" for s in new_shifts] + [s for s in (shifts or []) if s not in new_set]
+        shifts_label = ", ".join(ordered) if ordered else "+?"
+        title = f"[{shifts_label}] {weekday} {tent_name} {de_date}"
+        message = f"Neue Schicht erkannt {when}. Tippen zum Buchen."
     else:
-        title = f"Wiesn FREI: {tent_name} — {_format_german_date(iso_date)}{shifts_str}"
+        shifts_label = ", ".join(shifts) if shifts else "?"
+        title = f"[{shifts_label}] {weekday} {tent_name} {de_date}"
         message = f"Verfügbarkeit erkannt {when}. Tippen zum Buchen."
     payload = {
         "title": title,
