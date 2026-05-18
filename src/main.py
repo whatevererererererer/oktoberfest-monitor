@@ -130,7 +130,7 @@ def run(*, dry_run: bool = False) -> int:
         try:
             pw_ctx, browser = headless_fetcher.launch_browser()
         except Exception as e:
-            log.error("could not launch playwright browser: %s", e)
+            log.error("could not launch playwright browser: %s", e, exc_info=True)
             aggregate_errors.append(f"playwright launch: {e}")
 
     with httpx.Client(timeout=15, follow_redirects=True) as client:
@@ -157,7 +157,7 @@ def run(*, dry_run: bool = False) -> int:
                                 dry_run=dry_run, aggregate_errors=aggregate_errors,
                             )
                     except Exception as e:
-                        log.warning("%s: fetch failed: %s", cfg.slug, e)
+                        log.warning("%s: fetch failed: %s", cfg.slug, e, exc_info=True)
                         tent_failed_this_run = True
                         aggregate_errors.append(f"{cfg.slug}: {e}")
             else:
