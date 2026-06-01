@@ -5,26 +5,26 @@
       "dates": {
         "2026-09-25": {
           "last_change": "2026-05-11T16:10:57+00:00",
-          "last_check": "2026-06-01T19:41:00+00:00",
+          "last_check": "2026-06-01T19:45:58+00:00",
           "shifts": [],
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-05-10T15:56:02+00:00",
-          "last_check": "2026-06-01T19:41:00+00:00",
+          "last_check": "2026-06-01T19:45:58+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-27T12:58:33+00:00",
-      "last_success_at": "2026-06-01T19:41:00+00:00"
+      "last_success_at": "2026-06-01T19:45:58+00:00"
     },
     "fischer-vroni": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-28T10:44:27+00:00",
-          "last_check": "2026-06-01T19:41:14+00:00",
+          "last_check": "2026-06-01T19:46:11+00:00",
           "shifts": [
             "Mittag"
           ],
@@ -32,7 +32,7 @@
         },
         "2026-09-26": {
           "last_change": "2026-06-01T19:31:10+00:00",
-          "last_check": "2026-06-01T19:41:14+00:00",
+          "last_check": "2026-06-01T19:46:11+00:00",
           "shifts": [
             "Mittag"
           ],
@@ -40,109 +40,109 @@
         }
       },
       "last_error": "2026-05-18T18:41:12+00:00",
-      "last_success_at": "2026-06-01T19:41:14+00:00"
+      "last_success_at": "2026-06-01T19:46:11+00:00"
     },
     "hofbraeu": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-05-21T07:46:13+00:00",
-          "last_check": "2026-06-01T19:41:21+00:00",
+          "last_check": "2026-06-01T19:46:19+00:00",
           "shifts": [],
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-04-28T10:44:30+00:00",
-          "last_check": "2026-06-01T19:41:21+00:00",
+          "last_check": "2026-06-01T19:46:19+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-18T18:41:15+00:00",
-      "last_success_at": "2026-06-01T19:41:21+00:00"
+      "last_success_at": "2026-06-01T19:46:19+00:00"
     },
     "loewenbraeu": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-28T10:44:32+00:00",
-          "last_check": "2026-06-01T19:41:29+00:00",
+          "last_check": "2026-06-01T19:46:27+00:00",
           "shifts": [],
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-04-28T10:44:33+00:00",
-          "last_check": "2026-06-01T19:41:29+00:00",
+          "last_check": "2026-06-01T19:46:27+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-18T18:41:16+00:00",
-      "last_success_at": "2026-06-01T19:41:29+00:00"
+      "last_success_at": "2026-06-01T19:46:27+00:00"
     },
     "marstall": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-29T11:31:31+00:00",
-          "last_check": "2026-06-01T19:41:39+00:00",
+          "last_check": "2026-06-01T19:46:38+00:00",
           "shifts": [],
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-04-29T11:31:39+00:00",
-          "last_check": "2026-06-01T19:41:39+00:00",
+          "last_check": "2026-06-01T19:46:38+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-18T18:41:17+00:00",
-      "last_success_at": "2026-06-01T19:41:39+00:00"
+      "last_success_at": "2026-06-01T19:46:38+00:00"
     },
     "ochsenbraterei": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-29T11:31:48+00:00",
-          "last_check": "2026-06-01T19:41:49+00:00",
+          "last_check": "2026-06-01T19:46:49+00:00",
           "shifts": [],
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-04-29T11:31:55+00:00",
-          "last_check": "2026-06-01T19:41:49+00:00",
+          "last_check": "2026-06-01T19:46:49+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-18T18:41:20+00:00",
-      "last_success_at": "2026-06-01T19:41:49+00:00"
+      "last_success_at": "2026-06-01T19:46:49+00:00"
     },
     "paulaner": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-06-01T07:56:56+00:00",
-          "last_check": "2026-06-01T19:41:57+00:00",
+          "last_check": "2026-06-01T19:46:56+00:00",
           "shifts": [],
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-06-01T09:41:58+00:00",
-          "last_check": "2026-06-01T19:41:57+00:00",
+          "last_check": "2026-06-01T19:46:56+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-18T18:41:21+00:00",
-      "last_success_at": "2026-06-01T19:41:57+00:00"
+      "last_success_at": "2026-06-01T19:46:56+00:00"
     },
     "poschner": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-05-19T08:17:49+00:00",
-          "last_check": "2026-06-01T19:42:07+00:00",
+          "last_check": "2026-06-01T19:47:08+00:00",
           "shifts": [
             "Mittag"
           ],
@@ -150,20 +150,20 @@
         },
         "2026-09-26": {
           "last_change": "2026-05-13T12:22:00+00:00",
-          "last_check": "2026-06-01T19:42:07+00:00",
+          "last_check": "2026-06-01T19:47:08+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-21T12:43:28+00:00",
-      "last_success_at": "2026-06-01T19:42:07+00:00"
+      "last_success_at": "2026-06-01T19:47:08+00:00"
     },
     "schottenhamel": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-06-01T13:32:34+00:00",
-          "last_check": "2026-06-01T19:42:18+00:00",
+          "last_check": "2026-06-01T19:47:21+00:00",
           "shifts": [
             "Mittag"
           ],
@@ -171,52 +171,52 @@
         },
         "2026-09-26": {
           "last_change": "2026-06-01T08:52:20+00:00",
-          "last_check": "2026-06-01T19:42:18+00:00",
+          "last_check": "2026-06-01T19:47:21+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-18T18:41:25+00:00",
-      "last_success_at": "2026-06-01T19:42:18+00:00"
+      "last_success_at": "2026-06-01T19:47:21+00:00"
     },
     "schuetzen": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-29T11:32:29+00:00",
-          "last_check": "2026-06-01T19:42:27+00:00",
+          "last_check": "2026-06-01T19:47:32+00:00",
           "shifts": [],
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-04-29T11:32:36+00:00",
-          "last_check": "2026-06-01T19:42:27+00:00",
+          "last_check": "2026-06-01T19:47:32+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-18T18:41:27+00:00",
-      "last_success_at": "2026-06-01T19:42:27+00:00"
+      "last_success_at": "2026-06-01T19:47:32+00:00"
     },
     "weinzelt": {
       "consecutive_failures": 0,
       "dates": {
         "2026-09-25": {
           "last_change": "2026-04-29T11:32:48+00:00",
-          "last_check": "2026-06-01T19:42:38+00:00",
+          "last_check": "2026-06-01T19:47:43+00:00",
           "shifts": [],
           "status": "unavailable"
         },
         "2026-09-26": {
           "last_change": "2026-04-29T11:32:57+00:00",
-          "last_check": "2026-06-01T19:42:38+00:00",
+          "last_check": "2026-06-01T19:47:43+00:00",
           "shifts": [],
           "status": "unavailable"
         }
       },
       "last_error": "2026-05-18T18:41:30+00:00",
-      "last_success_at": "2026-06-01T19:42:38+00:00"
+      "last_success_at": "2026-06-01T19:47:43+00:00"
     }
   },
-  "workflow_last_run_at": "2026-06-01T19:40:51+00:00"
+  "workflow_last_run_at": "2026-06-01T19:45:49+00:00"
 }
