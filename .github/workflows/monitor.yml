@@ -22,17 +22,28 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[headless]
+
+      - name: Resolve Playwright version
+        id: playwright-version
+        # Note: the playwright module has no __version__; read it from package metadata.
+        run: echo "version=$(python -c 'import importlib.metadata as m; print(m.version("playwright"))')" >> "$GITHUB_OUTPUT"
+
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-chromium-v2
+          # Key on the installed Playwright version so any version bump auto-invalidates
+          # the cache and forces a matching Chromium download. Avoids the pip-vs-cached-
+          # browser mismatch that silently breaks `browser.launch()`.
+          key: playwright-${{ runner.os }}-chromium-${{ steps.playwright-version.outputs.version }}
 
-      - name: Install
+      - name: Install Playwright browser
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .[headless]
           if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
             python -m playwright install --with-deps chromium
           else

@@ -12,7 +12,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-headless = ["playwright>=1.45"]
+# Pin exactly: an unbounded range let pip silently upgrade Playwright to a build
+# expecting a newer Chromium than the cached one, which broke browser.launch() in CI.
+# Bump deliberately; the workflow cache key tracks this version and self-heals.
+headless = ["playwright==1.59.0"]
 
 [build-system]
 requires = ["setuptools>=68"]
