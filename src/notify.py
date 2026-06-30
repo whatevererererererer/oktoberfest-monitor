@@ -57,7 +57,7 @@ def alert_available(
         title = f"[{shifts_label}] {weekday} {tent_name} {de_date}"
         message = f"Neue Schicht erkannt {when}. Tippen zum Buchen."
     else:
-        shifts_label = ", ".join(shifts) if shifts else "?"
+        shifts_label = ", ".join(shifts) if shifts else "Zeit auf Seite"
         title = f"[{shifts_label}] {weekday} {tent_name} {de_date}"
         message = f"Verfügbarkeit erkannt {when}. Tippen zum Buchen."
     payload = {

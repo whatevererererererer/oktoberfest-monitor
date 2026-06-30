@@ -92,6 +92,13 @@ def _process_result(
 
     if became_available or shifts_added:
         reason = "shifts_added" if shifts_added and not became_available else "available"
+        # festzelt_os tents resolve a shift list. An empty list means the booking
+        # wizard's time-slot step couldn't be read (bot-protected step 2), so the
+        # alert isn't actionable as a one-tap booking — suppress it. Modes without
+        # shift detection pass new_shifts=None and still alert (neutral title).
+        if became_available and new_shifts == []:
+            log.info("%s/%s: available but no shift resolved — suppressing alert", cfg.slug, iso_date)
+            return
         log.info("%s/%s: notifying (%s)", cfg.slug, iso_date, reason)
         if dry_run:
             log.info(
