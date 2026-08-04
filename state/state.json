@@ -218,8 +218,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "loewenbraeu",
-  "producer_revision": "c29ef47d747358f9cadd6a0e2dc0ba1253c62072",
+  "probe_rotation_cursor": "paulaner",
+  "producer_revision": "12fd43ac31bbd0e9654fb35b36f7a51e8fb4a876",
   "pushover_quota": {},
   "schema_version": 3,
   "tents": {
@@ -518,8 +518,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-08-04T22:32:31+00:00",
-          "last_reliable_at": "2026-08-04T22:32:31+00:00",
+          "last_check": "2026-08-04T22:52:25+00:00",
+          "last_reliable_at": "2026-08-04T22:52:25+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -561,8 +561,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-08-04T22:32:31+00:00",
-          "last_reliable_at": "2026-08-04T22:32:31+00:00",
+          "last_check": "2026-08-04T22:52:25+00:00",
+          "last_reliable_at": "2026-08-04T22:52:25+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -587,7 +587,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 1,
       "last_error": "2026-08-04T15:37:33+00:00",
-      "last_success_at": "2026-08-04T22:32:31+00:00"
+      "last_success_at": "2026-08-04T22:52:25+00:00"
     },
     "marstall": {
       "consecutive_degraded": 0,
@@ -616,8 +616,8 @@
           },
           "health": "healthy",
           "last_change": "2026-04-29T11:31:31+00:00",
-          "last_check": "2026-08-04T22:32:31+00:00",
-          "last_reliable_at": "2026-08-04T22:32:31+00:00",
+          "last_check": "2026-08-04T22:52:25+00:00",
+          "last_reliable_at": "2026-08-04T22:52:25+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -659,8 +659,8 @@
           },
           "health": "healthy",
           "last_change": "2026-04-29T11:31:39+00:00",
-          "last_check": "2026-08-04T22:32:31+00:00",
-          "last_reliable_at": "2026-08-04T22:32:31+00:00",
+          "last_check": "2026-08-04T22:52:25+00:00",
+          "last_reliable_at": "2026-08-04T22:52:25+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -685,7 +685,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:47:23+00:00",
-      "last_success_at": "2026-08-04T22:32:31+00:00"
+      "last_success_at": "2026-08-04T22:52:25+00:00"
     },
     "ochsenbraterei": {
       "consecutive_degraded": 0,
@@ -714,8 +714,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-08-04T22:32:31+00:00",
-          "last_reliable_at": "2026-08-04T22:32:31+00:00",
+          "last_check": "2026-08-04T22:52:25+00:00",
+          "last_reliable_at": "2026-08-04T22:52:25+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -757,8 +757,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-08-04T22:32:31+00:00",
-          "last_reliable_at": "2026-08-04T22:32:31+00:00",
+          "last_check": "2026-08-04T22:52:25+00:00",
+          "last_reliable_at": "2026-08-04T22:52:25+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -783,7 +783,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 1,
       "last_error": "2026-08-04T15:37:33+00:00",
-      "last_success_at": "2026-08-04T22:32:31+00:00"
+      "last_success_at": "2026-08-04T22:52:25+00:00"
     },
     "paulaner": {
       "consecutive_degraded": 0,
@@ -1228,8 +1228,8 @@
       "last_success_at": "2026-08-04T22:41:56+00:00"
     }
   },
-  "workflow_duration_seconds": 61.313,
-  "workflow_finished_at": "2026-08-04T22:47:05+00:00",
-  "workflow_last_run_at": "2026-08-04T22:46:04+00:00",
-  "workflow_started_at": "2026-08-04T22:46:04+00:00"
+  "workflow_duration_seconds": 84.748,
+  "workflow_finished_at": "2026-08-04T22:52:25+00:00",
+  "workflow_last_run_at": "2026-08-04T22:51:01+00:00",
+  "workflow_started_at": "2026-08-04T22:51:01+00:00"
 }
