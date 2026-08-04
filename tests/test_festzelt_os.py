@@ -1,15 +1,19 @@
 from __future__ import annotations
 
+import json
+import sys
 import unittest
 from dataclasses import dataclass, field
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import patch
+from types import ModuleType
+from unittest.mock import Mock, patch
 
 from pydantic import ValidationError
 
 from src.config import FestzeltOsConfig, TentConfig, load_tents
 from src.fetchers.festzelt_os import canonical_date, fetch
+from src.fetchers.headless import launch_browser
 
 
 @dataclass
@@ -25,6 +29,8 @@ class SelectDef:
     options: object
     attrs: dict[str, str] = field(default_factory=dict)
     initial: str = ""
+    visible: bool = True
+    enabled: bool = True
 
 
 @dataclass
@@ -33,6 +39,9 @@ class Scenario:
     body: str = "Reservierung"
     title: str = "Reservierung"
     navigation_error: bool = False
+    navigation_status: int = 200
+    navigation_headers: dict[str, str] = field(default_factory=dict)
+    frames: list[object] = field(default_factory=list)
     on_select: object | None = None
 
 
@@ -41,14 +50,28 @@ class FakeResponse:
     url: str
     status: int
     headers: dict[str, str] = field(default_factory=dict)
+    request: object | None = None
+    json_payload: object = field(default_factory=lambda: {"components": []})
+    json_error: bool = False
 
     def header_value(self, name: str) -> str | None:
-        return self.headers.get(name)
+        wanted = name.casefold()
+        return next(
+            (value for key, value in self.headers.items() if key.casefold() == wanted),
+            None,
+        )
+
+    def json(self) -> object:
+        if self.json_error:
+            raise ValueError("invalid JSON")
+        return self.json_payload
 
 
 @dataclass
 class FakeRequest:
     url: str
+    method: str = "POST"
+    post_data: str | None = None
 
 
 class FakeClock:
@@ -95,6 +118,22 @@ class FakeText:
         return self.text
 
 
+class FakeFrame:
+    def __init__(self, body: str, *, url: str = "about:blank", name: str = "") -> None:
+        self.body = body
+        self.url = url
+        self.name = name
+
+    def locator(self, selector: str):
+        if selector == "body":
+            return FakeText(self.body)
+        if selector == 'input[type="password"]':
+            return FakeCollection(
+                [object()] if "password" in self.body.casefold() else []
+            )
+        return FakeCollection([])
+
+
 class FakeSelect:
     def __init__(self, page: "FakePage", definition: SelectDef) -> None:
         self.page = page
@@ -115,8 +154,39 @@ class FakeSelect:
     def input_value(self, **_kwargs) -> str:
         return self.page.values.get(self.definition.key, self.definition.initial)
 
-    def evaluate(self, script: str):
+    def is_visible(self, **_kwargs) -> bool:
+        return self.definition.visible
+
+    def is_enabled(self, **_kwargs) -> bool:
+        return self.definition.enabled
+
+    def evaluate(self, script: str, **_kwargs):
+        if "__wiesnSelectSnapshot" in script:
+            return {
+                "__wiesnSelectSnapshot": True,
+                "attributes": dict(self.definition.attrs),
+                "value": self.input_value(),
+                "visible": self.definition.visible,
+                "enabled": self.definition.enabled,
+                "options": [
+                    {
+                        "value": option.value,
+                        "text": option.text,
+                        "disabled": option.disabled,
+                    }
+                    for option in self._options()
+                ],
+            }
         if "getAttributeNames" in script:
+            if "el.getAttribute(name)" in script:
+                return next(
+                    (
+                        value
+                        for name, value in self.definition.attrs.items()
+                        if name == "wire:model" or name.startswith("wire:model.")
+                    ),
+                    None,
+                )
             return any(
                 name == "wire:model" or name.startswith("wire:model.")
                 for name in self.definition.attrs
@@ -136,6 +206,16 @@ class FakeSelect:
         self.page.values[self.definition.key] = chosen.value
         self.page.selected_at[self.definition.key] = self.page.tick
         self.page.actions.append((self.definition.key, chosen.value, chosen.text))
+        if any(
+            name == "wire:model" or name.startswith("wire:model.")
+            for name in self.definition.attrs
+        ):
+            model = next(
+                value
+                for name, value in self.definition.attrs.items()
+                if name == "wire:model" or name.startswith("wire:model.")
+            )
+            self.page.emit_livewire_request(chosen.value, model=model)
         if self.page.scenario.on_select:
             self.page.scenario.on_select(self.page, self.definition.key, chosen.value)
 
@@ -152,11 +232,21 @@ class FakePage:
         self.dom_updated = False
         self.observer_script: str | None = None
         self.listeners: dict[str, list[object]] = {}
+        self.last_livewire_request: FakeRequest | None = None
         self.closed = False
 
-    def goto(self, *_args, **_kwargs) -> None:
+    @property
+    def frames(self) -> list[object]:
+        return self.scenario.frames
+
+    def goto(self, *_args, **_kwargs) -> FakeResponse:
         if self.scenario.navigation_error:
             raise RuntimeError("navigation failed")
+        return FakeResponse(
+            "https://example.test/reservation",
+            self.scenario.navigation_status,
+            self.scenario.navigation_headers,
+        )
 
     def title(self) -> str:
         return self.scenario.title
@@ -207,6 +297,53 @@ class FakePage:
     def emit_response(self, response: FakeResponse) -> None:
         for handler in list(self.listeners.get("response", [])):
             handler(response)
+
+    def emit_livewire_request(
+        self,
+        selected_value: str,
+        *,
+        model: str = "data.reservation_date",
+    ) -> FakeRequest:
+        request = FakeRequest(
+            "https://example.test/livewire/update",
+            post_data=json.dumps({"updates": {model: selected_value}}),
+        )
+        self.last_livewire_request = request
+        for handler in list(self.listeners.get("request", [])):
+            handler(request)
+        return request
+
+    def emit_livewire_response(
+        self,
+        status: int,
+        *,
+        headers: dict[str, str] | None = None,
+        request: FakeRequest | None = None,
+        finish: bool = True,
+        finish_error: bool = False,
+        content_type: str = "application/json; charset=utf-8",
+        json_error: bool = False,
+    ) -> FakeResponse:
+        request = request or self.last_livewire_request
+        response_headers = {"content-type": content_type}
+        response_headers.update(headers or {})
+        response = FakeResponse(
+            "https://example.test/livewire/update",
+            status,
+            response_headers,
+            request,
+            json_error=json_error,
+        )
+        self.emit_response(response)
+        if finish_error and request is not None:
+            self.emit_request_failed(request)
+        elif finish and request is not None:
+            self.emit_request_finished(request)
+        return response
+
+    def emit_request_finished(self, request: FakeRequest) -> None:
+        for handler in list(self.listeners.get("requestfinished", [])):
+            handler(request)
 
     def emit_request_failed(self, request: FakeRequest) -> None:
         for handler in list(self.listeners.get("requestfailed", [])):
@@ -259,6 +396,8 @@ def date_select(
     key="dates",
     disabled_target=False,
     livewire: bool | str = False,
+    visible: bool = True,
+    enabled: bool = True,
 ) -> SelectDef:
     options = list(options or DATES)
     if disabled_target:
@@ -270,7 +409,7 @@ def date_select(
     if livewire:
         modifier = "wire:model.live" if livewire is True else livewire
         attrs[modifier] = "data.reservation_date"
-    return SelectDef(key, options, attrs, initial)
+    return SelectDef(key, options, attrs, initial, visible, enabled)
 
 
 def shift_select(options, *, key="shifts") -> SelectDef:
@@ -320,6 +459,65 @@ class FestzeltFetcherTests(unittest.TestCase):
         result, context = self.run_fetch([Scenario([date_select(only_other_day)])])
         self.assertEqual(result["2026-09-25"].status, "unavailable")
         self.assertEqual(len(context.pages), 1)
+        self.assertGreaterEqual(self.clock.value, self.cfg.date_control_timeout_ms / 1000)
+
+    def test_conflicting_parseable_date_value_and_text_is_structure_error(self) -> None:
+        contradictory = [
+            OptionDef("", "Bitte auswÃ¤hlen"),
+            OptionDef("2026-09-24", "Donnerstag, 24. September 2026"),
+            OptionDef("2026-09-25", "Samstag, 26. September 2026"),
+        ]
+        result, context = self.run_fetch(
+            [Scenario([date_select(contradictory)])]
+        )
+        probe = result["2026-09-25"]
+        self.assertEqual(probe.status, "error")
+        self.assertEqual(probe.diagnostics.page_type, "error")
+        self.assertEqual(probe.diagnostics.error_class, "date_option_conflict")
+        self.assertEqual(context.pages[0].actions, [])
+
+    def test_transient_duplicate_date_controls_are_tolerated_until_deadline(self) -> None:
+        only_other_day = [
+            OptionDef("", "Bitte auswählen"),
+            OptionDef("2026-09-24", "Donnerstag, 24. September 2026"),
+        ]
+
+        def controls(page: FakePage):
+            valid = date_select(only_other_day)
+            if page.tick < 6:
+                return [valid, date_select(only_other_day, key="duplicate")]
+            return [valid]
+
+        result, _ = self.run_fetch([Scenario(controls)])
+        self.assertEqual(result["2026-09-25"].status, "unavailable")
+        self.assertGreaterEqual(self.clock.value, self.cfg.date_control_timeout_ms / 1000)
+
+    def test_hidden_or_disabled_date_controls_are_not_evidence(self) -> None:
+        visible = date_select()
+        hidden_duplicate = date_select(key="hidden", visible=False)
+        disabled_duplicate = date_select(key="disabled", enabled=False)
+        shifts = lambda page: (
+            [OptionDef("lunch", "Mittag")] if page.selected_at else []
+        )
+        result, _ = self.run_fetch(
+            [
+                Scenario(
+                    [visible, hidden_duplicate, disabled_duplicate, shift_select(shifts)],
+                    on_select=lambda page, _key, _value: setattr(page, "dom_updated", True),
+                )
+            ]
+        )
+        self.assertEqual(result["2026-09-25"].status, "available")
+
+        self.clock.value = 0
+        hidden_only, _ = self.run_fetch(
+            [Scenario([date_select(visible=False), date_select(key="off", enabled=False)])]
+        )
+        self.assertEqual(hidden_only["2026-09-25"].status, "error")
+        self.assertEqual(
+            hidden_only["2026-09-25"].diagnostics.error_class,
+            "date_control_missing",
+        )
 
     def test_target_appended_after_initial_stability_is_not_false_unavailable(self) -> None:
         cfg = self.cfg.model_copy(update={"wait_extra_ms": 60})
@@ -374,6 +572,53 @@ class FestzeltFetcherTests(unittest.TestCase):
         probe = result["2026-09-25"]
         self.assertEqual(probe.status, "unknown")
         self.assertEqual(probe.diagnostics.error_class, "shift_options_empty")
+
+    def test_negative_shift_sentinels_with_values_are_never_availability(self) -> None:
+        sentinels = (
+            OptionDef("prompt", "Bitte auswählen"),
+            OptionDef("123", "Bitte Schicht auswählen"),
+            OptionDef("none-1", "Keine Schichten verfügbar"),
+            OptionDef("real-looking", "Keine Reservierung verfügbar"),
+            OptionDef("none-2", "Keine Plätze frei"),
+            OptionDef("sold", "Mittag (ausgebucht)"),
+            OptionDef("loading-id", "Loading..."),
+            OptionDef("no-slots", "No slots available"),
+            OptionDef("unavailable", "Mittag"),
+        )
+        for sentinel in sentinels:
+            with self.subTest(label=sentinel.text, value=sentinel.value):
+                self.clock.value = 0
+                result, _ = self.run_fetch(
+                    [
+                        Scenario(
+                            [date_select(), shift_select([sentinel])],
+                            on_select=lambda page, _key, _value: setattr(
+                                page, "dom_updated", True
+                            ),
+                        )
+                    ]
+                )
+                probe = result["2026-09-25"]
+                self.assertEqual(probe.status, "unknown")
+                self.assertEqual(probe.diagnostics.error_class, "shift_options_empty")
+
+    def test_sentinels_are_removed_without_hiding_real_shifts(self) -> None:
+        options = [
+            OptionDef("none", "Keine Schichten verfügbar"),
+            OptionDef("lunch", "Mittag"),
+            OptionDef("sold", "Abend (ausgebucht)"),
+        ]
+        result, _ = self.run_fetch(
+            [
+                Scenario(
+                    [date_select(), shift_select(options)],
+                    on_select=lambda page, _key, _value: setattr(
+                        page, "dom_updated", True
+                    ),
+                )
+            ]
+        )
+        self.assertEqual(result["2026-09-25"].shifts, ("Mittag",))
 
     def test_unchanged_options_from_previous_date_are_not_accepted(self) -> None:
         stale = [OptionDef("lunch", "Mittag")]
@@ -491,6 +736,49 @@ class FestzeltFetcherTests(unittest.TestCase):
                 self.assertEqual(result["2026-09-25"].status, "error")
                 self.assertEqual(result["2026-09-25"].diagnostics.error_class, expected)
 
+    def test_bot_marker_after_first_4000_body_characters_is_detected(self) -> None:
+        body = f"{'Reservierung ' * 500} Verify you are human"
+        result, _ = self.run_fetch([Scenario([date_select()], body=body)])
+        probe = result["2026-09-25"]
+        self.assertEqual((probe.status, probe.diagnostics.page_type), ("error", "bot"))
+        self.assertEqual(probe.diagnostics.error_class, "bot_page")
+
+    def test_challenge_inside_iframe_is_detected_without_interaction(self) -> None:
+        frame = FakeFrame(
+            "Complete the CAPTCHA",
+            url="https://challenge.example/cdn-cgi/challenge-platform/widget",
+        )
+        result, context = self.run_fetch(
+            [Scenario([date_select()], frames=[frame])]
+        )
+        probe = result["2026-09-25"]
+        self.assertEqual((probe.status, probe.diagnostics.page_type), ("error", "bot"))
+        self.assertEqual(probe.diagnostics.error_class, "bot_page")
+        self.assertEqual(context.pages[0].actions, [])
+
+    def test_navigation_http_status_and_challenge_header_are_not_booking(self) -> None:
+        scenarios = (
+            (403, {}, "bot", "navigation_http_403"),
+            (503, {}, "error", "navigation_http_503"),
+            (200, {"cf-mitigated": "challenge"}, "bot", "navigation_challenge"),
+        )
+        for status, headers, page_type, error_class in scenarios:
+            with self.subTest(status=status, headers=headers):
+                self.clock.value = 0
+                result, context = self.run_fetch(
+                    [
+                        Scenario(
+                            [date_select()],
+                            navigation_status=status,
+                            navigation_headers=headers,
+                        )
+                    ]
+                )
+                probe = result["2026-09-25"]
+                self.assertEqual((probe.status, probe.diagnostics.page_type), ("error", page_type))
+                self.assertEqual(probe.diagnostics.error_class, error_class)
+                self.assertEqual(context.pages[0].actions, [])
+
     def test_navigation_timeout_then_next_run_recovers(self) -> None:
         failed, _ = self.run_fetch([Scenario([], navigation_error=True)])
         self.assertEqual(failed["2026-09-25"].status, "error")
@@ -506,12 +794,10 @@ class FestzeltFetcherTests(unittest.TestCase):
 
     def test_livewire_403_is_a_fast_bot_error_and_listener_is_removed(self) -> None:
         def rejected(page: FakePage, _key: str, _value: str) -> None:
-            page.emit_response(
-                FakeResponse("https://example.test/livewire/update", 403)
-            )
+            page.emit_livewire_response(403)
 
         result, context = self.run_fetch(
-            [Scenario([date_select()], on_select=rejected)]
+            [Scenario([date_select(livewire=True)], on_select=rejected)]
         )
         probe = result["2026-09-25"]
         self.assertEqual(probe.status, "error")
@@ -530,9 +816,7 @@ class FestzeltFetcherTests(unittest.TestCase):
                 and not getattr(page, "failure_emitted", False)
             ):
                 page.failure_emitted = True
-                page.emit_response(
-                    FakeResponse("https://example.test/livewire/update", 403)
-                )
+                page.emit_livewire_response(403)
             return stale
 
         def transient_rerender(page: FakePage, _key: str, _value: str) -> None:
@@ -555,12 +839,11 @@ class FestzeltFetcherTests(unittest.TestCase):
         self.assertEqual(probe.status, "error")
         self.assertEqual(probe.diagnostics.error_class, "shift_update_http_403")
 
-    def test_livewire_available_requires_successful_update_response(self) -> None:
+    def test_livewire_identical_list_accepts_paired_success_response(self) -> None:
         shifts = [OptionDef("lunch", "Mittag")]
 
         def completed(page: FakePage, _key: str, _value: str) -> None:
-            page.dom_updated = True
-            page.emit_response(FakeResponse("https://example.test/livewire/update", 200))
+            page.emit_livewire_response(200)
 
         result, _ = self.run_fetch(
             [
@@ -571,6 +854,93 @@ class FestzeltFetcherTests(unittest.TestCase):
             ]
         )
         self.assertEqual(result["2026-09-25"].status, "available")
+
+    def test_livewire_2xx_waits_for_request_finished_and_dom_turn(self) -> None:
+        cfg = self.cfg.model_copy(update={"stable_for_ms": 0})
+        finished_at_tick: list[int] = []
+
+        def shifts(page: FakePage) -> list[OptionDef]:
+            if (
+                page.tick >= 2
+                and page.last_livewire_request is not None
+                and not finished_at_tick
+            ):
+                finished_at_tick.append(page.tick)
+                page.emit_request_finished(page.last_livewire_request)
+            return [OptionDef("lunch", "Mittag")]
+
+        def early_headers(page: FakePage, _key: str, _value: str) -> None:
+            page.emit_livewire_response(200, finish=False)
+
+        browser = FakeBrowser(
+            [
+                Scenario(
+                    [date_select(livewire=True), shift_select(shifts)],
+                    on_select=early_headers,
+                )
+            ],
+            self.clock,
+        )
+        result = fetch(cfg, ["2026-09-25"], browser)
+        self.assertEqual(result["2026-09-25"].status, "available")
+        self.assertEqual(finished_at_tick, [2])
+        self.assertGreater(browser.context.pages[0].tick, finished_at_tick[0])
+
+    def test_livewire_2xx_with_incomplete_body_is_technical_error(self) -> None:
+        shifts = [OptionDef("lunch", "Mittag")]
+
+        def incomplete(page: FakePage, _key: str, _value: str) -> None:
+            page.emit_livewire_response(200, finish_error=True)
+
+        result, _ = self.run_fetch(
+            [
+                Scenario(
+                    [date_select(livewire=True), shift_select(shifts)],
+                    on_select=incomplete,
+                )
+            ]
+        )
+        probe = result["2026-09-25"]
+        self.assertEqual((probe.status, probe.diagnostics.page_type), ("error", "error"))
+        self.assertEqual(probe.diagnostics.error_class, "shift_update_response_incomplete")
+
+    def test_livewire_2xx_html_body_cannot_confirm_stale_shifts(self) -> None:
+        stale = [OptionDef("lunch", "Mittag")]
+
+        def html_error(page: FakePage, _key: str, _value: str) -> None:
+            page.emit_livewire_response(200, content_type="text/html; charset=utf-8")
+
+        result, _ = self.run_fetch(
+            [
+                Scenario(
+                    [date_select(livewire=True), shift_select(stale)],
+                    on_select=html_error,
+                )
+            ]
+        )
+        probe = result["2026-09-25"]
+        self.assertEqual((probe.status, probe.diagnostics.page_type), ("error", "error"))
+        self.assertEqual(probe.diagnostics.error_class, "shift_update_response_not_json")
+        self.assertIsNone(probe.shifts)
+
+    def test_livewire_2xx_invalid_json_cannot_confirm_stale_shifts(self) -> None:
+        stale = [OptionDef("lunch", "Mittag")]
+
+        def invalid_json(page: FakePage, _key: str, _value: str) -> None:
+            page.emit_livewire_response(200, json_error=True)
+
+        result, _ = self.run_fetch(
+            [
+                Scenario(
+                    [date_select(livewire=True), shift_select(stale)],
+                    on_select=invalid_json,
+                )
+            ]
+        )
+        probe = result["2026-09-25"]
+        self.assertEqual((probe.status, probe.diagnostics.page_type), ("error", "error"))
+        self.assertEqual(probe.diagnostics.error_class, "shift_update_response_invalid_json")
+        self.assertIsNone(probe.shifts)
 
     def test_livewire_dom_update_without_response_stays_degraded(self) -> None:
         shifts = [OptionDef("lunch", "Mittag")]
@@ -592,14 +962,38 @@ class FestzeltFetcherTests(unittest.TestCase):
             probe.diagnostics.error_class, "shift_update_response_unconfirmed"
         )
 
+    def test_foreign_livewire_response_cannot_confirm_or_fail_target(self) -> None:
+        shifts = [OptionDef("lunch", "Mittag")]
+        for status in (200, 403):
+            with self.subTest(status=status):
+                self.clock.value = 0
+
+                def foreign(page: FakePage, _key: str, _value: str) -> None:
+                    page.dom_updated = True
+                    unrelated = page.emit_livewire_request("2026-09-24")
+                    page.emit_livewire_response(status, request=unrelated)
+
+                result, _ = self.run_fetch(
+                    [
+                        Scenario(
+                            [date_select(livewire=True), shift_select(shifts)],
+                            on_select=foreign,
+                        )
+                    ]
+                )
+                probe = result["2026-09-25"]
+                self.assertEqual(probe.status, "unknown")
+                self.assertEqual(
+                    probe.diagnostics.error_class,
+                    "shift_update_response_unconfirmed",
+                )
+
     def test_livewire_5xx_is_a_fast_technical_error(self) -> None:
         def rejected(page: FakePage, _key: str, _value: str) -> None:
-            page.emit_response(
-                FakeResponse("https://example.test/livewire/update", 503)
-            )
+            page.emit_livewire_response(503)
 
         result, context = self.run_fetch(
-            [Scenario([date_select()], on_select=rejected)]
+            [Scenario([date_select(livewire=True)], on_select=rejected)]
         )
         probe = result["2026-09-25"]
         self.assertEqual(probe.status, "error")
@@ -636,81 +1030,73 @@ class FestzeltFetcherTests(unittest.TestCase):
 
     def test_livewire_challenge_header_is_a_bot_error(self) -> None:
         def challenged(page: FakePage, _key: str, _value: str) -> None:
-            page.emit_response(
-                FakeResponse(
-                    "https://example.test/livewire/update",
-                    200,
-                    {"cf-mitigated": "challenge"},
-                )
+            page.emit_livewire_response(
+                200, headers={"cf-mitigated": "challenge"}
             )
 
         result, _ = self.run_fetch(
-            [Scenario([date_select()], on_select=challenged)]
+            [Scenario([date_select(livewire=True)], on_select=challenged)]
         )
         probe = result["2026-09-25"]
         self.assertEqual(probe.status, "error")
         self.assertEqual(probe.diagnostics.page_type, "bot")
         self.assertEqual(probe.diagnostics.error_class, "shift_update_challenge")
 
-    def test_sequential_targets_reacquire_date_locator_after_rerender(self) -> None:
+    def test_each_target_uses_a_fresh_independent_page(self) -> None:
         def selects(page: FakePage):
-            stage = getattr(page, "stage", 0)
-            date_key = "date-initial" if stage == 0 else f"date-rerender-{stage}"
-            selected = getattr(page, "current_target", "")
+            selected = page.values.get("dates", "")
             shifts = []
             if selected:
-                shifts = [
-                    OptionDef(
-                        "slot",
-                        "Mittag" if selected == "2026-09-25" else "Abend",
-                    )
-                ]
-            return [date_select(key=date_key, initial=selected), shift_select(shifts)]
+                shifts = [OptionDef("slot", "Mittag" if selected.endswith("25") else "Abend")]
+            return [date_select(), shift_select(shifts)]
 
-        def rerender(page: FakePage, _key: str, value: str) -> None:
-            page.current_target = value
-            page.stage = getattr(page, "stage", 0) + 1
-            page.values[f"date-rerender-{page.stage}"] = value
+        def rerender(page: FakePage, _key: str, _value: str) -> None:
             page.dom_updated = True
 
         result, context = self.run_fetch(
-            [Scenario(selects, on_select=rerender)],
+            [
+                Scenario(selects, on_select=rerender),
+                Scenario(selects, on_select=rerender),
+            ],
             ["2026-09-25", "2026-09-26"],
         )
         self.assertEqual(result["2026-09-25"].shifts, ("Mittag",))
         self.assertEqual(result["2026-09-26"].shifts, ("Abend",))
-        self.assertEqual(len(context.pages), 1)
-        self.assertEqual(
-            [action[0] for action in context.pages[0].actions],
-            ["date-initial", "date-rerender-1"],
-        )
+        self.assertEqual(len(context.pages), 2)
+        self.assertTrue(all(page.closed for page in context.pages))
+        self.assertEqual([len(page.actions) for page in context.pages], [1, 1])
 
-    def test_second_target_cannot_reuse_identical_stale_first_target_options(self) -> None:
-        def shifts(page: FakePage):
-            return (
-                [OptionDef("lunch", "Mittag")]
-                if getattr(page, "first_loaded", False)
-                else []
-            )
+    def test_late_first_target_response_cannot_confirm_second_target(self) -> None:
+        identical = [OptionDef("lunch", "Mittag")]
+        browser = FakeBrowser([], self.clock)
 
-        def select_date(page: FakePage, _key: str, value: str) -> None:
-            if value == "2026-09-25":
-                page.first_loaded = True
-                page.dom_updated = True
-            # Saturday deliberately leaves Friday's options untouched and
-            # produces no relevant shift-control mutation.
+        def friday(page: FakePage, _key: str, _value: str) -> None:
+            page.emit_livewire_response(200)
 
-        result, context = self.run_fetch(
-            [Scenario([date_select(), shift_select(shifts)], on_select=select_date)],
-            ["2026-09-25", "2026-09-26"],
-        )
+        def saturday(page: FakePage, _key: str, _value: str) -> None:
+            page.dom_updated = True
+            old_request = browser.context.pages[0].last_livewire_request
+            page.emit_livewire_response(200, request=old_request)
+
+        browser.context.scenarios = [
+            Scenario(
+                [date_select(livewire=True), shift_select(identical)],
+                on_select=friday,
+            ),
+            Scenario(
+                [date_select(livewire=True), shift_select(identical)],
+                on_select=saturday,
+            ),
+        ]
+        result = fetch(self.cfg, ["2026-09-25", "2026-09-26"], browser)
+        context = browser.context
         self.assertEqual(result["2026-09-25"].status, "available")
         self.assertEqual(result["2026-09-26"].status, "unknown")
         self.assertEqual(
             result["2026-09-26"].diagnostics.error_class,
-            "shift_update_unconfirmed",
+            "shift_update_response_unconfirmed",
         )
-        self.assertEqual(len(context.pages), 1)
+        self.assertEqual(len(context.pages), 2)
 
     def test_date_control_and_options_may_appear_late(self) -> None:
         shifts = lambda page: (
@@ -765,6 +1151,27 @@ class ConfigValidationTests(unittest.TestCase):
         )
         self.assertEqual(cfg.wait_extra_ms, 7000)
         self.assertEqual(cfg.shift_wait_ms, 2500)
+
+
+class BrowserLaunchTests(unittest.TestCase):
+    def test_playwright_is_stopped_when_chromium_launch_fails(self) -> None:
+        playwright = Mock()
+        playwright.chromium.launch.side_effect = RuntimeError("launch blocked")
+        starter = Mock()
+        starter.start.return_value = playwright
+        sync_api = ModuleType("playwright.sync_api")
+        sync_api.sync_playwright = Mock(return_value=starter)
+        package = ModuleType("playwright")
+        package.sync_api = sync_api
+
+        with patch.dict(
+            sys.modules,
+            {"playwright": package, "playwright.sync_api": sync_api},
+        ):
+            with self.assertRaisesRegex(RuntimeError, "launch blocked"):
+                launch_browser()
+
+        playwright.stop.assert_called_once_with()
 
 
 if __name__ == "__main__":

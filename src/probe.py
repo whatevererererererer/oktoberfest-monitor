@@ -64,6 +64,33 @@ class ProbeResult:
             raise ValueError(
                 f"status={self.status!r} requires diagnostics.health={expected_health!r}"
             )
+        if self.status == "available":
+            correlated = (
+                self.diagnostics.page_type == "booking"
+                and self.diagnostics.date_control_count == 1
+                and self.diagnostics.plausible_date_option_count > 0
+                and self.diagnostics.target_found
+                and self.diagnostics.target_enabled is True
+                and self.diagnostics.shift_control_count == 1
+                and self.diagnostics.shift_control_found
+                and self.diagnostics.update_confirmed
+                and self.diagnostics.shift_count == len(self.shifts or ())
+            )
+            if not correlated:
+                raise ValueError(
+                    "available probe results require date-correlated shift evidence"
+                )
+        if self.status == "unavailable":
+            proven_absent = (
+                self.diagnostics.page_type == "booking"
+                and self.diagnostics.date_control_count == 1
+                and self.diagnostics.plausible_date_option_count > 0
+                and not self.diagnostics.target_found
+            )
+            if not proven_absent:
+                raise ValueError(
+                    "unavailable probe results require a valid date control and absent target"
+                )
 
     def __iter__(self) -> Iterator[object]:
         yield self.status

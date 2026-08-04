@@ -14,6 +14,18 @@ _TIME = re.compile(r"\b\d{1,2}(?::|\.)\d{2}\s*(?:uhr)?\b.*$", re.IGNORECASE)
 _PARENS = re.compile(r"\s*[\(\[].*?[\)\]]\s*")
 _NON_WORD = re.compile(r"[^\wäöüß]+", re.IGNORECASE)
 _KNOWN_SHIFTS = ("vormittag", "mittag", "nachmittag", "abend", "ganztag")
+_SHIFT_EVIDENCE_LOSS_CLASSES = frozenset(
+    {
+        "available_without_shifts",
+        "ambiguous_shift_control",
+        "shift_control_missing",
+        "shift_evidence_unavailable",
+        "shift_options_empty",
+        "shift_update_response_unconfirmed",
+        "shift_update_unconfirmed",
+        "target_selection_unconfirmed",
+    }
+)
 
 
 def normalize_shift_label(label: str) -> str:
@@ -56,13 +68,56 @@ def _diagnostics_dict(result: Any) -> dict[str, Any]:
     if hasattr(result, "diagnostic_dict"):
         value = result.diagnostic_dict()
         if isinstance(value, dict):
-            return value
+            return dict(value)
     diagnostics = getattr(result, "diagnostics", {})
     if hasattr(diagnostics, "model_dump"):
-        return diagnostics.model_dump(mode="json")
+        return dict(diagnostics.model_dump(mode="json"))
     if isinstance(diagnostics, dict):
-        return diagnostics
+        return dict(diagnostics)
     return {"detail": str(diagnostics)}
+
+
+def _structured_reliable_error(
+    result: Any,
+    status: str,
+    raw_shifts: list[str],
+    diagnostics: dict[str, Any],
+) -> str | None:
+    """Reject impossible success records from structured probe implementations.
+
+    Lightweight legacy/generic result objects intentionally remain supported;
+    their adapter owns the evidence contract. A result exposing
+    ``diagnostic_dict`` is the structured contract used by ``ProbeResult`` and
+    must contain internally consistent Festzelt evidence.
+    """
+    if not hasattr(result, "diagnostic_dict"):
+        return None
+    common = (
+        diagnostics.get("health") == "healthy"
+        and diagnostics.get("page_type") == "booking"
+        and diagnostics.get("date_control_count") == 1
+        and isinstance(diagnostics.get("plausible_date_option_count"), int)
+        and diagnostics.get("plausible_date_option_count", 0) > 0
+        and not diagnostics.get("error_class")
+    )
+    if not common:
+        return f"inconsistent_{status}_diagnostics"
+    if status == "available":
+        consistent = (
+            bool(raw_shifts)
+            and diagnostics.get("target_found") is True
+            and diagnostics.get("target_enabled") is not False
+            and diagnostics.get("shift_control_count") == 1
+            and diagnostics.get("shift_control_found") is True
+            and diagnostics.get("update_confirmed") is True
+            and diagnostics.get("shift_count") == len(raw_shifts)
+        )
+    else:
+        consistent = (
+            diagnostics.get("target_found") is False
+            and diagnostics.get("shift_count", 0) == 0
+        )
+    return None if consistent else f"inconsistent_{status}_diagnostics"
 
 
 def _event_id(
@@ -135,14 +190,21 @@ def apply_probe_result(
     raw_status = str(result.status)
     raw_shifts = list(getattr(result, "shifts", []) or [])
     shifts, shift_keys = canonicalize_shifts(raw_shifts)
+    diagnostics = _diagnostics_dict(result)
 
     # Defensive invariant even if a future fetcher regresses.
     if raw_status == "available" and not shift_keys:
         raw_status = "unknown"
-        diagnostics = _diagnostics_dict(result)
-        diagnostics.setdefault("error_class", "available_without_shifts")
-    else:
-        diagnostics = _diagnostics_dict(result)
+        diagnostics["health"] = "degraded"
+        diagnostics["error_class"] = "available_without_shifts"
+    elif raw_status in {"available", "unavailable"}:
+        consistency_error = _structured_reliable_error(
+            result, raw_status, raw_shifts, diagnostics
+        )
+        if consistency_error:
+            raw_status = "unknown"
+            diagnostics["health"] = "degraded"
+            diagnostics["error_class"] = consistency_error
 
     date_state.last_check = timestamp
     date_state.observed_status = raw_status  # type: ignore[assignment]
@@ -152,6 +214,14 @@ def apply_probe_result(
         date_state.health = "degraded"
         date_state.consecutive_degraded += 1
         date_state.consecutive_errors = 0
+        error_class = diagnostics.get("error_class")
+        if (
+            date_state.baseline_verified
+            and date_state.status == "available"
+            and isinstance(error_class, str)
+            and error_class in _SHIFT_EVIDENCE_LOSS_CLASSES
+        ):
+            date_state.availability_evidence_lost = True
         return AppliedProbe(None, date_state.health, raw_status)
 
     if raw_status == "error":
@@ -163,24 +233,41 @@ def apply_probe_result(
     if raw_status not in ("available", "unavailable"):
         raise ValueError(f"unsupported probe status: {raw_status}")
 
+    diagnostics["health"] = "healthy"
+    diagnostics["error_class"] = None
+    date_state.diagnostics = diagnostics
     date_state.health = "healthy"
     date_state.consecutive_degraded = 0
     date_state.consecutive_errors = 0
 
     previous_status = date_state.status
+    baseline_was_verified = date_state.baseline_verified
+    evidence_was_lost = date_state.availability_evidence_lost
     previous_shifts, previous_keys = canonicalize_shifts(date_state.shifts)
     if date_state.shift_keys:
         previous_keys = list(date_state.shift_keys)
 
     event: OutboxEvent | None = None
     if raw_status == "available":
-        if previous_status != "available":
+        if not baseline_was_verified or previous_status != "available":
             event = _enqueue_availability(
                 state=state,
                 cfg=cfg,
                 date_state=date_state,
                 iso_date=iso_date,
                 reason="available",
+                shifts=shifts,
+                new_shifts=shifts,
+                new_shift_keys=shift_keys,
+                timestamp=timestamp,
+            )
+        elif evidence_was_lost:
+            event = _enqueue_availability(
+                state=state,
+                cfg=cfg,
+                date_state=date_state,
+                iso_date=iso_date,
+                reason="availability_reconfirmed",
                 shifts=shifts,
                 new_shifts=shifts,
                 new_shift_keys=shift_keys,
@@ -206,12 +293,17 @@ def apply_probe_result(
 
     reliable_shift_keys = shift_keys if raw_status == "available" else []
     reliable_changed = (
-        previous_status != raw_status
+        not baseline_was_verified
+        or previous_status != raw_status
         or set(previous_keys) != set(reliable_shift_keys)
     )
     date_state.status = raw_status  # type: ignore[assignment]
     date_state.shifts = shifts if raw_status == "available" else []
     date_state.shift_keys = shift_keys if raw_status == "available" else []
+    date_state.baseline_verified = True
+    date_state.last_reliable_at = timestamp
+    date_state.last_reliable_diagnostics = dict(diagnostics)
+    date_state.availability_evidence_lost = False
     if reliable_changed:
         date_state.last_change = timestamp
     return AppliedProbe(event, date_state.health, raw_status)

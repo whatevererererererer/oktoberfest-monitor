@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import os
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from src.main import _record_tent_health, probe_run
+import src.main as main_module
+from src.events import AppliedProbe
+from src.main import _legacy_probe, _record_tent_health, probe_run
 from src.probe import ProbeDiagnostics, ProbeResult
 from src.state import State, TentDateState, TentState, load, save
 
@@ -62,15 +66,24 @@ def error() -> ProbeResult:
     )
 
 
+def applied(result: ProbeResult) -> AppliedProbe:
+    return AppliedProbe(None, result.diagnostics.health, result.status)
+
+
 class MainIntegrationTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.temp = tempfile.TemporaryDirectory(dir=ROOT / "work")
-        self.path = Path(self.temp.name) / "state.json"
+        descriptor, name = tempfile.mkstemp(
+            prefix=".test-main-state-", suffix=".json", dir=ROOT
+        )
+        os.close(descriptor)
+        self.path = Path(name)
+        self.path.unlink()
         self.browser = Mock()
         self.playwright = Mock()
 
     def tearDown(self) -> None:
-        self.temp.cleanup()
+        self.path.unlink(missing_ok=True)
+        self.path.with_name(f".{self.path.name}.tmp").unlink(missing_ok=True)
 
     def initial_state(self, slugs: list[str]) -> None:
         state = State()
@@ -82,6 +95,14 @@ class MainIntegrationTests(unittest.TestCase):
                 }
             )
         save(self.path, state)
+
+    def test_legacy_unavailable_without_date_control_evidence_is_degraded(self) -> None:
+        result = _legacy_probe("unavailable", source="html")
+        self.assertEqual(result.status, "unknown")
+        self.assertEqual(result.diagnostics.health, "degraded")
+        self.assertEqual(
+            result.diagnostics.error_class, "date_and_shift_evidence_unavailable"
+        )
 
     def test_probe_enqueues_multiple_tents_without_sending(self) -> None:
         configs = [config("a"), config("b")]
@@ -96,6 +117,11 @@ class MainIntegrationTests(unittest.TestCase):
             patch("src.main.festzelt_os_fetcher.fetch", side_effect=fetch),
             patch("src.main.time.sleep"),
             patch("src.notify.send_event_part") as send,
+            patch.dict(
+                os.environ,
+                {"MONITOR_PRODUCER_REVISION": "abc123"},
+                clear=False,
+            ),
         ):
             self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
 
@@ -103,6 +129,208 @@ class MainIntegrationTests(unittest.TestCase):
         state = load(self.path)
         self.assertEqual(len(state.outbox), 4)
         self.assertTrue(all(event.status == "pending" for event in state.outbox.values()))
+        self.assertEqual(state.producer_revision, "abc123")
+        self.assertIsNotNone(state.workflow_started_at)
+        self.assertIsNotNone(state.workflow_finished_at)
+        self.assertIsNotNone(state.workflow_duration_seconds)
+
+    def test_festzelt_probes_use_at_most_four_isolated_workers(self) -> None:
+        configs = [config(chr(ord("a") + index)) for index in range(6)]
+        self.initial_state([cfg.slug for cfg in configs])
+        main_thread = threading.get_ident()
+        lock = threading.Lock()
+        release = threading.Event()
+        resources: list[tuple[object, object]] = []
+        resource_errors: list[str] = []
+        apply_threads: list[int] = []
+        apply_order: list[tuple[str, str]] = []
+        active = 0
+        max_active = 0
+
+        class Browser:
+            def __init__(self) -> None:
+                self.creator = threading.get_ident()
+                self.closed = False
+
+            def close(self) -> None:
+                if threading.get_ident() != self.creator:
+                    resource_errors.append("browser closed from another thread")
+                self.closed = True
+
+        class Playwright:
+            def __init__(self, creator: int) -> None:
+                self.creator = creator
+                self.stopped = False
+
+            def stop(self) -> None:
+                if threading.get_ident() != self.creator:
+                    resource_errors.append("playwright stopped from another thread")
+                self.stopped = True
+
+        def launch_browser():
+            browser = Browser()
+            playwright = Playwright(browser.creator)
+            with lock:
+                resources.append((playwright, browser))
+            return playwright, browser
+
+        def fetch(_cfg, dates, browser):
+            nonlocal active, max_active
+            if threading.get_ident() != browser.creator:
+                resource_errors.append("browser used from another thread")
+            with lock:
+                active += 1
+                max_active = max(max_active, active)
+                fourth_worker = active == 4
+            try:
+                if fourth_worker:
+                    # Keep the first four calls in flight briefly: an accidental
+                    # fifth worker would then raise max_active above the cap.
+                    threading.Event().wait(timeout=0.05)
+                    release.set()
+                release.wait(timeout=1)
+                return {date: available("Mittag") for date in dates}
+            finally:
+                with lock:
+                    active -= 1
+
+        real_apply = main_module._apply_observation
+
+        def record_apply(**kwargs):
+            apply_threads.append(threading.get_ident())
+            apply_order.append((kwargs["cfg"].slug, kwargs["iso_date"]))
+            return real_apply(**kwargs)
+
+        with (
+            patch("src.main.load_tents", return_value=configs),
+            patch("src.main.headless_fetcher.launch_browser", side_effect=launch_browser),
+            patch("src.main.festzelt_os_fetcher.fetch", side_effect=fetch),
+            patch("src.main._apply_observation", side_effect=record_apply),
+        ):
+            self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+
+        self.assertEqual(max_active, 4)
+        self.assertEqual(len(resources), 4)
+        self.assertEqual(len({browser.creator for _, browser in resources}), 4)
+        self.assertTrue(all(browser.creator != main_thread for _, browser in resources))
+        self.assertTrue(all(playwright.stopped for playwright, _ in resources))
+        self.assertTrue(all(browser.closed for _, browser in resources))
+        self.assertEqual(resource_errors, [])
+        self.assertEqual(set(apply_threads), {main_thread})
+        self.assertEqual(
+            apply_order,
+            [(cfg.slug, iso_date) for cfg in configs for iso_date in cfg.dates],
+        )
+        state = load(self.path)
+        self.assertTrue(
+            all(
+                date_state.observed_status == "available"
+                for tent in state.tents.values()
+                for date_state in tent.dates.values()
+            )
+        )
+
+    def test_worker_fetch_errors_are_isolated_and_resources_are_closed(self) -> None:
+        configs = [config("ok"), config("raised"), config("invalid")]
+        self.initial_state([cfg.slug for cfg in configs])
+        resources: list[tuple[Mock, Mock]] = []
+
+        def launch_browser():
+            playwright = Mock()
+            browser = Mock()
+            resources.append((playwright, browser))
+            return playwright, browser
+
+        def fetch(cfg, dates, _browser):
+            if cfg is configs[1].festzelt_os:
+                raise RuntimeError("synthetic failure")
+            if cfg is configs[2].festzelt_os:
+                return []
+            return {date: available("Mittag") for date in dates}
+
+        with (
+            patch("src.main.load_tents", return_value=configs),
+            patch("src.main.headless_fetcher.launch_browser", side_effect=launch_browser),
+            patch("src.main.festzelt_os_fetcher.fetch", side_effect=fetch),
+        ):
+            self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+
+        self.assertEqual(len(resources), 3)
+        for playwright, browser in resources:
+            browser.close.assert_called_once_with()
+            playwright.stop.assert_called_once_with()
+        state = load(self.path)
+        self.assertEqual(
+            state.tents["ok"].dates[configs[0].dates[0]].observed_status,
+            "available",
+        )
+        for slug in ("raised", "invalid"):
+            for date_state in state.tents[slug].dates.values():
+                self.assertEqual(date_state.observed_status, "error")
+                self.assertEqual(
+                    date_state.diagnostics["error_class"], "probe_exception"
+                )
+
+    def test_worker_launch_failure_is_recorded_without_state_thread_failure(self) -> None:
+        cfg = config("launch-error")
+        self.initial_state([cfg.slug])
+        with (
+            patch("src.main.load_tents", return_value=[cfg]),
+            patch(
+                "src.main.headless_fetcher.launch_browser",
+                side_effect=OSError("synthetic launch failure"),
+            ),
+            patch("src.main.festzelt_os_fetcher.fetch") as fetch,
+        ):
+            self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+
+        fetch.assert_not_called()
+        for date_state in load(self.path).tents[cfg.slug].dates.values():
+            self.assertEqual(date_state.observed_status, "error")
+            self.assertEqual(
+                date_state.diagnostics["error_class"], "browser_unavailable"
+            )
+            self.assertEqual(date_state.diagnostics["detail"], "OSError")
+
+    def test_legacy_headless_mode_keeps_main_thread_browser_lifecycle(self) -> None:
+        cfg = SimpleNamespace(
+            slug="headless",
+            name="Headless",
+            booking_url="https://example.com/headless",
+            enabled=True,
+            mode="headless",
+            dates=["2026-09-25"],
+            headless=SimpleNamespace(),
+        )
+        self.initial_state([cfg.slug])
+        main_thread = threading.get_ident()
+        fetch_threads: list[int] = []
+
+        def fetch(_cfg, _date, browser):
+            self.assertIs(browser, self.browser)
+            fetch_threads.append(threading.get_ident())
+            return "unavailable"
+
+        with (
+            patch("src.main.load_tents", return_value=[cfg]),
+            patch(
+                "src.main.headless_fetcher.launch_browser",
+                return_value=(self.playwright, self.browser),
+            ) as launch,
+            patch("src.main.headless_fetcher.fetch", side_effect=fetch),
+        ):
+            self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+
+        launch.assert_called_once_with()
+        self.browser.close.assert_called_once_with()
+        self.playwright.stop.assert_called_once_with()
+        self.assertEqual(fetch_threads, [main_thread])
+        date_state = load(self.path).tents[cfg.slug].dates[cfg.dates[0]]
+        self.assertEqual(date_state.observed_status, "unknown")
+        self.assertEqual(
+            date_state.diagnostics["error_class"],
+            "date_and_shift_evidence_unavailable",
+        )
 
     def test_dry_run_does_not_modify_state_file(self) -> None:
         cfg = config("a")
@@ -129,7 +357,7 @@ class MainIntegrationTests(unittest.TestCase):
                 state=state,
                 cfg=cfg,
                 tent_state=tent,
-                results=[degraded(), degraded()],
+                results=[applied(degraded()), applied(degraded())],
                 timestamp=f"2026-08-04T08:0{index}:00+00:00",
             )
         self.assertEqual(tent.consecutive_degraded, 3)
@@ -140,7 +368,7 @@ class MainIntegrationTests(unittest.TestCase):
             state=state,
             cfg=cfg,
             tent_state=tent,
-            results=[available("Mittag"), available("Mittag")],
+            results=[applied(available("Mittag")), applied(available("Mittag"))],
             timestamp="2026-08-04T08:04:00+00:00",
         )
         self.assertFalse(tent.failure_incident_open)
@@ -150,10 +378,100 @@ class MainIntegrationTests(unittest.TestCase):
             state=state,
             cfg=cfg,
             tent_state=tent,
-            results=[error(), error()],
+            results=[applied(error()), applied(error())],
             timestamp="2026-08-04T08:05:00+00:00",
         )
         self.assertEqual(tent.consecutive_failures, 1)
+
+    def test_alternating_degraded_and_error_share_unhealthy_streak(self) -> None:
+        state = State()
+        cfg = config("a")
+        tent = state.tents.setdefault("a", TentState())
+        observations = [
+            [applied(degraded()), applied(degraded())],
+            [applied(error()), applied(error())],
+            [applied(degraded()), applied(degraded())],
+        ]
+        for index, results in enumerate(observations):
+            _record_tent_health(
+                state=state,
+                cfg=cfg,
+                tent_state=tent,
+                results=results,
+                timestamp=f"2026-08-04T08:0{index}:00+00:00",
+            )
+
+        self.assertEqual(tent.consecutive_unhealthy, 3)
+        self.assertTrue(tent.failure_incident_open)
+        self.assertEqual(len(state.outbox), 1)
+
+    def test_defensive_available_without_shifts_is_degraded_at_tent_level(self) -> None:
+        cfg = config("a")
+        self.initial_state(["a"])
+        invalid = SimpleNamespace(
+            status="available",
+            shifts=[],
+            diagnostics=ProbeDiagnostics(
+                health="healthy",
+                page_type="booking",
+                date_control_count=1,
+                plausible_date_option_count=10,
+                target_found=True,
+                target_enabled=True,
+                shift_control_count=1,
+                shift_control_found=True,
+                update_confirmed=True,
+                shift_count=0,
+            ),
+        )
+        with (
+            patch("src.main.load_tents", return_value=[cfg]),
+            patch(
+                "src.main.headless_fetcher.launch_browser",
+                return_value=(self.playwright, self.browser),
+            ),
+            patch(
+                "src.main.festzelt_os_fetcher.fetch",
+                return_value={date: invalid for date in cfg.dates},
+            ),
+            patch("src.main.time.sleep"),
+        ):
+            self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+
+        state = load(self.path)
+        tent = state.tents["a"]
+        self.assertEqual(tent.consecutive_degraded, 1)
+        self.assertEqual(tent.consecutive_unhealthy, 1)
+        self.assertIsNone(tent.last_success_at)
+        for date_state in tent.dates.values():
+            self.assertEqual(date_state.observed_status, "unknown")
+            self.assertEqual(date_state.health, "degraded")
+            self.assertEqual(
+                date_state.diagnostics["error_class"], "available_without_shifts"
+            )
+
+    def test_one_malformed_date_result_does_not_abort_remaining_dates(self) -> None:
+        cfg = config("a")
+        self.initial_state(["a"])
+        batch = {
+            cfg.dates[0]: SimpleNamespace(shifts=["Mittag"]),
+            cfg.dates[1]: available("Mittag"),
+        }
+        with (
+            patch("src.main.load_tents", return_value=[cfg]),
+            patch(
+                "src.main.headless_fetcher.launch_browser",
+                return_value=(self.playwright, self.browser),
+            ),
+            patch("src.main.festzelt_os_fetcher.fetch", return_value=batch),
+            patch("src.main.time.sleep"),
+        ):
+            self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+
+        tent = load(self.path).tents["a"]
+        self.assertEqual(tent.dates[cfg.dates[0]].observed_status, "error")
+        self.assertEqual(tent.dates[cfg.dates[1]].observed_status, "available")
+        self.assertEqual(tent.dates[cfg.dates[1]].shifts, ["Mittag"])
 
     def test_hash_mode_reuses_diagnostic_baseline(self) -> None:
         cfg = SimpleNamespace(

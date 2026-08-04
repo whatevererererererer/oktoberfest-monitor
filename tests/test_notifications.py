@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import os
 import importlib.util
+import os
 import sys
 import types
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 if importlib.util.find_spec("httpx") is None:
@@ -13,10 +13,11 @@ if importlib.util.find_spec("httpx") is None:
     httpx_stub.Client = object
     sys.modules["httpx"] = httpx_stub
 
-from src.notification_policy import needs_notification_burst
 import httpx
 
-from src.notify import PushoverDeliveryError, alert_available, build_payload, send_event_part
+import src.notify as notify
+from src.notification_policy import needs_notification_burst
+from src.notify import PushoverDeliveryError, build_payload, send_event_part
 from src.state import OutboxEvent
 
 
@@ -51,50 +52,6 @@ class NotificationPolicyTests(unittest.TestCase):
         )
 
 
-class NotificationBurstTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.env = patch.dict(
-            os.environ,
-            {"PUSHOVER_TOKEN": "token", "PUSHOVER_USER": "user"},
-        )
-        self.env.start()
-
-    def tearDown(self) -> None:
-        self.env.stop()
-
-    @patch("src.notify.time.sleep")
-    @patch("src.notify._post")
-    def test_burst_sends_two_groups_of_four(self, post, sleep) -> None:
-        alert_available(
-            tent_name="Testzelt",
-            tent_slug="testzelt",
-            iso_date="2026-09-26",
-            booking_url="https://example.com/book",
-            shifts=["Nachmittag"],
-            burst=True,
-        )
-
-        self.assertEqual(post.call_count, 8)
-        self.assertEqual(
-            [call.args[0] for call in sleep.call_args_list],
-            [5, 5, 5, 30, 5, 5, 5],
-        )
-
-    @patch("src.notify.time.sleep")
-    @patch("src.notify._post")
-    def test_normal_alert_stays_single(self, post, sleep) -> None:
-        alert_available(
-            tent_name="Testzelt",
-            tent_slug="testzelt",
-            iso_date="2026-09-26",
-            booking_url="https://example.com/book",
-            shifts=["Mittag"],
-        )
-
-        post.assert_called_once()
-        sleep.assert_not_called()
-
-
 class NotificationTransportTests(unittest.TestCase):
     def setUp(self) -> None:
         self.env = patch.dict(
@@ -123,6 +80,11 @@ class NotificationTransportTests(unittest.TestCase):
         )
         self.assertIn("14:34", payload["message"])
 
+    def test_only_durable_outbox_transport_is_exposed(self) -> None:
+        self.assertFalse(hasattr(notify, "alert_available"))
+        self.assertFalse(hasattr(notify, "alert_error"))
+        self.assertFalse(hasattr(notify, "_post_burst"))
+
     def test_success_requires_json_status_and_captures_metadata(self) -> None:
         response = unittest.mock.Mock()
         response.status_code = 200
@@ -150,6 +112,7 @@ class NotificationTransportTests(unittest.TestCase):
         self.assertEqual(raised.exception.failure_class, "terminal")
 
     def test_429_is_rate_limited(self) -> None:
+        now = datetime(2026, 8, 4, 8, 0, tzinfo=timezone.utc)
         response = unittest.mock.Mock(
             status_code=429,
             headers=httpx.Headers({"Retry-After": "30"}),
@@ -157,9 +120,114 @@ class NotificationTransportTests(unittest.TestCase):
         client = unittest.mock.Mock()
         client.post.return_value = response
         with self.assertRaises(PushoverDeliveryError) as raised:
-            send_event_part(self.event, client=client)
+            send_event_part(self.event, client=client, now=now)
         self.assertEqual(raised.exception.failure_class, "rate_limited")
-        self.assertIsNotNone(raised.exception.retry_at)
+        self.assertEqual(raised.exception.retry_at, now + timedelta(seconds=30))
+        self.assertEqual(raised.exception.retry_after_seconds, 30)
+
+    def test_429_uses_later_quota_reset_and_captures_headers(self) -> None:
+        now = datetime(2026, 8, 4, 8, 0, tzinfo=timezone.utc)
+        reset = int((now + timedelta(minutes=3)).timestamp())
+        response = unittest.mock.Mock(
+            status_code=429,
+            headers=httpx.Headers(
+                {
+                    "Retry-After": "30",
+                    "X-Limit-App-Limit": "10000",
+                    "X-Limit-App-Remaining": "0",
+                    "X-Limit-App-Reset": str(reset),
+                }
+            ),
+        )
+        client = unittest.mock.Mock()
+        client.post.return_value = response
+
+        with self.assertRaises(PushoverDeliveryError) as raised:
+            send_event_part(self.event, client=client, now=now)
+
+        error = raised.exception
+        self.assertEqual(error.retry_at, now + timedelta(minutes=3))
+        self.assertEqual(
+            (error.quota_limit, error.quota_remaining, error.quota_reset),
+            (10000, 0, reset),
+        )
+
+    def test_429_past_reset_has_a_deterministic_minimum_delay(self) -> None:
+        now = datetime(2026, 8, 4, 8, 0, 0, 900000, tzinfo=timezone.utc)
+        response = unittest.mock.Mock(
+            status_code=429,
+            headers=httpx.Headers(
+                {
+                    "X-Limit-App-Remaining": "0",
+                    "X-Limit-App-Reset": str(int(now.timestamp()) - 10),
+                }
+            ),
+        )
+        client = unittest.mock.Mock()
+        client.post.return_value = response
+
+        with self.assertRaises(PushoverDeliveryError) as raised:
+            send_event_part(self.event, client=client, now=now)
+
+        self.assertEqual(raised.exception.retry_at, now + timedelta(seconds=5))
+
+    def test_429_without_usable_headers_uses_bounded_default_delay(self) -> None:
+        now = datetime(2026, 8, 4, 8, 0, tzinfo=timezone.utc)
+        response = unittest.mock.Mock(
+            status_code=429,
+            headers=httpx.Headers({"Retry-After": "not-a-date"}),
+        )
+        client = unittest.mock.Mock()
+        client.post.return_value = response
+
+        with self.assertRaises(PushoverDeliveryError) as raised:
+            send_event_part(self.event, client=client, now=now)
+
+        self.assertEqual(raised.exception.retry_at, now + timedelta(seconds=60))
+
+    def test_429_huge_reset_is_ignored_without_overflow(self) -> None:
+        now = datetime(2026, 8, 4, 8, 0, tzinfo=timezone.utc)
+        response = unittest.mock.Mock(
+            status_code=429,
+            headers=httpx.Headers(
+                {
+                    "X-Limit-App-Remaining": "0",
+                    "X-Limit-App-Reset": str(10**100),
+                }
+            ),
+        )
+        client = unittest.mock.Mock()
+        client.post.return_value = response
+
+        with self.assertRaises(PushoverDeliveryError) as raised:
+            send_event_part(self.event, client=client, now=now)
+
+        self.assertEqual(raised.exception.failure_class, "rate_limited")
+        self.assertEqual(raised.exception.retry_at, now + timedelta(seconds=60))
+        self.assertIsNone(raised.exception.quota_reset)
+
+    def test_429_positive_remaining_does_not_wait_for_quota_reset(self) -> None:
+        now = datetime(2026, 8, 4, 8, 0, tzinfo=timezone.utc)
+        reset = int((now + timedelta(hours=1)).timestamp())
+        response = unittest.mock.Mock(
+            status_code=429,
+            headers=httpx.Headers(
+                {
+                    "Retry-After": "30",
+                    "X-Limit-App-Limit": "10000",
+                    "X-Limit-App-Remaining": "5",
+                    "X-Limit-App-Reset": str(reset),
+                }
+            ),
+        )
+        client = unittest.mock.Mock()
+        client.post.return_value = response
+
+        with self.assertRaises(PushoverDeliveryError) as raised:
+            send_event_part(self.event, client=client, now=now)
+
+        self.assertEqual(raised.exception.retry_at, now + timedelta(seconds=30))
+        self.assertEqual(raised.exception.quota_remaining, 5)
 
     def test_5xx_and_timeout_are_retryable(self) -> None:
         response = unittest.mock.Mock(status_code=503, headers=httpx.Headers())

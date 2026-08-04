@@ -76,5 +76,10 @@ def launch_browser():
     """Lazy-import playwright and launch a Chromium browser. Caller must close."""
     from playwright.sync_api import sync_playwright
     pw = sync_playwright().start()
-    browser = pw.chromium.launch(headless=True, args=["--no-sandbox"])
+    try:
+        browser = pw.chromium.launch(headless=True, args=["--no-sandbox"])
+    except Exception:
+        # start() owns a driver process even when Chromium cannot be launched.
+        pw.stop()
+        raise
     return pw, browser

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import os
-import time
 from dataclasses import dataclass
-from datetime import date as date_type, datetime, timezone
+from datetime import date as date_type, datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from typing import Literal
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 from zoneinfo import ZoneInfo
@@ -15,11 +15,12 @@ from .state import OutboxEvent
 PUSHOVER_API = "https://api.pushover.net/1/messages.json"
 BERLIN = ZoneInfo("Europe/Berlin")
 
-BURST_COUNT = 4
-BURST_INTERVAL_SECONDS = 5
-BURST_REPEAT_DELAY_SECONDS = 30
 BURST_DELAYS = (5, 5, 5, 30, 5, 5, 5)
 MAX_ATTEMPTS_PER_PART = 5
+MAX_RATE_LIMIT_DEFERRALS_PER_PART = 12
+MIN_RATE_LIMIT_DELAY_SECONDS = 5
+DEFAULT_RATE_LIMIT_DELAY_SECONDS = 60
+MAX_RATE_LIMIT_DELAY_SECONDS = 35 * 24 * 60 * 60
 
 WEEKDAY_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
@@ -43,12 +44,20 @@ class PushoverDeliveryError(RuntimeError):
         retry_at: datetime | None = None,
         status_code: int | None = None,
         request_id: str | None = None,
+        quota_limit: int | None = None,
+        quota_remaining: int | None = None,
+        quota_reset: int | None = None,
+        retry_after_seconds: int | None = None,
     ) -> None:
         super().__init__(message)
         self.failure_class = failure_class
         self.retry_at = retry_at
         self.status_code = status_code
         self.request_id = request_id
+        self.quota_limit = quota_limit
+        self.quota_remaining = quota_remaining
+        self.quota_reset = quota_reset
+        self.retry_after_seconds = retry_after_seconds
 
 
 def _weekday_short(iso_date: str) -> str:
@@ -76,8 +85,88 @@ def _header_int(headers: httpx.Headers, name: str) -> int | None:
         return None
 
 
+def _quota_header_int(headers: httpx.Headers, name: str) -> int | None:
+    value = _header_int(headers, name)
+    return value if value is not None and value >= 0 else None
+
+
+def _quota_metadata(
+    headers: httpx.Headers,
+    *,
+    now: datetime,
+) -> tuple[int | None, int | None, int | None]:
+    limit = _quota_header_int(headers, "X-Limit-App-Limit")
+    remaining = _quota_header_int(headers, "X-Limit-App-Remaining")
+    reset = _quota_header_int(headers, "X-Limit-App-Reset")
+    if reset is not None:
+        try:
+            reset_at = datetime.fromtimestamp(reset, timezone.utc)
+        except (OverflowError, OSError, ValueError):
+            reset = None
+        else:
+            if reset_at > now + timedelta(seconds=MAX_RATE_LIMIT_DELAY_SECONDS):
+                reset = None
+    if limit is not None and remaining is not None and remaining > limit:
+        limit = None
+        remaining = None
+    return limit, remaining, reset
+
+
+def _as_utc(value: datetime | None) -> datetime:
+    value = value or datetime.now(timezone.utc)
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def _retry_after_seconds(headers: httpx.Headers) -> int | None:
+    raw = headers.get("Retry-After")
+    if raw is None:
+        return None
+    try:
+        return min(MAX_RATE_LIMIT_DELAY_SECONDS, max(0, int(raw)))
+    except ValueError:
+        return None
+
+
+def _retry_at(
+    headers: httpx.Headers,
+    *,
+    now: datetime,
+    quota_remaining: int | None,
+    quota_reset: int | None,
+) -> datetime:
+    """Return a deterministic, non-past 429 retry time.
+
+    Standard ``Retry-After`` values (seconds or HTTP date) are honoured. The
+    Pushover quota-reset epoch participates only when the provider explicitly
+    reports an exhausted quota.
+    """
+    minimum = now.timestamp() + MIN_RATE_LIMIT_DELAY_SECONDS
+    candidates = [minimum]
+    retry_after = headers.get("Retry-After")
+    relative_seconds = _retry_after_seconds(headers)
+    if relative_seconds is not None:
+        candidates.append(now.timestamp() + relative_seconds)
+    elif retry_after:
+        try:
+            parsed = parsedate_to_datetime(retry_after)
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            parsed_timestamp = parsed.timestamp()
+            upper_bound = now.timestamp() + MAX_RATE_LIMIT_DELAY_SECONDS
+            candidates.append(min(upper_bound, parsed_timestamp))
+        except (TypeError, ValueError, OverflowError, OSError):
+            pass
+    if quota_remaining == 0 and quota_reset is not None:
+        candidates.append(float(quota_reset))
+    if len(candidates) == 1:
+        candidates.append(now.timestamp() + DEFAULT_RATE_LIMIT_DELAY_SECONDS)
+    return datetime.fromtimestamp(max(candidates), timezone.utc)
+
+
 def build_payload(event: OutboxEvent, *, now: datetime | None = None) -> dict:
-    now = now or datetime.now(timezone.utc)
+    now = _as_utc(now)
     when = now.astimezone(BERLIN).strftime("%H:%M")
 
     if event.kind == "monitor_error":
@@ -135,6 +224,7 @@ def send_event_part(
     now: datetime | None = None,
 ) -> DeliveryResult:
     """Send exactly one outbox part. Scheduling/checkpointing lives elsewhere."""
+    now = _as_utc(now)
     token, user = _credentials(event)
     payload = build_payload(event, now=now)
     body = {"token": token, "user": user, **payload}
@@ -152,22 +242,24 @@ def send_event_part(
         request_id = response.headers.get("X-Pushover-Request")
         status = response.status_code
         if status == 429:
-            retry_at: datetime | None = None
-            retry_after = _header_int(response.headers, "Retry-After")
-            reset = _header_int(response.headers, "X-Limit-App-Reset")
-            if retry_after is not None:
-                retry_at = datetime.now(timezone.utc).replace(microsecond=0)
-                retry_at = datetime.fromtimestamp(
-                    retry_at.timestamp() + max(5, retry_after), timezone.utc
-                )
-            elif reset is not None:
-                retry_at = datetime.fromtimestamp(reset, timezone.utc)
+            quota_limit, quota_remaining, quota_reset = _quota_metadata(
+                response.headers, now=now
+            )
             raise PushoverDeliveryError(
                 "http_429",
                 failure_class="rate_limited",
-                retry_at=retry_at,
+                retry_at=_retry_at(
+                    response.headers,
+                    now=now,
+                    quota_remaining=quota_remaining,
+                    quota_reset=quota_reset,
+                ),
                 status_code=status,
                 request_id=request_id,
+                quota_limit=quota_limit,
+                quota_remaining=quota_remaining,
+                quota_reset=quota_reset,
+                retry_after_seconds=_retry_after_seconds(response.headers),
             )
         if 400 <= status < 500:
             raise PushoverDeliveryError(
@@ -197,11 +289,14 @@ def send_event_part(
                 status_code=status,
                 request_id=str(data.get("request") or request_id or "") or None,
             )
+        quota_limit, quota_remaining, quota_reset = _quota_metadata(
+            response.headers, now=now
+        )
         return DeliveryResult(
             request_id=str(data.get("request") or request_id or "") or None,
-            quota_limit=_header_int(response.headers, "X-Limit-App-Limit"),
-            quota_remaining=_header_int(response.headers, "X-Limit-App-Remaining"),
-            quota_reset=_header_int(response.headers, "X-Limit-App-Reset"),
+            quota_limit=quota_limit,
+            quota_remaining=quota_remaining,
+            quota_reset=quota_reset,
         )
     finally:
         if owns_client:
@@ -210,65 +305,3 @@ def send_event_part(
 
 def retry_delay_seconds(attempt: int) -> int:
     return min(60, 5 * (2 ** max(0, attempt - 1)))
-
-
-# Backward-compatible direct helpers. Production uses the durable outbox path.
-def _post(token: str, user: str, payload: dict) -> None:
-    with httpx.Client(timeout=10) as client:
-        response = client.post(PUSHOVER_API, data={"token": token, "user": user, **payload})
-        response.raise_for_status()
-        data = response.json()
-        if data.get("status") != 1:
-            raise RuntimeError("Pushover did not confirm the request")
-
-
-def _post_burst(token: str, user: str, payload: dict) -> None:
-    _post(token, user, payload)
-    for delay in BURST_DELAYS:
-        time.sleep(delay)
-        _post(token, user, payload)
-
-
-def alert_available(
-    *,
-    tent_name: str,
-    tent_slug: str,
-    iso_date: str,
-    booking_url: str,
-    shifts: list[str] | None = None,
-    new_shifts: list[str] | None = None,
-    reason: str = "available",
-    burst: bool = False,
-) -> None:
-    event = OutboxEvent(
-        event_id=f"legacy-{tent_slug}-{iso_date}",
-        tent_slug=tent_slug,
-        tent_name=tent_name,
-        iso_date=iso_date,
-        booking_url=booking_url,
-        shifts=shifts or [],
-        new_shifts=new_shifts or [],
-        reason=reason,
-        burst=burst,
-        total_messages=8 if burst else 1,
-        created_at=datetime.now(timezone.utc).isoformat(),
-    )
-    token, user = _credentials(event)
-    payload = build_payload(event)
-    if burst:
-        _post_burst(token, user, payload)
-    else:
-        _post(token, user, payload)
-
-
-def alert_error(*, summary: str, details: str = "") -> None:
-    token = os.environ.get("PUSHOVER_TOKEN_ERROR")
-    user = os.environ.get("PUSHOVER_USER")
-    if not token or not user:
-        return
-    payload = {
-        "title": "Wiesn-Monitor: Fehler",
-        "message": (summary + ("\n\n" + details if details else ""))[:1024],
-        "priority": 0,
-    }
-    _post(token, user, payload)

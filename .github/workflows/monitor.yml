@@ -16,17 +16,24 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    # The platform safety net matches the external dispatch cadence. The
+    # application deadline below leaves time for Actions post-steps.
+    timeout-minutes: 4
     steps:
+      - name: Start end-to-end runtime budget
+        run: echo "MONITOR_JOB_STARTED=$(date +%s)" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v5
         with:
           # workflow_dispatch otherwise checks out the event SHA, which may carry
           # stale state after a queued run. Always start from current main.
           ref: main
-          fetch-depth: 0
+          # The writer guard compares exact SHAs and never rebases, so it needs
+          # the checked-out parent, not 27k historical state commits.
+          fetch-depth: 1
 
-      - name: Start end-to-end runtime budget
-        run: echo "MONITOR_JOB_STARTED=$(date +%s)" >> "$GITHUB_ENV"
+      - name: Record producer revision
+        run: echo "MONITOR_PRODUCER_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v6
         with:
@@ -65,28 +72,62 @@ jobs:
         run: |
           git config user.name  "wiesn-monitor[bot]"
           git config user.email "wiesn-monitor@users.noreply.github.com"
+          # Every checkpoint must still be based on precisely the revision this
+          # writer checked out.  The script advances its private basis file only
+          # after its own push succeeds.  A concurrent code *or* state commit is
+          # therefore a hard stop, never something an old writer rebases over.
+          # Deployment of this guard itself still requires cron/Actions quiescing:
+          # an already-running checkout of the old script cannot enforce it.
+          echo "MONITOR_WRITER_BASE=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Probe, persist outbox, and deliver with checkpoints
         env:
           PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
           PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
           PUSHOVER_TOKEN_ERROR: ${{ secrets.PUSHOVER_TOKEN_ERROR }}
+          # Two bounded fetch/push attempts plus their backoff fit inside the
+          # 50-second finalization reserve below, together with HTTP timeout.
+          CHECKPOINT_MAX_ATTEMPTS: "2"
+          CHECKPOINT_GIT_TIMEOUT_SECONDS: "8"
+          CHECKPOINT_BACKOFF_SECONDS: "1"
         run: |
+          # The complete normal path, including setup, probe and checkpoints,
+          # must fit below the four-minute dispatch cadence. A stuck page must
+          # not hold the serialized writer indefinitely. Probe sends no push;
+          # on timeout it exits before the checkpoint and the old state remains.
+          delivery_deadline=210
+          finalization_reserve=50
+          elapsed=$(( $(date +%s) - MONITOR_JOB_STARTED ))
+          probe_budget=$(( delivery_deadline - elapsed - finalization_reserve ))
+          if [ "$probe_budget" -le 0 ]; then
+            echo "setup exhausted probe budget; refusing a stale partial run" >&2
+            exit 1
+          fi
+
           # Phase 1: inspect every tent and durably persist observations/outbox.
-          python -m src.main --probe
+          timeout --signal=TERM --kill-after=5 "${probe_budget}s" python -m src.main --probe
           bash scripts/checkpoint_state.sh probe
 
           # Phase 2: one message per process, followed immediately by a Git
           # checkpoint. Several events share the same due-time scheduler, so
           # bursts do not delay any remaining tent probe and do not add linearly.
+          # Keep the normal path below the four-minute dispatch interval.  The
+          # finalization reserve covers one Pushover request plus a bounded Git
+          # checkpoint.  In particular, never begin a 35-second outbox wait when
+          # only a few seconds remain before the delivery deadline.
           for delivery in $(seq 1 100); do
             elapsed=$(( $(date +%s) - MONITOR_JOB_STARTED ))
-            if [ "$elapsed" -ge 210 ]; then
-              echo "end-to-end deadline reached; remaining outbox resumes next run"
+            remaining=$(( delivery_deadline - elapsed ))
+            if [ "$remaining" -le "$finalization_reserve" ]; then
+              echo "delivery reserve reached; remaining outbox resumes next run"
               break
             fi
+            max_wait=$(( remaining - finalization_reserve ))
+            if [ "$max_wait" -gt 35 ]; then
+              max_wait=35
+            fi
             set +e
-            python -m src.main --deliver-next --max-wait-seconds 35
+            python -m src.main --deliver-next --max-wait-seconds "$max_wait"
             rc=$?
             set -e
             if [ "$rc" -eq 3 ]; then

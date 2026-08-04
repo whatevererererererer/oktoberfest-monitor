@@ -28,10 +28,14 @@ ambiguous part; Pushover offers no idempotency key, so stronger exactly-once
 delivery is not possible. Already checkpointed parts of a burst are not
 intentionally repeated.
 
-The 210-second internal delivery budget starts before Python/dependency and
-Playwright setup (immediately after checkout), leaving margin before the
-six-minute hard job timeout for the final state checkpoint. Remaining outbox
-parts resume in the next, current-`main` run.
+The 210-second normal-operation deadline starts in the first job step, before
+checkout, Python/dependency, and Playwright setup. Both the probe and each
+delivery wait are derived from the remaining budget; 50 seconds are reserved
+for the HTTP/state/Git checkpoint and roughly 30 seconds remain for Actions
+post-steps. A timed-out probe is not checkpointed. The four-minute job timeout
+is a final safety net, and remaining outbox parts resume in the next
+current-`main` run. Checkout is shallow because the writer guard compares exact
+SHAs and never rebases through the historical state commits.
 
 ## Probe and health invariants
 
@@ -47,15 +51,28 @@ For the active `festzelt_os` mode:
   invalid structure, navigation failure, or technical probe failure.
 
 Unknown/error observations are stored separately and do not overwrite the last
-reliable availability and shift baseline. Diagnostics are intentionally small:
-page type, control/option counts, target/update evidence, shift count, and an
-error class. Page HTML, cookies, tokens, and form values are never stored.
+verified availability and shift baseline. The baseline has its own verification
+flag, timestamp, and privacy-safe evidence snapshot. A target-specific unreadable
+shift step is latched so the same real shift is reported once when it becomes
+readable again; an unrelated bot/navigation error does not create that duplicate.
+Diagnostics are intentionally small: page type, control/option counts,
+target/update evidence, shift count, and an error class. Page HTML, cookies,
+tokens, and form values are never stored.
 
-Both targets are selected sequentially on one low-load page per tent with
-Playwright's native `select_option`. Date and shift controls are reacquired
-after every rerender, and unchanged options from the previous date are rejected
-unless a concrete relevant mutation proves the wizard updated. Failed Livewire
-update responses are classified separately from an honestly empty shift step.
+Within a tent, each target is checked sequentially on a freshly navigated
+low-load page with Playwright's native `select_option`; this prevents a late
+response for Friday from being attributed to Saturday. Up to four deterministic
+tent shards run concurrently, each with its own thread-bound Playwright/browser;
+they are fully joined before the main thread applies results to State in config
+order. Thus no browser object or State mutation crosses worker threads, and one
+tent/domain never has two target pages active at once. Date and shift controls
+are read atomically and reacquired after every rerender. Only visible, enabled
+controls count as evidence. Livewire responses are paired with a request whose
+update payload contains the selected target/model; an identical shift list is
+accepted only after the paired response completes and the browser receives an
+additional DOM turn. Placeholder, loading, sold-out, and other non-offer
+options are never shifts. Failed updates are classified separately from an
+honestly empty shift step.
 The browser uses Playwright's native Chromium identity; no Safari spoofing,
 stealth plugin, challenge cookie, or CAPTCHA workaround is used.
 German long dates, numeric German dates, ISO dates, whitespace, and NBSP are
@@ -84,24 +101,29 @@ use `Europe/Berlin` explicitly.
 
 Pushover transport verifies HTTP 200 plus JSON `status=1`, records the request
 ID and quota headers, does not blindly retry ordinary 4xx responses, defers 429
-responses, and retries 5xx/network timeouts with bounded backoff. Tests never
-send a real message.
+responses without consuming the ordinary retry budget, and retries 5xx/network
+timeouts with bounded backoff. Quota gates are separate for availability and
+monitor-error tokens. Malformed events are quarantined instead of blocking the
+queue. Burst gaps are scheduled from provider-call completion, not request
+start. Tests never send a real message.
 
 ## State schema
 
-`state/state.json` is the source of truth and Git history. Schema v2 contains:
+`state/state.json` is the source of truth and Git history. Schema v3 contains:
 
-- last reliable status/shifts;
+- last verified status/shifts and their provenance;
 - latest observed status and health;
-- privacy-preserving probe diagnostics and degraded/error counters;
+- privacy-preserving probe diagnostics and combined unhealthy/error counters;
 - stable alert sequences;
 - a resumable outbox with message-part cursor, attempts, next due time,
-  Pushover request/quota metadata, and delivered/dead-letter status.
+  channel-specific Pushover quota metadata, and delivered/dead-letter status;
+- run start/end/duration and the exact checked-out producer revision.
 
-Legacy snapshots migrate in memory without discarding their timestamps,
-failure counters, statuses, or shifts. Legacy successful-looking observations
-start with `health=unknown` until a v2 probe supplies control evidence. State
-writes use an atomic same-directory replacement.
+Legacy snapshots migrate in memory without discarding timestamps, counters, or
+their previous values in migration diagnostics. A successful-looking legacy
+baseline without correlation evidence becomes `unknown`, so an empty historical
+`available` value cannot suppress the first real shift. A state from a newer
+schema fails closed. State writes use an atomic same-directory replacement.
 
 ## Local verification
 
@@ -170,6 +192,27 @@ availability alert until it supplies date-correlated shift evidence.
 
 Do not enable a disabled tent merely because a landing page or generic form is
 reachable. Enablement requires repeatable, target-date-specific live evidence.
+
+## Deployment and rollback
+
+The first deployment of schema v3 and the fail-closed writer guard requires a
+quiet writer boundary: pause the external cron dispatch, let every running and
+pending old workflow finish or cancel it, update from current `origin/main`, and
+only then push the reviewed code commit. Resume dispatch only after confirming
+that no old checkout can write schema v2 over schema v3.
+
+Validate at least three consecutive runs by duration, outbox/health values and
+producer ancestry. `producer_revision` is the exact checkout HEAD, so after the
+first run it normally names a preceding state commit rather than remaining
+textually equal to the deployment commit. The deployment commit must be an
+ancestor of every observed producer revision, with no intervening code change.
+
+After any schema-v3 checkpoint, do not roll back with a plain revert to the old
+schema-v2 loader: it would accept v3 while silently dropping the new provenance,
+quota, and outbox metadata on save. First pause cron and drain workflows. A safe
+rollback must retain the v3 loader/state/outbox and fail-closed checkpoint as a
+forward-compatible fix, or leave the monitor disabled while such a fix is
+deployed. Never restore an older `state/state.json` over its Git history.
 
 ## Important files
 

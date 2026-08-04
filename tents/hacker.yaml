@@ -6,6 +6,6 @@ enabled: false
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
   Plain HTTP returns 403 (anti-bot). Playwright also rendered no dates
-  during probe — likely additional Cloudflare Turnstile/JS challenge
-  blocks headless browsers too. Park; revisit with stealth plugin or
-  by reverse-engineering API with proper headers from real browser.
+  during probe — likely an additional Cloudflare Turnstile/JS challenge
+  blocks headless browsers too. It stays disabled unless the operator can
+  obtain reproducible date-specific evidence without bypassing that protection.

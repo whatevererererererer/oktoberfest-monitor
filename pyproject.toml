@@ -9,6 +9,8 @@ dependencies = [
     "pyyaml>=6.0",
     "pydantic>=2.7",
     "jsonpath-ng>=1.6",
+    # `zoneinfo` needs the IANA database on clean Windows installations.
+    "tzdata>=2025.2; platform_system == 'Windows'",
 ]
 
 [project.optional-dependencies]

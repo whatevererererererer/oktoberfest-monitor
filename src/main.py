@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import json
 import logging
+import os
 import random
 import sys
 import time
@@ -11,7 +13,7 @@ from pathlib import Path
 import httpx
 
 from .config import TentConfig, load_tents
-from .events import apply_probe_result, enqueue_monitor_error
+from .events import AppliedProbe, apply_probe_result, enqueue_monitor_error
 from .fetchers import api as api_fetcher
 from .fetchers import festzelt_os as festzelt_os_fetcher
 from .fetchers import hash as hash_fetcher
@@ -26,28 +28,21 @@ TENTS_DIR = ROOT / "tents"
 STATE_PATH = ROOT / "state" / "state.json"
 
 FAILURE_THRESHOLD = 3
+MAX_FESTZELT_WORKERS = 4
 
 log = logging.getLogger("wiesn")
 
 
 def _legacy_probe(status: str, *, source: str) -> ProbeResult:
     """Conservatively adapt legacy fetchers that cannot correlate shifts."""
-    if status == "unavailable":
-        return ProbeResult(
-            "unavailable",
-            shifts=(),
-            diagnostics=ProbeDiagnostics(
-                health="healthy", page_type="booking", error_class=None, detail=source
-            ),
-        )
-    # `available` without a date-correlated shift is not actionable under the
-    # v2 invariant. Keep it degraded until that mode gains shift evidence.
+    # A marker or unchanged hash cannot prove that a valid date control exists,
+    # so neither side of that legacy binary result is reliable business state.
     return ProbeResult(
         "unknown",
         diagnostics=ProbeDiagnostics(
             health="degraded",
             page_type="booking",
-            error_class="shift_evidence_unavailable",
+            error_class="date_and_shift_evidence_unavailable",
             detail=f"{source}:{status}",
         ),
     )
@@ -104,40 +99,158 @@ def _check_one(
     raise ValueError(f"unknown mode {cfg.mode}")
 
 
+def _probe_error_batch(
+    cfg: TentConfig, error_class: str, detail: str | None = None
+) -> dict[str, ProbeResult]:
+    return {
+        iso_date: _error_probe(error_class, detail)
+        for iso_date in cfg.dates
+    }
+
+
+def _probe_festzelt_worker(
+    configs: tuple[TentConfig, ...], *, jitter: bool
+) -> dict[str, dict[str, ProbeResult]]:
+    """Probe one deterministic shard with thread-owned Playwright resources."""
+
+    playwright = None
+    browser = None
+    results: dict[str, dict[str, ProbeResult]] = {}
+    try:
+        try:
+            playwright, browser = headless_fetcher.launch_browser()
+        except Exception as exc:
+            detail = type(exc).__name__
+            log.error(
+                "could not launch browser for %d festzelt probes: %s",
+                len(configs),
+                detail,
+            )
+            return {
+                cfg.slug: _probe_error_batch(cfg, "browser_unavailable", detail)
+                for cfg in configs
+            }
+
+        for cfg in configs:
+            if jitter:
+                time.sleep(random.uniform(0.2, 0.6))
+            try:
+                assert cfg.festzelt_os
+                fetched = festzelt_os_fetcher.fetch(
+                    cfg.festzelt_os, cfg.dates, browser
+                )
+                if not isinstance(fetched, dict):
+                    raise TypeError("probe batch is not a mapping")
+                results[cfg.slug] = fetched
+            except Exception as exc:
+                detail = type(exc).__name__
+                log.warning("%s: probe failed: %s", cfg.slug, detail)
+                results[cfg.slug] = _probe_error_batch(
+                    cfg, "probe_exception", detail
+                )
+        return results
+    finally:
+        if browser is not None:
+            try:
+                browser.close()
+            except Exception:
+                pass
+        if playwright is not None:
+            try:
+                playwright.stop()
+            except Exception:
+                pass
+
+
+def _probe_festzelt_tents(
+    configs: list[TentConfig], *, jitter: bool
+) -> dict[str, dict[str, ProbeResult]]:
+    """Run at most four isolated browser workers and join all of them."""
+
+    if not configs:
+        return {}
+
+    worker_count = min(MAX_FESTZELT_WORKERS, len(configs))
+    shards: list[list[TentConfig]] = [[] for _ in range(worker_count)]
+    for index, cfg in enumerate(configs):
+        shards[index % worker_count].append(cfg)
+
+    batches: dict[str, dict[str, ProbeResult]] = {}
+    with ThreadPoolExecutor(
+        max_workers=worker_count, thread_name_prefix="festzelt-probe"
+    ) as executor:
+        futures = [
+            executor.submit(
+                _probe_festzelt_worker, tuple(shard), jitter=jitter
+            )
+            for shard in shards
+        ]
+        # Consume shard results in submission order. State is intentionally not
+        # touched until every worker has stopped and the main-thread loop below
+        # applies tent results in configuration order.
+        for shard, future in zip(shards, futures, strict=True):
+            try:
+                batches.update(future.result())
+            except Exception as exc:
+                detail = type(exc).__name__
+                log.error("festzelt worker failed: %s", detail)
+                for cfg in shard:
+                    batches[cfg.slug] = _probe_error_batch(
+                        cfg, "probe_exception", detail
+                    )
+    return batches
+
+
 def _record_tent_health(
     *,
     state: State,
     cfg: TentConfig,
     tent_state: TentState,
-    results: list[ProbeResult],
+    results: list[AppliedProbe],
     timestamp: str,
 ) -> None:
-    any_error = any(result.status == "error" for result in results)
-    any_degraded = any(result.status == "unknown" for result in results)
+    statuses = [result.observed_status for result in results]
+    any_error = "error" in statuses
+    any_degraded = "unknown" in statuses
+    any_unhealthy = any_error or any_degraded
+
+    if any_unhealthy:
+        tent_state.consecutive_unhealthy += 1
+    else:
+        tent_state.consecutive_unhealthy = 0
+
     if any_error:
         tent_state.consecutive_failures += 1
-        tent_state.consecutive_degraded = 0
+        tent_state.consecutive_degraded = (
+            tent_state.consecutive_degraded + 1 if any_degraded else 0
+        )
         tent_state.last_error = timestamp
-        incident_count = tent_state.consecutive_failures
         incident_kind = "error"
     elif any_degraded:
         tent_state.consecutive_failures = 0
         tent_state.consecutive_degraded += 1
-        incident_count = tent_state.consecutive_degraded
         incident_kind = "degraded"
     else:
         tent_state.consecutive_failures = 0
         tent_state.consecutive_degraded = 0
         tent_state.last_success_at = timestamp
         tent_state.failure_incident_open = False
+        tent_state.failure_incident_kind = None
         return
 
-    if incident_count >= FAILURE_THRESHOLD and not tent_state.failure_incident_open:
+    incident_count = tent_state.consecutive_unhealthy
+    opens_incident = incident_count >= FAILURE_THRESHOLD and not tent_state.failure_incident_open
+    escalates_incident = (
+        tent_state.failure_incident_open
+        and incident_kind == "error"
+        and tent_state.failure_incident_kind != "error"
+    )
+    if opens_incident or escalates_incident:
         tent_state.failure_incident_sequence += 1
         affected = [
             date
             for date, result in zip(cfg.dates, results, strict=True)
-            if result.status in {"unknown", "error"}
+            if result.observed_status in {"unknown", "error"}
         ]
         enqueue_monitor_error(
             state=state,
@@ -151,6 +264,44 @@ def _record_tent_health(
             timestamp=timestamp,
         )
         tent_state.failure_incident_open = True
+        tent_state.failure_incident_kind = incident_kind
+
+
+def _apply_observation(
+    *,
+    state: State,
+    cfg: TentConfig,
+    tent_state: TentState,
+    iso_date: str,
+    result: object,
+    timestamp: str,
+) -> tuple[ProbeResult | object, AppliedProbe]:
+    """Normalize a malformed fetcher result without aborting later tents."""
+
+    try:
+        applied = apply_probe_result(
+            state=state,
+            cfg=cfg,
+            tent_state=tent_state,
+            iso_date=iso_date,
+            result=result,
+            timestamp=timestamp,
+        )
+        return result, applied
+    except Exception as exc:
+        log.warning(
+            "%s/%s: invalid probe result: %s", cfg.slug, iso_date, type(exc).__name__
+        )
+        fallback = _error_probe("invalid_probe_result", type(exc).__name__)
+        applied = apply_probe_result(
+            state=state,
+            cfg=cfg,
+            tent_state=tent_state,
+            iso_date=iso_date,
+            result=fallback,
+            timestamp=timestamp,
+        )
+        return fallback, applied
 
 
 def probe_run(
@@ -164,72 +315,65 @@ def probe_run(
     persisted = load(state_path)
     # Dry-run is a true simulation: mutate only an in-memory copy and never save.
     state = State.model_validate(persisted.model_dump()) if dry_run else persisted
+    run_started_monotonic = time.monotonic()
     run_timestamp = now_iso()
     state.workflow_last_run_at = run_timestamp
+    state.workflow_started_at = run_timestamp
+    state.workflow_finished_at = None
+    state.workflow_duration_seconds = None
+    state.producer_revision = os.environ.get("MONITOR_PRODUCER_REVISION") or None
 
     tents = [tent for tent in load_tents(tents_dir) if tent.enabled]
     log.info("checking %d tents", len(tents))
-    needs_browser = any(tent.mode in ("headless", "festzelt_os") for tent in tents)
+    festzelt_batches = _probe_festzelt_tents(
+        [tent for tent in tents if tent.mode == "festzelt_os"], jitter=jitter
+    )
+
+    # Legacy headless configs retain one main-thread browser. Festzelt-OS
+    # workers never share it (or any Playwright object) across threads.
+    needs_browser = any(tent.mode == "headless" for tent in tents)
     playwright = None
     browser = None
-    browser_error: Exception | None = None
     if needs_browser:
         try:
             playwright, browser = headless_fetcher.launch_browser()
         except Exception as exc:
-            browser_error = exc
             log.error("could not launch browser: %s", type(exc).__name__)
 
     try:
         with httpx.Client(timeout=15, follow_redirects=True) as client:
             for cfg in tents:
-                if jitter:
+                if jitter and cfg.mode != "festzelt_os":
                     time.sleep(random.uniform(0.2, 0.6))
                 tent_state = state.tents.setdefault(cfg.slug, TentState())
-                results: list[ProbeResult] = []
+                applied_results: list[AppliedProbe] = []
 
                 if cfg.mode == "festzelt_os":
-                    if browser is None:
-                        detail = type(browser_error).__name__ if browser_error else None
-                        batch = {
-                            date: _error_probe("browser_unavailable", detail)
-                            for date in cfg.dates
-                        }
-                    else:
-                        assert cfg.festzelt_os
-                        try:
-                            batch = festzelt_os_fetcher.fetch(
-                                cfg.festzelt_os, cfg.dates, browser
-                            )
-                        except Exception as exc:
-                            log.warning("%s: probe failed: %s", cfg.slug, type(exc).__name__)
-                            batch = {
-                                date: _error_probe(
-                                    "probe_exception", type(exc).__name__
-                                )
-                                for date in cfg.dates
-                            }
+                    batch = festzelt_batches.get(
+                        cfg.slug, _probe_error_batch(cfg, "missing_probe_batch")
+                    )
                     for iso_date in cfg.dates:
                         result = batch.get(
                             iso_date, _error_probe("missing_probe_result")
                         )
-                        results.append(result)
-                        applied = apply_probe_result(
+                        observation_timestamp = now_iso()
+                        result, applied = _apply_observation(
                             state=state,
                             cfg=cfg,
                             tent_state=tent_state,
                             iso_date=iso_date,
                             result=result,
-                            timestamp=run_timestamp,
+                            timestamp=observation_timestamp,
                         )
+                        applied_results.append(applied)
                         log.info(
                             "%s/%s observed=%s health=%s shifts=%s diagnostics=%s",
                             cfg.slug,
                             iso_date,
                             applied.observed_status,
                             applied.health,
-                            list(result.shifts or ()),
-                            result.diagnostic_dict(),
+                            list(getattr(result, "shifts", None) or ()),
+                            tent_state.dates[iso_date].diagnostics,
                         )
                 else:
                     for iso_date in cfg.dates:
@@ -247,15 +391,16 @@ def probe_run(
                             result, new_hash = _error_probe(
                                 "probe_exception", type(exc).__name__
                             ), None
-                        results.append(result)
-                        apply_probe_result(
+                        observation_timestamp = now_iso()
+                        result, applied = _apply_observation(
                             state=state,
                             cfg=cfg,
                             tent_state=tent_state,
                             iso_date=iso_date,
                             result=result,
-                            timestamp=run_timestamp,
+                            timestamp=observation_timestamp,
                         )
+                        applied_results.append(applied)
                         if cfg.mode == "hash" and new_hash:
                             tent_state.dates[iso_date].diagnostics["content_hash"] = new_hash
 
@@ -263,8 +408,8 @@ def probe_run(
                     state=state,
                     cfg=cfg,
                     tent_state=tent_state,
-                    results=results,
-                    timestamp=run_timestamp,
+                    results=applied_results,
+                    timestamp=now_iso(),
                 )
     finally:
         if browser is not None:
@@ -277,6 +422,11 @@ def probe_run(
                 playwright.stop()
             except Exception:
                 pass
+
+    state.workflow_finished_at = now_iso()
+    state.workflow_duration_seconds = round(
+        max(0.0, time.monotonic() - run_started_monotonic), 3
+    )
 
     if dry_run:
         pending = [event.event_id for event in state.outbox.values() if event.status == "pending"]
