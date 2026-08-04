@@ -1,9 +1,9 @@
 """Safe Playwright probe for Festzelt-OS and compatible booking wizards.
 
 The fetcher deliberately distinguishes a proven missing target date from an
-unreadable page.  It uses one fresh page per target date, reacquires all
-controls after every wizard rerender, and requires target-specific update
-evidence before attributing any shift options.
+unreadable page.  It uses one low-load page per tent, reacquires all controls
+after every wizard rerender, and requires target-specific update evidence
+before attributing any shift options.
 """
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from ..config import FestzeltOsConfig
 from ..probe import PageType, ProbeDiagnostics, ProbeResult
+from .headless import SAFARI_MACOS_USER_AGENT
 
 _MONTHS = {
     "januar": 1,
@@ -91,7 +92,6 @@ _BOT_FRAME_MARKERS = (
     "cdn-cgi/challenge",
     "challenge-platform",
 )
-
 
 @dataclass(frozen=True, slots=True)
 class _Option:
@@ -1428,6 +1428,7 @@ def fetch(
 
     try:
         context = browser.new_context(
+            user_agent=SAFARI_MACOS_USER_AGENT,
             locale="de-DE",
             viewport={"width": 1280, "height": 1100},
         )
@@ -1448,14 +1449,11 @@ def fetch(
         }
 
     try:
-        for target in target_dates:
-            # Each target gets a newly navigated page.  This makes an
-            # in-flight Friday response incapable of confirming Saturday and
-            # avoids carrying wizard/session DOM state across target dates.
-            try:
-                page = context.new_page()
-            except Exception:
-                results[target] = ProbeResult(
+        try:
+            page = context.new_page()
+        except Exception:
+            return {
+                target: ProbeResult(
                     "error",
                     diagnostics=_diag(
                         "error",
@@ -1466,11 +1464,13 @@ def fetch(
                         error_class="page_creation_failed",
                     ),
                 )
-                continue
-            try:
-                navigated, navigation_failure = _navigate(page, cfg)
-                if not navigated:
-                    results[target] = ProbeResult(
+                for target in target_dates
+            }
+        try:
+            navigated, navigation_failure = _navigate(page, cfg)
+            if not navigated:
+                return {
+                    target: ProbeResult(
                         "error",
                         diagnostics=_diag(
                             "error",
@@ -1481,9 +1481,11 @@ def fetch(
                             error_class="navigation_failed",
                         ),
                     )
-                    continue
-                if navigation_failure is not None:
-                    results[target] = ProbeResult(
+                    for target in target_dates
+                }
+            if navigation_failure is not None:
+                return {
+                    target: ProbeResult(
                         "error",
                         diagnostics=_diag(
                             "error",
@@ -1494,10 +1496,15 @@ def fetch(
                             error_class=navigation_failure.error_class,
                         ),
                     )
-                    continue
+                    for target in target_dates
+                }
+            for target in target_dates:
+                # Every probe reacquires the date and shift controls. Its
+                # Livewire monitor accepts only a response paired to this
+                # target's request, so prior target traffic is not evidence.
                 results[target] = _probe_target(page, cfg, target, target_years)
-            finally:
-                _close_page(page)
+        finally:
+            _close_page(page)
     finally:
         context.close()
     return results

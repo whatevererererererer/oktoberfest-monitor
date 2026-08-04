@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     # The platform safety net matches the external dispatch cadence. The
     # application deadline below leaves time for Actions post-steps.
-    timeout-minutes: 4
+    timeout-minutes: 5
     steps:
       - name: Start end-to-end runtime budget
         run: echo "MONITOR_JOB_STARTED=$(date +%s)" >> "$GITHUB_ENV"
@@ -92,10 +92,10 @@ jobs:
           CHECKPOINT_BACKOFF_SECONDS: "1"
         run: |
           # The complete normal path, including setup, probe and checkpoints,
-          # must fit below the four-minute dispatch cadence. A stuck page must
+          # must fit below the five-minute dispatch cadence. A stuck page must
           # not hold the serialized writer indefinitely. Probe sends no push;
           # on timeout it exits before the checkpoint and the old state remains.
-          delivery_deadline=210
+          delivery_deadline=270
           finalization_reserve=50
           elapsed=$(( $(date +%s) - MONITOR_JOB_STARTED ))
           probe_budget=$(( delivery_deadline - elapsed - finalization_reserve ))
@@ -111,7 +111,7 @@ jobs:
           # Phase 2: one message per process, followed immediately by a Git
           # checkpoint. Several events share the same due-time scheduler, so
           # bursts do not delay any remaining tent probe and do not add linearly.
-          # Keep the normal path below the four-minute dispatch interval.  The
+          # Keep the normal path below the five-minute dispatch interval.  The
           # finalization reserve covers one Pushover request plus a bounded Git
           # checkpoint.  In particular, never begin a 35-second outbox wait when
           # only a few seconds remain before the delivery deadline.

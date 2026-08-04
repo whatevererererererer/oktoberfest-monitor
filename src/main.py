@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 import json
 import logging
 import os
@@ -28,7 +27,6 @@ TENTS_DIR = ROOT / "tents"
 STATE_PATH = ROOT / "state" / "state.json"
 
 FAILURE_THRESHOLD = 3
-MAX_FESTZELT_WORKERS = 4
 
 log = logging.getLogger("wiesn")
 
@@ -111,7 +109,7 @@ def _probe_error_batch(
 def _probe_festzelt_worker(
     configs: tuple[TentConfig, ...], *, jitter: bool
 ) -> dict[str, dict[str, ProbeResult]]:
-    """Probe one deterministic shard with thread-owned Playwright resources."""
+    """Probe all Festzelt-OS tents sequentially with one browser."""
 
     playwright = None
     browser = None
@@ -133,7 +131,7 @@ def _probe_festzelt_worker(
 
         for cfg in configs:
             if jitter:
-                time.sleep(random.uniform(0.2, 0.6))
+                time.sleep(random.uniform(1.0, 3.0))
             try:
                 assert cfg.festzelt_os
                 fetched = festzelt_os_fetcher.fetch(
@@ -165,40 +163,11 @@ def _probe_festzelt_worker(
 def _probe_festzelt_tents(
     configs: list[TentConfig], *, jitter: bool
 ) -> dict[str, dict[str, ProbeResult]]:
-    """Run at most four isolated browser workers and join all of them."""
+    """Run one low-load Festzelt-OS browser session in config order."""
 
     if not configs:
         return {}
-
-    worker_count = min(MAX_FESTZELT_WORKERS, len(configs))
-    shards: list[list[TentConfig]] = [[] for _ in range(worker_count)]
-    for index, cfg in enumerate(configs):
-        shards[index % worker_count].append(cfg)
-
-    batches: dict[str, dict[str, ProbeResult]] = {}
-    with ThreadPoolExecutor(
-        max_workers=worker_count, thread_name_prefix="festzelt-probe"
-    ) as executor:
-        futures = [
-            executor.submit(
-                _probe_festzelt_worker, tuple(shard), jitter=jitter
-            )
-            for shard in shards
-        ]
-        # Consume shard results in submission order. State is intentionally not
-        # touched until every worker has stopped and the main-thread loop below
-        # applies tent results in configuration order.
-        for shard, future in zip(shards, futures, strict=True):
-            try:
-                batches.update(future.result())
-            except Exception as exc:
-                detail = type(exc).__name__
-                log.error("festzelt worker failed: %s", detail)
-                for cfg in shard:
-                    batches[cfg.slug] = _probe_error_batch(
-                        cfg, "probe_exception", detail
-                    )
-    return batches
+    return _probe_festzelt_worker(tuple(configs), jitter=jitter)
 
 
 def _record_tent_health(
@@ -329,8 +298,8 @@ def probe_run(
         [tent for tent in tents if tent.mode == "festzelt_os"], jitter=jitter
     )
 
-    # Legacy headless configs retain one main-thread browser. Festzelt-OS
-    # workers never share it (or any Playwright object) across threads.
+    # Legacy headless configs retain a separate main-thread browser. Festzelt-OS
+    # tents have already been probed sequentially with their own browser above.
     needs_browser = any(tent.mode == "headless" for tent in tents)
     playwright = None
     browser = None

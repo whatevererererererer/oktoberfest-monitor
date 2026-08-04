@@ -37,7 +37,7 @@ class WorkflowStructureTests(unittest.TestCase):
         data = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
         self.assertFalse(data["concurrency"]["cancel-in-progress"])
         job = data["jobs"]["check"]
-        self.assertEqual(job["timeout-minutes"], 4)
+        self.assertEqual(job["timeout-minutes"], 5)
         self.assertIn("MONITOR_JOB_STARTED", job["steps"][0]["run"])
         checkout = next(step for step in job["steps"] if "uses" in step and "actions/checkout" in step["uses"])
         self.assertEqual(checkout["with"]["ref"], "main")
@@ -71,7 +71,7 @@ class WorkflowStructureTests(unittest.TestCase):
         self.assertNotIn("--max-wait-seconds 35", workflow_text)
         self.assertIn('CHECKPOINT_MAX_ATTEMPTS: "2"', workflow_text)
         self.assertIn('CHECKPOINT_GIT_TIMEOUT_SECONDS: "8"', workflow_text)
-        self.assertIn("delivery_deadline=210", workflow_text)
+        self.assertIn("delivery_deadline=270", workflow_text)
         self.assertIn("finalization_reserve=50", workflow_text)
         self.assertIn("MONITOR_WRITER_BASE=$(git rev-parse HEAD)", workflow_text)
         checkpoint_text = CHECKPOINT.read_text(encoding="utf-8")

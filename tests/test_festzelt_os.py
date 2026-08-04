@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch
 from pydantic import ValidationError
 
 from src.config import FestzeltOsConfig, TentConfig, load_tents
-from src.fetchers.festzelt_os import canonical_date, fetch
+from src.fetchers.festzelt_os import SAFARI_MACOS_USER_AGENT, canonical_date, fetch
 from src.fetchers.headless import launch_browser
 
 
@@ -234,12 +234,14 @@ class FakePage:
         self.listeners: dict[str, list[object]] = {}
         self.last_livewire_request: FakeRequest | None = None
         self.closed = False
+        self.navigation_count = 0
 
     @property
     def frames(self) -> list[object]:
         return self.scenario.frames
 
     def goto(self, *_args, **_kwargs) -> FakeResponse:
+        self.navigation_count += 1
         if self.scenario.navigation_error:
             raise RuntimeError("navigation failed")
         return FakeResponse(
@@ -447,9 +449,18 @@ class FestzeltFetcherTests(unittest.TestCase):
         self.assertEqual(probe.status, "error")
         self.assertEqual(probe.diagnostics.error_class, "date_control_missing")
 
-    def test_browser_context_does_not_spoof_a_different_browser(self) -> None:
+    def test_browser_context_uses_historical_safari_macos_profile(self) -> None:
         _, context = self.run_fetch([Scenario([date_select()])])
-        self.assertNotIn("user_agent", context.creation_kwargs)
+        self.assertEqual(
+            context.creation_kwargs,
+            {
+                "user_agent": SAFARI_MACOS_USER_AGENT,
+                "locale": "de-DE",
+                "viewport": {"width": 1280, "height": 1100},
+            },
+        )
+        self.assertIn("Macintosh; Intel Mac OS X 14_5", SAFARI_MACOS_USER_AGENT)
+        self.assertIn("Version/17.5 Safari/605.1.15", SAFARI_MACOS_USER_AGENT)
 
     def test_valid_control_without_target_is_unavailable(self) -> None:
         only_other_day = [
@@ -1042,7 +1053,7 @@ class FestzeltFetcherTests(unittest.TestCase):
         self.assertEqual(probe.diagnostics.page_type, "bot")
         self.assertEqual(probe.diagnostics.error_class, "shift_update_challenge")
 
-    def test_each_target_uses_a_fresh_independent_page(self) -> None:
+    def test_both_targets_share_one_navigated_page(self) -> None:
         def selects(page: FakePage):
             selected = page.values.get("dates", "")
             shifts = []
@@ -1054,49 +1065,54 @@ class FestzeltFetcherTests(unittest.TestCase):
             page.dom_updated = True
 
         result, context = self.run_fetch(
-            [
-                Scenario(selects, on_select=rerender),
-                Scenario(selects, on_select=rerender),
-            ],
+            [Scenario(selects, on_select=rerender)],
             ["2026-09-25", "2026-09-26"],
         )
         self.assertEqual(result["2026-09-25"].shifts, ("Mittag",))
         self.assertEqual(result["2026-09-26"].shifts, ("Abend",))
-        self.assertEqual(len(context.pages), 2)
+        self.assertEqual(len(context.pages), 1)
         self.assertTrue(all(page.closed for page in context.pages))
-        self.assertEqual([len(page.actions) for page in context.pages], [1, 1])
+        self.assertEqual(context.pages[0].navigation_count, 1)
+        self.assertEqual(len(context.pages[0].actions), 2)
 
-    def test_late_first_target_response_cannot_confirm_second_target(self) -> None:
+    def test_open_first_target_request_cannot_confirm_second_target(self) -> None:
         identical = [OptionDef("lunch", "Mittag")]
-        browser = FakeBrowser([], self.clock)
+        first_request: list[FakeRequest] = []
 
-        def friday(page: FakePage, _key: str, _value: str) -> None:
-            page.emit_livewire_response(200)
-
-        def saturday(page: FakePage, _key: str, _value: str) -> None:
+        def reply(page: FakePage, _key: str, value: str) -> None:
+            if value.endswith("25"):
+                assert page.last_livewire_request is not None
+                first_request.append(page.last_livewire_request)
+                page.dom_updated = True
+                return
             page.dom_updated = True
-            old_request = browser.context.pages[0].last_livewire_request
-            page.emit_livewire_response(200, request=old_request)
+            # Friday's request was deliberately left open. Its response now
+            # arrives while Saturday's target-specific monitor is active.
+            page.emit_livewire_response(200, request=first_request[0])
 
-        browser.context.scenarios = [
-            Scenario(
-                [date_select(livewire=True), shift_select(identical)],
-                on_select=friday,
-            ),
-            Scenario(
-                [date_select(livewire=True), shift_select(identical)],
-                on_select=saturday,
-            ),
-        ]
+        browser = FakeBrowser(
+            [
+                Scenario(
+                    [date_select(livewire=True), shift_select(identical)],
+                    on_select=reply,
+                )
+            ],
+            self.clock,
+        )
         result = fetch(self.cfg, ["2026-09-25", "2026-09-26"], browser)
         context = browser.context
-        self.assertEqual(result["2026-09-25"].status, "available")
-        self.assertEqual(result["2026-09-26"].status, "unknown")
-        self.assertEqual(
-            result["2026-09-26"].diagnostics.error_class,
-            "shift_update_response_unconfirmed",
+        for target in ("2026-09-25", "2026-09-26"):
+            self.assertEqual(result[target].status, "unknown")
+            self.assertEqual(
+                result[target].diagnostics.error_class,
+                "shift_update_response_unconfirmed",
+            )
+        self.assertEqual(len(context.pages), 1)
+        self.assertEqual(context.pages[0].navigation_count, 1)
+        self.assertEqual(len(context.pages[0].actions), 2)
+        self.assertTrue(
+            all(not handlers for handlers in context.pages[0].listeners.values())
         )
-        self.assertEqual(len(context.pages), 2)
 
     def test_date_control_and_options_may_appear_late(self) -> None:
         shifts = lambda page: (

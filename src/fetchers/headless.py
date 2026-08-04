@@ -17,6 +17,11 @@ GERMAN_MONTHS = {
     9: "September", 10: "Oktober", 11: "November", 12: "Dezember",
 }
 
+SAFARI_MACOS_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 "
+    "(KHTML, like Gecko) Version/17.5 Safari/605.1.15"
+)
+
 _ERROR_PAGE = re.compile(
     r"cloudflare|captcha|verify you are human|access denied|forbidden|bad gateway|service unavailable",
     re.IGNORECASE,
@@ -37,7 +42,10 @@ def fetch(cfg: HeadlessConfig, iso_date: str, browser) -> Availability:
     if cfg.available_regex is None and cfg.unavailable_regex is None:
         raise ValueError("headless config must define available_regex or unavailable_regex")
 
-    ctx = browser.new_context(locale="de-DE")
+    ctx = browser.new_context(
+        user_agent=SAFARI_MACOS_USER_AGENT,
+        locale="de-DE",
+    )
     try:
         page = ctx.new_page()
         page.goto(_render(cfg.url_template, iso_date), wait_until=cfg.wait_until, timeout=45000)

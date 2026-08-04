@@ -81,7 +81,13 @@ class LegacyFetcherSafetyTests(unittest.TestCase):
             unavailable_regex="ausverkauft",
         )
         self.assertEqual(headless.fetch(cfg, "2026-09-25", browser), "unknown")
-        self.assertNotIn("user_agent", browser.new_context.call_args.kwargs)
+        self.assertEqual(
+            browser.new_context.call_args.kwargs,
+            {
+                "user_agent": headless.SAFARI_MACOS_USER_AGENT,
+                "locale": "de-DE",
+            },
+        )
         context.close.assert_called_once()
 
 

@@ -6,7 +6,7 @@ import threading
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 import src.main as main_module
 from src.events import AppliedProbe
@@ -134,14 +134,14 @@ class MainIntegrationTests(unittest.TestCase):
         self.assertIsNotNone(state.workflow_finished_at)
         self.assertIsNotNone(state.workflow_duration_seconds)
 
-    def test_festzelt_probes_use_at_most_four_isolated_workers(self) -> None:
+    def test_festzelt_probes_are_sequential_in_config_order(self) -> None:
         configs = [config(chr(ord("a") + index)) for index in range(6)]
         self.initial_state([cfg.slug for cfg in configs])
         main_thread = threading.get_ident()
-        lock = threading.Lock()
-        release = threading.Event()
         resources: list[tuple[object, object]] = []
         resource_errors: list[str] = []
+        fetch_threads: list[int] = []
+        fetch_order: list[str] = []
         apply_threads: list[int] = []
         apply_order: list[tuple[str, str]] = []
         active = 0
@@ -170,29 +170,23 @@ class MainIntegrationTests(unittest.TestCase):
         def launch_browser():
             browser = Browser()
             playwright = Playwright(browser.creator)
-            with lock:
-                resources.append((playwright, browser))
+            resources.append((playwright, browser))
             return playwright, browser
 
-        def fetch(_cfg, dates, browser):
+        def fetch(cfg, dates, browser):
             nonlocal active, max_active
             if threading.get_ident() != browser.creator:
                 resource_errors.append("browser used from another thread")
-            with lock:
-                active += 1
-                max_active = max(max_active, active)
-                fourth_worker = active == 4
+            active += 1
+            max_active = max(max_active, active)
+            fetch_threads.append(threading.get_ident())
+            fetch_order.append(
+                next(item.slug for item in configs if item.festzelt_os is cfg)
+            )
             try:
-                if fourth_worker:
-                    # Keep the first four calls in flight briefly: an accidental
-                    # fifth worker would then raise max_active above the cap.
-                    threading.Event().wait(timeout=0.05)
-                    release.set()
-                release.wait(timeout=1)
                 return {date: available("Mittag") for date in dates}
             finally:
-                with lock:
-                    active -= 1
+                active -= 1
 
         real_apply = main_module._apply_observation
 
@@ -206,13 +200,24 @@ class MainIntegrationTests(unittest.TestCase):
             patch("src.main.headless_fetcher.launch_browser", side_effect=launch_browser),
             patch("src.main.festzelt_os_fetcher.fetch", side_effect=fetch),
             patch("src.main._apply_observation", side_effect=record_apply),
+            patch("src.main.random.uniform", return_value=2.0) as uniform,
+            patch("src.main.time.sleep") as sleep,
         ):
-            self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+            self.assertEqual(probe_run(state_path=self.path, jitter=True), 0)
 
-        self.assertEqual(max_active, 4)
-        self.assertEqual(len(resources), 4)
-        self.assertEqual(len({browser.creator for _, browser in resources}), 4)
-        self.assertTrue(all(browser.creator != main_thread for _, browser in resources))
+        self.assertEqual(max_active, 1)
+        self.assertEqual(len(resources), 1)
+        self.assertEqual(fetch_threads, [main_thread] * len(configs))
+        self.assertEqual(fetch_order, [cfg.slug for cfg in configs])
+        self.assertEqual(
+            uniform.call_args_list,
+            [call(1.0, 3.0)] * len(configs),
+        )
+        self.assertEqual(
+            sleep.call_args_list,
+            [call(2.0)] * len(configs),
+        )
+        self.assertEqual(resources[0][1].creator, main_thread)
         self.assertTrue(all(playwright.stopped for playwright, _ in resources))
         self.assertTrue(all(browser.closed for _, browser in resources))
         self.assertEqual(resource_errors, [])
@@ -230,7 +235,7 @@ class MainIntegrationTests(unittest.TestCase):
             )
         )
 
-    def test_worker_fetch_errors_are_isolated_and_resources_are_closed(self) -> None:
+    def test_sequential_fetch_errors_are_isolated_and_resources_are_closed(self) -> None:
         configs = [config("ok"), config("raised"), config("invalid")]
         self.initial_state([cfg.slug for cfg in configs])
         resources: list[tuple[Mock, Mock]] = []
@@ -255,7 +260,7 @@ class MainIntegrationTests(unittest.TestCase):
         ):
             self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
 
-        self.assertEqual(len(resources), 3)
+        self.assertEqual(len(resources), 1)
         for playwright, browser in resources:
             browser.close.assert_called_once_with()
             playwright.stop.assert_called_once_with()

@@ -12,7 +12,7 @@ whether each enabled portal also permits a date-correlated shift update.
 ## Runtime model
 
 An external cron-job.org job dispatches `.github/workflows/monitor.yml`
-approximately every four minutes. A run has two durable phases:
+approximately every five minutes. A run has two durable phases:
 
 1. Probe every enabled tent, update health/baselines, and enqueue stable alert
    events in `state/state.json`.
@@ -28,11 +28,11 @@ ambiguous part; Pushover offers no idempotency key, so stronger exactly-once
 delivery is not possible. Already checkpointed parts of a burst are not
 intentionally repeated.
 
-The 210-second normal-operation deadline starts in the first job step, before
+The 270-second normal-operation deadline starts in the first job step, before
 checkout, Python/dependency, and Playwright setup. Both the probe and each
 delivery wait are derived from the remaining budget; 50 seconds are reserved
 for the HTTP/state/Git checkpoint and roughly 30 seconds remain for Actions
-post-steps. A timed-out probe is not checkpointed. The four-minute job timeout
+post-steps. A timed-out probe is not checkpointed. The five-minute job timeout
 is a final safety net, and remaining outbox parts resume in the next
 current-`main` run. Checkout is shallow because the writer guard compares exact
 SHAs and never rebases through the historical state commits.
@@ -59,22 +59,20 @@ Diagnostics are intentionally small: page type, control/option counts,
 target/update evidence, shift count, and an error class. Page HTML, cookies,
 tokens, and form values are never stored.
 
-Within a tent, each target is checked sequentially on a freshly navigated
-low-load page with Playwright's native `select_option`; this prevents a late
-response for Friday from being attributed to Saturday. Up to four deterministic
-tent shards run concurrently, each with its own thread-bound Playwright/browser;
-they are fully joined before the main thread applies results to State in config
-order. Thus no browser object or State mutation crosses worker threads, and one
-tent/domain never has two target pages active at once. Date and shift controls
-are read atomically and reacquired after every rerender. Only visible, enabled
-controls count as evidence. Livewire responses are paired with a request whose
-update payload contains the selected target/model; an identical shift list is
-accepted only after the paired response completes and the browser receives an
-additional DOM turn. Placeholder, loading, sold-out, and other non-offer
-options are never shifts. Failed updates are classified separately from an
-honestly empty shift step.
-The browser uses Playwright's native Chromium identity; no Safari spoofing,
-stealth plugin, challenge cookie, or CAPTCHA workaround is used.
+All Festzelt-OS tents run sequentially in configuration order with a randomized
+1–3 second pause before each tent. One browser and one freshly navigated page are
+used per tent; both target dates are checked on that page with Playwright's
+native `select_option`. Date and shift controls are read atomically and
+reacquired after every rerender. Only visible, enabled controls count as
+evidence. Livewire responses are paired with a request whose update payload
+contains the selected target/model, so traffic from the prior target is not
+accepted as evidence; an identical shift list is accepted only after the paired
+response completes and the browser receives an additional DOM turn.
+Placeholder, loading, sold-out, and other non-offer options are never shifts.
+Failed updates are classified separately from an honestly empty shift step.
+The Chromium context sends the historical Safari 17.5 on macOS 14.5 user-agent,
+uses the German locale and a 1280×1100 viewport. No stealth plugin, challenge
+cookie, or CAPTCHA workaround is used.
 German long dates, numeric German dates, ISO dates, whitespace, and NBSP are
 normalized before exact comparison.
 
