@@ -185,6 +185,10 @@ class State(_StateModel):
     workflow_finished_at: str | None = None
     workflow_duration_seconds: float | None = None
     producer_revision: str | None = None
+    # Slug of the first enabled tent due in the next probe batch. A slug is
+    # stable when configuration files are inserted or reordered, unlike a
+    # numeric list offset. ``None`` starts at the first enabled configuration.
+    probe_rotation_cursor: str | None = None
 
     @model_validator(mode="after")
     def _supported_schema_and_outbox_keys(self) -> "State":
@@ -406,6 +410,7 @@ def _migrate(raw: dict[str, Any]) -> dict[str, Any]:
     migrated.setdefault("workflow_finished_at", None)
     migrated.setdefault("workflow_duration_seconds", None)
     migrated.setdefault("producer_revision", None)
+    migrated.setdefault("probe_rotation_cursor", None)
     tents = migrated.setdefault("tents", {})
     if not isinstance(tents, dict):
         raise ValueError("state tents must be a JSON object")

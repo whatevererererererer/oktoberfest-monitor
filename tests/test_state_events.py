@@ -98,6 +98,7 @@ class StateMigrationTests(unittest.TestCase):
         }
         state = self.write_and_load(raw)
         self.assertEqual(state.schema_version, SCHEMA_VERSION)
+        self.assertIsNone(state.probe_rotation_cursor)
         self.assertEqual(state.tents["x"].consecutive_failures, 7)
         self.assertEqual(state.tents["x"].model_extra["historical_note"], "keep-me")
         self.assertEqual(state.model_extra["future_minor_metadata"], {"keep": True})
@@ -343,7 +344,10 @@ class StateMigrationTests(unittest.TestCase):
     def test_atomic_save_round_trip(self) -> None:
         path = Path(__file__).parent / f".state-events-{uuid4().hex}.json"
         try:
-            state = State(workflow_last_run_at="2026-08-04T00:00:00+00:00")
+            state = State(
+                workflow_last_run_at="2026-08-04T00:00:00+00:00",
+                probe_rotation_cursor="tent-d",
+            )
             save(path, state)
             self.assertEqual(load(path), state)
             self.assertEqual(list(path.parent.glob("*.tmp")), [])

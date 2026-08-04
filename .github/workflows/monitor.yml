@@ -104,7 +104,8 @@ jobs:
             exit 1
           fi
 
-          # Phase 1: inspect every tent and durably persist observations/outbox.
+          # Phase 1: inspect the next durable three-tent rotation batch and
+          # persist its observations, outbox, and next-batch cursor together.
           timeout --signal=TERM --kill-after=5 "${probe_budget}s" python -m src.main --probe
           bash scripts/checkpoint_state.sh probe
 

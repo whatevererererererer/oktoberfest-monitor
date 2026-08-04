@@ -27,6 +27,7 @@ TENTS_DIR = ROOT / "tents"
 STATE_PATH = ROOT / "state" / "state.json"
 
 FAILURE_THRESHOLD = 3
+PROBE_BATCH_SIZE = 3
 
 log = logging.getLogger("wiesn")
 
@@ -170,6 +171,38 @@ def _probe_festzelt_tents(
     return _probe_festzelt_worker(tuple(configs), jitter=jitter)
 
 
+def _select_probe_batch(
+    configs: list[TentConfig], cursor: str | None
+) -> tuple[list[TentConfig], str | None]:
+    """Select one deterministic, non-wrapping batch and its durable cursor.
+
+    The cursor names the first tent due on the next run. If that configuration
+    was removed or disabled, restart at the first enabled tent rather than
+    guessing from a stale numeric offset. The final (possibly short) batch does
+    not wrap, so every enabled tent is visited exactly once per rotation.
+    """
+
+    slugs = [cfg.slug for cfg in configs]
+    if len(slugs) != len(set(slugs)):
+        raise ValueError("enabled tent slugs must be unique for probe rotation")
+
+    if not configs:
+        return [], None
+
+    start = 0
+    if cursor is not None:
+        start = next(
+            (index for index, cfg in enumerate(configs) if cfg.slug == cursor),
+            0,
+        )
+    selected = configs[start : start + PROBE_BATCH_SIZE]
+    next_index = start + len(selected)
+    next_cursor = (
+        configs[next_index].slug if next_index < len(configs) else configs[0].slug
+    )
+    return selected, next_cursor
+
+
 def _record_tent_health(
     *,
     state: State,
@@ -292,8 +325,16 @@ def probe_run(
     state.workflow_duration_seconds = None
     state.producer_revision = os.environ.get("MONITOR_PRODUCER_REVISION") or None
 
-    tents = [tent for tent in load_tents(tents_dir) if tent.enabled]
-    log.info("checking %d tents", len(tents))
+    enabled_tents = [tent for tent in load_tents(tents_dir) if tent.enabled]
+    tents, next_rotation_cursor = _select_probe_batch(
+        enabled_tents, state.probe_rotation_cursor
+    )
+    log.info(
+        "checking rotation batch of %d/%d tents: %s",
+        len(tents),
+        len(enabled_tents),
+        ", ".join(tent.slug for tent in tents) or "none",
+    )
     festzelt_batches = _probe_festzelt_tents(
         [tent for tent in tents if tent.mode == "festzelt_os"], jitter=jitter
     )
@@ -396,6 +437,10 @@ def probe_run(
     state.workflow_duration_seconds = round(
         max(0.0, time.monotonic() - run_started_monotonic), 3
     )
+    # Advance only after the complete batch was applied. In production this
+    # value becomes authoritative only when the workflow's fail-closed Git
+    # checkpoint succeeds; an abort before save/checkpoint retries this batch.
+    state.probe_rotation_cursor = next_rotation_cursor
 
     if dry_run:
         pending = [event.event_id for event in state.outbox.values() if event.status == "pending"]

@@ -7,15 +7,17 @@ or bypasses a CAPTCHA.
 The repository contains 19 tent configurations. Eleven portals with validated
 date controls are enabled; eight unsupported, bot-protected, contact-only,
 widget, or out-of-scope tents remain disabled. Per-run health still reflects
-whether each enabled portal also permits a date-correlated shift update.
+whether each portal selected for that rotation run permits a date-correlated
+shift update.
 
 ## Runtime model
 
 An external cron-job.org job dispatches `.github/workflows/monitor.yml`
 approximately every five minutes. A run has two durable phases:
 
-1. Probe every enabled tent, update health/baselines, and enqueue stable alert
-   events in `state/state.json`.
+1. Probe the next deterministic group of at most three enabled tents, update
+   only their health/baselines, and enqueue stable alert events in
+   `state/state.json`.
 2. Commit and push that outbox before sending anything. Deliver at most one
    Pushover message part per process and Git-checkpoint its cursor immediately.
 
@@ -59,10 +61,18 @@ Diagnostics are intentionally small: page type, control/option counts,
 target/update evidence, shift count, and an error class. Page HTML, cookies,
 tokens, and form values are never stored.
 
-All Festzelt-OS tents run sequentially in configuration order with a randomized
-1–3 second pause before each tent. One browser and one freshly navigated page are
-used per tent; both target dates are checked on that page with Playwright's
-native `select_option`. Date and shift controls are read atomically and
+The enabled tents are split into deterministic, non-wrapping groups of at most
+three. The next group's first slug is stored as a durable schema-v3 rotation
+cursor, so an interrupted or uncheckpointed run retries the same group. With
+eleven enabled tents a complete rotation takes four five-minute runs. Tents not
+selected for a run retain their observations, health, and failure counters
+unchanged. A completed final group advances the cursor back to the first enabled
+tent; a removed or disabled cursor target safely restarts there as well.
+
+Festzelt-OS tents in the selected group run sequentially in configuration order
+with a randomized 1–3 second pause before each tent. One browser and one freshly
+navigated page are used per tent; both target dates are checked on that page
+with Playwright's native `select_option`. Date and shift controls are read atomically and
 reacquired after every rerender. Only visible, enabled controls count as
 evidence. Livewire responses are paired with a request whose update payload
 contains the selected target/model, so traffic from the prior target is not
@@ -115,7 +125,8 @@ start. Tests never send a real message.
 - stable alert sequences;
 - a resumable outbox with message-part cursor, attempts, next due time,
   channel-specific Pushover quota metadata, and delivered/dead-letter status;
-- run start/end/duration and the exact checked-out producer revision.
+- run start/end/duration and the exact checked-out producer revision;
+- the durable next-tent cursor for three-tent probe rotation.
 
 Legacy snapshots migrate in memory without discarding timestamps, counters, or
 their previous values in migration diagnostics. A successful-looking legacy

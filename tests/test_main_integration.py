@@ -10,7 +10,12 @@ from unittest.mock import Mock, call, patch
 
 import src.main as main_module
 from src.events import AppliedProbe
-from src.main import _legacy_probe, _record_tent_health, probe_run
+from src.main import (
+    _legacy_probe,
+    _record_tent_health,
+    _select_probe_batch,
+    probe_run,
+)
 from src.probe import ProbeDiagnostics, ProbeResult
 from src.state import State, TentDateState, TentState, load, save
 
@@ -104,6 +109,18 @@ class MainIntegrationTests(unittest.TestCase):
             result.diagnostics.error_class, "date_and_shift_evidence_unavailable"
         )
 
+    def test_missing_rotation_cursor_safely_restarts_at_first_enabled_tent(self) -> None:
+        configs = [config(slug) for slug in ("a", "b", "c", "d")]
+        selected, cursor = _select_probe_batch(configs, "removed-tent")
+        self.assertEqual([cfg.slug for cfg in selected], ["a", "b", "c"])
+        self.assertEqual(cursor, "d")
+        self.assertEqual(_select_probe_batch([], "removed-tent"), ([], None))
+
+    def test_duplicate_enabled_slugs_fail_closed_before_rotation(self) -> None:
+        configs = [config(slug) for slug in ("a", "b", "c", "a", "d")]
+        with self.assertRaisesRegex(ValueError, "enabled tent slugs must be unique"):
+            _select_probe_batch(configs, None)
+
     def test_probe_enqueues_multiple_tents_without_sending(self) -> None:
         configs = [config("a"), config("b")]
         self.initial_state(["a", "b"])
@@ -136,7 +153,12 @@ class MainIntegrationTests(unittest.TestCase):
 
     def test_festzelt_probes_are_sequential_in_config_order(self) -> None:
         configs = [config(chr(ord("a") + index)) for index in range(6)]
+        selected = configs[:3]
         self.initial_state([cfg.slug for cfg in configs])
+        skipped_before = {
+            cfg.slug: load(self.path).tents[cfg.slug].model_dump()
+            for cfg in configs[3:]
+        }
         main_thread = threading.get_ident()
         resources: list[tuple[object, object]] = []
         resource_errors: list[str] = []
@@ -207,15 +229,15 @@ class MainIntegrationTests(unittest.TestCase):
 
         self.assertEqual(max_active, 1)
         self.assertEqual(len(resources), 1)
-        self.assertEqual(fetch_threads, [main_thread] * len(configs))
-        self.assertEqual(fetch_order, [cfg.slug for cfg in configs])
+        self.assertEqual(fetch_threads, [main_thread] * len(selected))
+        self.assertEqual(fetch_order, [cfg.slug for cfg in selected])
         self.assertEqual(
             uniform.call_args_list,
-            [call(1.0, 3.0)] * len(configs),
+            [call(1.0, 3.0)] * len(selected),
         )
         self.assertEqual(
             sleep.call_args_list,
-            [call(2.0)] * len(configs),
+            [call(2.0)] * len(selected),
         )
         self.assertEqual(resources[0][1].creator, main_thread)
         self.assertTrue(all(playwright.stopped for playwright, _ in resources))
@@ -224,8 +246,65 @@ class MainIntegrationTests(unittest.TestCase):
         self.assertEqual(set(apply_threads), {main_thread})
         self.assertEqual(
             apply_order,
-            [(cfg.slug, iso_date) for cfg in configs for iso_date in cfg.dates],
+            [(cfg.slug, iso_date) for cfg in selected for iso_date in cfg.dates],
         )
+        state = load(self.path)
+        self.assertEqual(state.probe_rotation_cursor, "d")
+        self.assertTrue(
+            all(
+                date_state.observed_status == "available"
+                for cfg in selected
+                for date_state in state.tents[cfg.slug].dates.values()
+            )
+        )
+        self.assertEqual(
+            {
+                cfg.slug: state.tents[cfg.slug].model_dump()
+                for cfg in configs[3:]
+            },
+            skipped_before,
+        )
+
+    def test_durable_rotation_covers_eleven_tents_without_touching_skipped_state(self) -> None:
+        configs = [config(chr(ord("a") + index)) for index in range(11)]
+        self.initial_state([cfg.slug for cfg in configs])
+        initial = load(self.path)
+        skipped_before = initial.tents["d"].model_dump()
+        fetch_order: list[str] = []
+
+        def fetch(cfg, dates, _browser):
+            fetch_order.append(
+                next(item.slug for item in configs if item.festzelt_os is cfg)
+            )
+            return {date: available("Mittag") for date in dates}
+
+        expected_batches = [
+            (["a", "b", "c"], "d"),
+            (["d", "e", "f"], "g"),
+            (["g", "h", "i"], "j"),
+            (["j", "k"], "a"),
+        ]
+        with (
+            patch("src.main.load_tents", return_value=configs),
+            patch(
+                "src.main.headless_fetcher.launch_browser",
+                return_value=(self.playwright, self.browser),
+            ),
+            patch("src.main.festzelt_os_fetcher.fetch", side_effect=fetch),
+        ):
+            for expected_slugs, expected_cursor in expected_batches:
+                offset = len(fetch_order)
+                self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+                self.assertEqual(fetch_order[offset:], expected_slugs)
+                self.assertEqual(
+                    load(self.path).probe_rotation_cursor, expected_cursor
+                )
+                if expected_slugs == ["a", "b", "c"]:
+                    self.assertEqual(
+                        load(self.path).tents["d"].model_dump(), skipped_before
+                    )
+
+        self.assertEqual(fetch_order, [cfg.slug for cfg in configs])
         state = load(self.path)
         self.assertTrue(
             all(
@@ -234,6 +313,45 @@ class MainIntegrationTests(unittest.TestCase):
                 for date_state in tent.dates.values()
             )
         )
+
+    def test_unpersisted_batch_retries_same_tents_after_restart(self) -> None:
+        configs = [config(chr(ord("a") + index)) for index in range(5)]
+        self.initial_state([cfg.slug for cfg in configs])
+        fetch_order: list[str] = []
+
+        def fetch(cfg, dates, _browser):
+            fetch_order.append(
+                next(item.slug for item in configs if item.festzelt_os is cfg)
+            )
+            return {date: available("Mittag") for date in dates}
+
+        with (
+            patch("src.main.load_tents", return_value=configs),
+            patch(
+                "src.main.headless_fetcher.launch_browser",
+                return_value=(self.playwright, self.browser),
+            ),
+            patch("src.main.festzelt_os_fetcher.fetch", side_effect=fetch),
+            patch("src.main.save", side_effect=OSError("checkpoint unavailable")),
+        ):
+            with self.assertRaisesRegex(OSError, "checkpoint unavailable"):
+                probe_run(state_path=self.path, jitter=False)
+
+        self.assertEqual(fetch_order, ["a", "b", "c"])
+        self.assertIsNone(load(self.path).probe_rotation_cursor)
+
+        with (
+            patch("src.main.load_tents", return_value=configs),
+            patch(
+                "src.main.headless_fetcher.launch_browser",
+                return_value=(self.playwright, self.browser),
+            ),
+            patch("src.main.festzelt_os_fetcher.fetch", side_effect=fetch),
+        ):
+            self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+
+        self.assertEqual(fetch_order, ["a", "b", "c", "a", "b", "c"])
+        self.assertEqual(load(self.path).probe_rotation_cursor, "d")
 
     def test_sequential_fetch_errors_are_isolated_and_resources_are_closed(self) -> None:
         configs = [config("ok"), config("raised"), config("invalid")]
