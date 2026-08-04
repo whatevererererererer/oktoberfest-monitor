@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import os
+import time
 from datetime import date as date_type, datetime
 from urllib.parse import urlencode, urlparse, urlunparse, parse_qsl
 
 import httpx
 
 PUSHOVER_API = "https://api.pushover.net/1/messages.json"
+
+BURST_COUNT = 4
+BURST_INTERVAL_SECONDS = 5
+BURST_REPEAT_DELAY_SECONDS = 30
 
 WEEKDAY_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
@@ -33,6 +38,17 @@ def _post(token: str, user: str, payload: dict) -> None:
         r.raise_for_status()
 
 
+def _post_burst(token: str, user: str, payload: dict) -> None:
+    """Send two four-message bursts, separated by a 30-second pause."""
+    for burst_index in range(2):
+        if burst_index:
+            time.sleep(BURST_REPEAT_DELAY_SECONDS)
+        for message_index in range(BURST_COUNT):
+            _post(token, user, payload)
+            if message_index < BURST_COUNT - 1:
+                time.sleep(BURST_INTERVAL_SECONDS)
+
+
 def alert_available(
     *,
     tent_name: str,
@@ -42,6 +58,7 @@ def alert_available(
     shifts: list[str] | None = None,
     new_shifts: list[str] | None = None,
     reason: str = "available",
+    burst: bool = False,
 ) -> None:
     token = os.environ["PUSHOVER_TOKEN"]
     user = os.environ["PUSHOVER_USER"]
@@ -68,7 +85,10 @@ def alert_available(
         "priority": 1,
         "sound": "persistent",
     }
-    _post(token, user, payload)
+    if burst:
+        _post_burst(token, user, payload)
+    else:
+        _post(token, user, payload)
 
 
 def alert_error(*, summary: str, details: str = "") -> None:

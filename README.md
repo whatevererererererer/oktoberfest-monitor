@@ -8,6 +8,7 @@ Watches the 13 main Wiesn tents for reservation availability on **Fri 25.09.2026
 - Each tent has a YAML in `tents/` declaring how to detect availability for the target dates.
 - State is committed back to `state/state.json` after every run — a JSON diff over time, free history.
 - On `unavailable → available` (or `unknown → available`), Pushover fires priority 1 with the booking URL pre-filled to the date.
+- Normal availability and shift changes send one Pushover message. High-attention shifts send two bursts of four messages: Saturday for every newly available shift except `Mittag`, and Friday for every newly available shift except `Mittag` and `Nachmittag`. Messages within a burst are five seconds apart; the second burst starts after a 30-second pause.
 - A separate Pushover app fires priority 0 if any tent fails 3 runs in a row.
 
 ## One-time setup

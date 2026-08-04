@@ -15,6 +15,7 @@ from .fetchers import festzelt_os as festzelt_os_fetcher
 from .fetchers import hash as hash_fetcher
 from .fetchers import headless as headless_fetcher
 from .fetchers import html as html_fetcher
+from .notification_policy import needs_notification_burst
 from .notify import alert_available, alert_error
 from .state import State, TentDateState, TentState, load, now_iso, save
 
@@ -76,14 +77,13 @@ def _process_result(
 
     became_available = new_status == "available" and prev_status in ("unavailable", "unknown")
     shifts_added: list[str] = []
-    # Only consider shift changes when we have a non-empty prior baseline,
-    # otherwise the first post-migration run would spuriously alert.
+    # Compare even against an empty baseline. A bot-blocked shift step may become
+    # readable on a later run; that newly visible shift still needs an alert.
     if (
         not became_available
         and new_status == "available"
         and prev_status == "available"
         and new_shifts is not None
-        and prev_shifts
     ):
         added = [s for s in new_shifts if s not in prev_shifts]
         if added:
@@ -92,6 +92,8 @@ def _process_result(
 
     if became_available or shifts_added:
         reason = "shifts_added" if shifts_added and not became_available else "available"
+        newly_available_shifts = list(new_shifts or []) if became_available else shifts_added
+        burst = needs_notification_burst(iso_date, newly_available_shifts)
         # festzelt_os tents resolve a shift list. An empty list means the booking
         # wizard's time-slot step couldn't be read (bot-protected step 2), so the
         # alert isn't actionable as a one-tap booking — suppress it. Modes without
@@ -102,8 +104,8 @@ def _process_result(
         log.info("%s/%s: notifying (%s)", cfg.slug, iso_date, reason)
         if dry_run:
             log.info(
-                "dry-run: would notify %s/%s reason=%s shifts=%s new=%s",
-                cfg.slug, iso_date, reason, new_shifts, shifts_added,
+                "dry-run: would notify %s/%s reason=%s shifts=%s new=%s burst=%s",
+                cfg.slug, iso_date, reason, new_shifts, shifts_added, burst,
             )
             return
         try:
@@ -115,6 +117,7 @@ def _process_result(
                 shifts=new_shifts or [],
                 new_shifts=shifts_added or None,
                 reason=reason,
+                burst=burst,
             )
         except Exception as e:
             log.error("pushover failed for %s/%s: %s", cfg.slug, iso_date, e)
