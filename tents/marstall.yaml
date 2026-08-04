@@ -5,7 +5,8 @@ mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Festzelt-OS SPA. So + Mo–Mi pattern; Mi 23 & Mi 30 have Nachmittag.
+  Festzelt-OS SPA. Live check 2026-08-04: wizard renders after SPA
+  initialization; valid date control, neither target date present.
 festzelt_os:
   url_template: https://reservierung.marstall-oktoberfest.de/reservation
   wait_extra_ms: 6000

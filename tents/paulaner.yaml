@@ -5,6 +5,9 @@ mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Festzelt-OS server-rendered. Currently Mo–Do only, Mittag only.
+  Festzelt-OS server-rendered. Live check 2026-08-04: both target dates
+  are present and an interactive browser resolves Mittag + Nachmittag for
+  each. Unmodified headless Chromium is currently stopped by a Cloudflare bot
+  page; this must remain visible as error health and must not be bypassed.
 festzelt_os:
   url_template: https://reservierung.paulanerfestzelt.de/reservierung

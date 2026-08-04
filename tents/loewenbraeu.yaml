@@ -5,6 +5,8 @@ mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Festzelt-OS server-rendered. Mo–Do + Fr 02.10 only, Mittag.
+  Interactive live check 2026-08-04: valid date control with neither target
+  present. Unmodified headless Chromium is currently stopped by a bot page;
+  keep this visible as error health and do not infer unavailable from CI.
 festzelt_os:
   url_template: https://reservierung.loewenbraeuzelt.de/reservierung

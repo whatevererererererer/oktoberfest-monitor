@@ -5,8 +5,9 @@ mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Festzelt-OS SPA. Page states no Abendreservierungen. Offers Mittag +
-  Nachmittag on Mo–Mi both weeks. No Fr 25 / Sa 26.
+  Festzelt-OS SPA. Live check 2026-08-04: both targets are present;
+  Friday resolves Mittag + Nachmittag and Saturday resolves Mittag.
+  The page states that no evening reservations are offered.
 festzelt_os:
   url_template: https://reservierung.festhalle-schottenhamel.de/reservation/
   wait_extra_ms: 6000

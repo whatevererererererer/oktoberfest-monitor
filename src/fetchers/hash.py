@@ -28,8 +28,12 @@ def fetch_hash(cfg: HashConfig, iso_date: str, client: httpx.Client) -> str:
     tree = HTMLParser(r.text)
     if cfg.selector:
         node = tree.css_first(cfg.selector)
-        text = node.text(strip=True) if node else ""
+        if node is None:
+            raise ValueError("configured hash selector is missing")
+        text = node.text(strip=True)
     else:
         text = tree.body.text(strip=True) if tree.body else r.text
     normalized = _WS.sub(" ", text).strip()
+    if not normalized:
+        raise ValueError("hash target region is empty")
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()

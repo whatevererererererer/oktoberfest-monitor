@@ -5,7 +5,8 @@ mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  Festzelt-OS SPA. Sparse: only Di 22, Mi 23, Mo 28 — Mittag only.
+  Festzelt-OS SPA. Live check 2026-08-04: valid date control currently
+  contains only 29./30.09.; neither target date is present.
 festzelt_os:
   url_template: https://reservierung.schuetzenfestzelt.com/reservation/
   wait_extra_ms: 6000

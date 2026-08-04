@@ -1,136 +1,186 @@
 # Oktoberfest 2026 Reservation Monitor
 
-Watches the 13 main Wiesn tents for reservation availability on **Fri 25.09.2026** and **Sat 26.09.2026** and pushes a tap-to-book Pushover alert to your iPhone the moment a slot opens or a cancellation re-releases a table.
+Read-only availability monitor for Friday, **25 September 2026**, and
+Saturday, **26 September 2026**. It never books, submits a reservation form,
+or bypasses a CAPTCHA.
 
-## How it works
+The repository contains 19 tent configurations. Eleven portals with validated
+date controls are enabled; eight unsupported, bot-protected, contact-only,
+widget, or out-of-scope tents remain disabled. Per-run health still reflects
+whether each enabled portal also permits a date-correlated shift update.
 
-- GitHub Actions cron runs `python -m src.main` every 5 minutes (the platform minimum).
-- Each tent has a YAML in `tents/` declaring how to detect availability for the target dates.
-- State is committed back to `state/state.json` after every run — a JSON diff over time, free history.
-- On `unavailable → available` (or `unknown → available`), Pushover fires priority 1 with the booking URL pre-filled to the date.
-- Normal availability and shift changes send one Pushover message. High-attention shifts send two bursts of four messages: Saturday for every newly available shift except `Mittag`, and Friday for every newly available shift except `Mittag` and `Nachmittag`. Messages within a burst are five seconds apart; the second burst starts after a 30-second pause.
-- A separate Pushover app fires priority 0 if any tent fails 3 runs in a row.
+## Runtime model
 
-## One-time setup
+An external cron-job.org job dispatches `.github/workflows/monitor.yml`
+approximately every four minutes. A run has two durable phases:
 
-### 1. Pushover
+1. Probe every enabled tent, update health/baselines, and enqueue stable alert
+   events in `state/state.json`.
+2. Commit and push that outbox before sending anything. Deliver at most one
+   Pushover message part per process and Git-checkpoint its cursor immediately.
 
-1. Buy and install [Pushover](https://pushover.net) on your iPhone (~$5 one-time). Log in.
-2. Note your **User Key** from https://pushover.net.
-3. Create two applications at https://pushover.net/apps/build:
-   - `Wiesn Alerts` → API token used for availability alerts (**`PUSHOVER_TOKEN`**).
-   - `Wiesn Errors` → API token used for monitor failures (**`PUSHOVER_TOKEN_ERROR`**).
-4. On iPhone: **Settings → Notifications → Pushover → Critical Alerts: On**. Priority-1 alerts will then break Focus / Do Not Disturb.
+The workflow always checks out current `main`, has one non-interrupted state
+writer, retains at most one pending run, fails closed on a state conflict, and
+never hides a final push failure. New dispatches replace only the pending run;
+they do not cancel a writer during a Git/Pushover checkpoint. A crash after
+Pushover accepts a message but before the Git checkpoint can repeat that one
+ambiguous part; Pushover offers no idempotency key, so stronger exactly-once
+delivery is not possible. Already checkpointed parts of a burst are not
+intentionally repeated.
 
-### 2. GitHub repository
+The 210-second internal delivery budget starts before Python/dependency and
+Playwright setup (immediately after checkout), leaving margin before the
+six-minute hard job timeout for the final state checkpoint. Remaining outbox
+parts resume in the next, current-`main` run.
 
-1. Create a **private** GitHub repo and push this code.
-2. Repo **Settings → Secrets and variables → Actions → New repository secret**, add:
-   - `PUSHOVER_USER` — your user key.
-   - `PUSHOVER_TOKEN` — Wiesn Alerts app token.
-   - `PUSHOVER_TOKEN_ERROR` — Wiesn Errors app token.
-3. Repo **Settings → Actions → General → Workflow permissions: Read and write**. The workflow needs this to commit `state/state.json` back to the repo.
+## Probe and health invariants
 
-### 3. Tent endpoint discovery (the manual part — ~30 min)
+For the active `festzelt_os` mode:
 
-Most tent reservation pages are JavaScript SPAs that fetch availability from a JSON API. We monitor the JSON API directly, not the rendered page. You discover each tent's API once via DevTools, paste it into the tent's YAML, and flip `enabled: true`.
+- `available`: the target date exists and native select interaction produced
+  at least one shift with a confirmed, target-correlated DOM update.
+- `unavailable`: one unambiguous, plausible Oktoberfest date control exists,
+  but the target date is absent.
+- `unknown` / degraded: the target exists, but its shift control, options, or
+  update cannot be proved.
+- `error`: missing or ambiguous base control, bot/login/error page, timeout,
+  invalid structure, navigation failure, or technical probe failure.
 
-For each tent in `tents/*.yaml`:
+Unknown/error observations are stored separately and do not overwrite the last
+reliable availability and shift baseline. Diagnostics are intentionally small:
+page type, control/option counts, target/update evidence, shift count, and an
+error class. Page HTML, cookies, tokens, and form values are never stored.
 
-1. Open `booking_url` in Chrome or Safari with **DevTools → Network** open and the **Fetch/XHR** filter active.
-2. Pick a date in late September 2026 (the closer to 25/26.09 the better).
-3. Watch the Network tab — one of the XHR responses contains availability for that date. Look for JSON with fields like `available`, `slots`, `status`, `ausgebucht`.
-4. Right-click that request → **Copy → Copy as cURL** to capture method, URL, headers, body.
-5. Edit the tent's YAML:
+Both targets are selected sequentially on one low-load page per tent with
+Playwright's native `select_option`. Date and shift controls are reacquired
+after every rerender, and unchanged options from the previous date are rejected
+unless a concrete relevant mutation proves the wizard updated. Failed Livewire
+update responses are classified separately from an honestly empty shift step.
+The browser uses Playwright's native Chromium identity; no Safari spoofing,
+stealth plugin, challenge cookie, or CAPTCHA workaround is used.
+German long dates, numeric German dates, ISO dates, whitespace, and NBSP are
+normalized before exact comparison.
 
-   ```yaml
-   mode: api
-   enabled: true
-   api:
-     endpoint: <captured URL — replace the date with {date}>
-     method: POST   # or GET
-     headers:
-       # only headers the server actually requires — usually none beyond the defaults
-     payload_template: '{"date":"{date}", ...}'   # POST body, with {date} placeholder
-     # OR for GET:
-     # query_template:
-     #   date: "{date}"
-     unavailable_when: '$.status == "ausgebucht"'   # JSONPath that's truthy when sold out
-     # OR:
-     # available_when: '$.slots[*].available'
-   ```
+## Notification policy
 
-6. Re-run the monitor with `python -m src.main --dry-run` to verify the new config without firing notifications.
+Normal availability and ordinary newly visible shifts create one Pushover
+message. An empty or unreadable shift step creates none.
 
-If a tent has no online booking flow (Käfer, partly Augustiner), leave it as `mode: manual, enabled: false`.
+High-attention hits create two groups of four messages:
 
-### 4. Local dry run
+- four messages five seconds apart;
+- 30 seconds before the second group;
+- four more messages five seconds apart.
+
+The resulting gap sequence is `5, 5, 5, 30, 5, 5, 5`.
+
+- Saturday: every new shift except `Mittag` is high-attention.
+- Friday: every new shift except `Mittag` and `Nachmittag` is high-attention.
+
+Shift order, case, whitespace, time suffixes, and parenthetical details do not
+create duplicates. A removed shift that later reappears and a true
+unavailable-to-available re-release do create a new event. Message timestamps
+use `Europe/Berlin` explicitly.
+
+Pushover transport verifies HTTP 200 plus JSON `status=1`, records the request
+ID and quota headers, does not blindly retry ordinary 4xx responses, defers 429
+responses, and retries 5xx/network timeouts with bounded backoff. Tests never
+send a real message.
+
+## State schema
+
+`state/state.json` is the source of truth and Git history. Schema v2 contains:
+
+- last reliable status/shifts;
+- latest observed status and health;
+- privacy-preserving probe diagnostics and degraded/error counters;
+- stable alert sequences;
+- a resumable outbox with message-part cursor, attempts, next due time,
+  Pushover request/quota metadata, and delivered/dead-letter status.
+
+Legacy snapshots migrate in memory without discarding their timestamps,
+failure counters, statuses, or shifts. Legacy successful-looking observations
+start with `health=unknown` until a v2 probe supplies control evidence. State
+writes use an atomic same-directory replacement.
+
+## Local verification
+
+Install the project and its pinned Playwright extra, then install the matching
+Chromium build:
 
 ```bash
-python -m pip install -e .
-PUSHOVER_USER=... PUSHOVER_TOKEN=... PUSHOVER_TOKEN_ERROR=... python -m src.main --dry-run
+python -m pip install -e '.[headless]'
+python -m playwright install chromium
 ```
 
-Verify `state/state.json` updates and no notifications fire.
+Run a safe live simulation:
 
-## Verification (end-to-end before you trust it)
-
-1. Enable one tent only (e.g. `hofbraeu.yaml`) once you've configured its api block. Run the workflow via **Actions → Wiesn Monitor → Run workflow**.
-2. Confirm `state/state.json` is committed and contains the current real status.
-3. **Synthetic transition**: locally edit `state/state.json` so that tent's date status is `unavailable`, commit, push. The next scheduled run should detect the (real) `unavailable → available` transition and push one Pushover. Time the round-trip: cron tick → iPhone notification should land within ~60 s.
-4. **Tap test**: tap the iPhone notification — Safari opens the booking URL with the date prefilled.
-5. **Failure-mode test**: corrupt one tent's `endpoint`, let the workflow run 3 times — confirm a `Wiesn-Monitor: Fehler` Pushover arrives.
-6. **Critical-alert test**: enable iPhone Focus, fire a manual priority-1 Pushover from https://pushover.net, confirm it breaks through.
-7. Enable all configured tents, let it run unattended for 7 days, review `state/state.json` git history for noise.
-
-## Tent YAML reference
-
-```yaml
-slug: hofbraeu                # filename stem, used as state key
-name: Hofbräu-Festzelt        # human name in notifications
-booking_url: https://...      # tap-to-open URL in the alert
-mode: api | html | hash | manual
-enabled: true | false
-dates: ["2026-09-25", "2026-09-26"]
-notes: |
-  Free-form
-
-# mode: api
-api:
-  endpoint: https://...
-  method: GET | POST
-  headers: { ... }
-  payload_template: '{"date":"{date}"}'   # for POST
-  query_template: { date: "{date}" }       # for GET
-  unavailable_when: 'JSONPath expression'  # truthy → sold out
-  available_when: 'JSONPath expression'    # truthy → free
-
-# mode: html
-html:
-  url_template: https://...?date={date}
-  selector: ".calendar-day[data-date='{date}']"   # optional
-  unavailable_regex: "ausgebucht|leider belegt"
-  available_regex: "verf[üu]gbar"                 # optional
-
-# mode: hash — last resort, fires on any change to a normalized region
-hash:
-  url_template: https://...
-  selector: "#availability"
-
-# mode: manual — placeholder; never auto-checked
+```bash
+python -m src.main --probe --dry-run
 ```
 
-## Out of scope (deliberately)
+Dry-run sends nothing and does not modify `state/state.json`.
 
-- **Auto-booking**. Forms differ per tent, several use CAPTCHA, and a misfired booking is hard to undo. V1 is alert + tap-to-open.
-- **Oide Wiesn** tents (Tradition, Herzkasperl, Museumszelt) — excluded by choice.
-- **Medium tents** (Weinzelt, Kalbskuchl, etc.) — drop in additional YAMLs to add.
+Run all synthetic tests:
 
-## Files
+```bash
+python -m unittest discover -s tests -v
+```
 
-- [`src/main.py`](src/main.py) — orchestrator
-- [`src/notify.py`](src/notify.py) — Pushover client
-- [`src/fetchers/`](src/fetchers) — api / html / hash detection
-- [`tents/`](tents) — 13 tent configs
-- [`.github/workflows/monitor.yml`](.github/workflows/monitor.yml) — cron + commit-back
-- [`state/state.json`](state/state.json) — diff source of truth
+Production delivery is intentionally separate and should normally be invoked
+only by the workflow after its probe checkpoint:
+
+```bash
+python -m src.main --deliver-next --max-wait-seconds 35
+```
+
+Exit code 3 means idle/deferred; exit code 2 means a terminal delivery failure
+was written to dead-letter and must be checkpointed before the workflow fails.
+After the underlying credential, quota, or provider problem has been reviewed
+and corrected, that exact event can be resumed at its unsent part without
+creating a new availability event:
+
+```bash
+python -m src.main --requeue-event EVENT_ID
+```
+
+Commit the resulting state checkpoint before invoking delivery. Requeue is an
+explicit operator action so ordinary 4xx responses and bounded retry exhaustion
+cannot create an automatic retry loop.
+
+## Secrets
+
+Configure these private GitHub Actions secrets:
+
+- `PUSHOVER_USER`
+- `PUSHOVER_TOKEN`
+- `PUSHOVER_TOKEN_ERROR`
+
+The workflow requires `contents: write` to commit state. Do not put keys,
+cookies, captured HTML, or personal data in YAML, state, fixtures, logs, or
+external review artifacts.
+
+## Tent modes
+
+Active tents use `festzelt_os`. The code retains conservative `api`, `html`,
+`headless`, `hash`, and `manual` support. Marker-based fetchers return `unknown`
+when neither explicit marker matches instead of inferring the opposite; missing
+or empty hash regions are errors. A non-shift mode cannot create an actionable
+availability alert until it supplies date-correlated shift evidence.
+
+Do not enable a disabled tent merely because a landing page or generic form is
+reachable. Enablement requires repeatable, target-date-specific live evidence.
+
+## Important files
+
+- `src/main.py` — probe orchestration and CLI
+- `src/fetchers/festzelt_os.py` — native, evidence-based wizard probe
+- `src/probe.py` — structured probe contract
+- `src/events.py` — transitions, shift identity, stable event creation
+- `src/outbox.py` — one-part delivery and retry cursor
+- `src/notify.py` — Pushover payload and transport
+- `src/state.py` — schema migration and atomic persistence
+- `tents/*.yaml` — tent inventory and live-evidence notes
+- `scripts/checkpoint_state.sh` — fail-closed Git checkpoint
+- `.github/workflows/monitor.yml` — bounded, serialized production flow
+- `tests/` — synthetic fetcher, transition, delivery, and Git-race coverage

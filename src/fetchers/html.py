@@ -15,6 +15,11 @@ DEFAULT_HEADERS = {
     "Accept-Language": "de-DE,de;q=0.9,en;q=0.8",
 }
 
+_ERROR_PAGE = re.compile(
+    r"cloudflare|captcha|verify you are human|access denied|forbidden|bad gateway|service unavailable",
+    re.IGNORECASE,
+)
+
 
 def _render(template: str, iso_date: str) -> str:
     return template.replace("{date}", iso_date)
@@ -39,9 +44,20 @@ def fetch(cfg: HtmlConfig, iso_date: str, client: httpx.Client) -> Availability:
         else:
             haystack = tree.body.text(strip=True) if tree.body else r.text
 
-    if cfg.available_regex:
-        pattern = _render(cfg.available_regex, iso_date)
-        return "available" if re.search(pattern, haystack, re.IGNORECASE) else "unavailable"
-
-    pattern = _render(cfg.unavailable_regex, iso_date)
-    return "unavailable" if re.search(pattern, haystack, re.IGNORECASE) else "available"
+    if _ERROR_PAGE.search(haystack):
+        raise ValueError("html error/bot page detected")
+    available = bool(
+        cfg.available_regex
+        and re.search(_render(cfg.available_regex, iso_date), haystack, re.IGNORECASE)
+    )
+    unavailable = bool(
+        cfg.unavailable_regex
+        and re.search(_render(cfg.unavailable_regex, iso_date), haystack, re.IGNORECASE)
+    )
+    if available and unavailable:
+        raise ValueError("html availability markers are contradictory")
+    if available:
+        return "available"
+    if unavailable:
+        return "unavailable"
+    return "unknown"

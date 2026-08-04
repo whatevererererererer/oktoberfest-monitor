@@ -1,11 +1,14 @@
 slug: ochsenbraterei
 name: Ochsenbraterei
-booking_url: https://reservierung.ochsenbraterei.de/
+booking_url: https://reservierung.ochsenbraterei.de/reservierungen
 mode: festzelt_os
 enabled: true
 dates: ["2026-09-25", "2026-09-26"]
 notes: |
-  SPA. Currently only So 04.10 in dropdown. No Fr 25 / Sa 26.
+  Festzelt-OS reservation page. The domain root is only a landing page and
+  contains no date control; /reservierungen is the verified booking wizard.
+  Interactive live check 2026-08-04: target dates absent from a valid date
+  control. Unmodified headless Chromium is currently stopped by a bot page.
 festzelt_os:
-  url_template: https://reservierung.ochsenbraterei.de/
+  url_template: https://reservierung.ochsenbraterei.de/reservierungen
   wait_extra_ms: 7000

@@ -47,12 +47,17 @@ def fetch(cfg: ApiConfig, iso_date: str, client: httpx.Client) -> Availability:
     r.raise_for_status()
     data = r.json()
 
-    if cfg.unavailable_when and _eval_predicate(cfg.unavailable_when, data):
+    if not cfg.unavailable_when and not cfg.available_when:
+        raise ValueError("api config must define unavailable_when or available_when")
+    unavailable = bool(
+        cfg.unavailable_when and _eval_predicate(cfg.unavailable_when, data)
+    )
+    available = bool(cfg.available_when and _eval_predicate(cfg.available_when, data))
+    if available and unavailable:
+        raise ValueError("api availability predicates are contradictory")
+    if unavailable:
         return "unavailable"
-    if cfg.available_when and _eval_predicate(cfg.available_when, data):
+    if available:
         return "available"
-    if cfg.unavailable_when:
-        return "available"
-    if cfg.available_when:
-        return "unavailable"
-    raise ValueError("api config must define unavailable_when or available_when")
+    # A missing JSONPath after a schema change is not evidence for the opposite.
+    return "unknown"

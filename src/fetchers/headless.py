@@ -17,9 +17,9 @@ GERMAN_MONTHS = {
     9: "September", 10: "Oktober", 11: "November", 12: "Dezember",
 }
 
-USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 "
-    "(KHTML, like Gecko) Version/17.5 Safari/605.1.15"
+_ERROR_PAGE = re.compile(
+    r"cloudflare|captcha|verify you are human|access denied|forbidden|bad gateway|service unavailable",
+    re.IGNORECASE,
 )
 
 
@@ -37,7 +37,7 @@ def fetch(cfg: HeadlessConfig, iso_date: str, browser) -> Availability:
     if cfg.available_regex is None and cfg.unavailable_regex is None:
         raise ValueError("headless config must define available_regex or unavailable_regex")
 
-    ctx = browser.new_context(user_agent=USER_AGENT, locale="de-DE")
+    ctx = browser.new_context(locale="de-DE")
     try:
         page = ctx.new_page()
         page.goto(_render(cfg.url_template, iso_date), wait_until=cfg.wait_until, timeout=45000)
@@ -53,12 +53,23 @@ def fetch(cfg: HeadlessConfig, iso_date: str, browser) -> Availability:
     finally:
         ctx.close()
 
-    if cfg.available_regex:
-        pattern = _render(cfg.available_regex, iso_date)
-        return "available" if re.search(pattern, haystack, re.IGNORECASE) else "unavailable"
-
-    pattern = _render(cfg.unavailable_regex, iso_date)
-    return "unavailable" if re.search(pattern, haystack, re.IGNORECASE) else "available"
+    if _ERROR_PAGE.search(haystack):
+        raise ValueError("headless error/bot page detected")
+    available = bool(
+        cfg.available_regex
+        and re.search(_render(cfg.available_regex, iso_date), haystack, re.IGNORECASE)
+    )
+    unavailable = bool(
+        cfg.unavailable_regex
+        and re.search(_render(cfg.unavailable_regex, iso_date), haystack, re.IGNORECASE)
+    )
+    if available and unavailable:
+        raise ValueError("headless availability markers are contradictory")
+    if available:
+        return "available"
+    if unavailable:
+        return "unavailable"
+    return "unknown"
 
 
 def launch_browser():
