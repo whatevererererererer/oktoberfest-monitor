@@ -4,12 +4,12 @@
   "tents": {
     "braeurosl": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 1,
+      "consecutive_failures": 2,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -26,7 +26,7 @@
           },
           "health": "error",
           "last_change": "2026-08-03T11:31:25+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -35,7 +35,7 @@
         "2026-09-26": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -52,7 +52,7 @@
           },
           "health": "error",
           "last_change": "2026-07-26T21:06:14+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -61,17 +61,17 @@
       },
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
-      "last_error": "2026-08-04T09:32:58+00:00",
+      "last_error": "2026-08-04T09:36:46+00:00",
       "last_success_at": "2026-08-04T09:28:59+00:00"
     },
     "fischer-vroni": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 1,
+      "consecutive_failures": 2,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -88,7 +88,7 @@
           },
           "health": "error",
           "last_change": "2026-07-29T06:21:29+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -97,7 +97,7 @@
         "2026-09-26": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -114,7 +114,7 @@
           },
           "health": "error",
           "last_change": "2026-08-04T09:05:09+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -123,17 +123,17 @@
       },
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
-      "last_error": "2026-08-04T09:32:58+00:00",
+      "last_error": "2026-08-04T09:36:46+00:00",
       "last_success_at": "2026-08-04T09:29:12+00:00"
     },
     "hofbraeu": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 1,
+      "consecutive_failures": 2,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -150,7 +150,7 @@
           },
           "health": "error",
           "last_change": "2026-07-10T01:56:45+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -159,7 +159,7 @@
         "2026-09-26": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -176,7 +176,7 @@
           },
           "health": "error",
           "last_change": "2026-07-08T12:56:16+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -185,17 +185,17 @@
       },
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
-      "last_error": "2026-08-04T09:32:58+00:00",
+      "last_error": "2026-08-04T09:36:46+00:00",
       "last_success_at": "2026-08-04T09:29:21+00:00"
     },
     "loewenbraeu": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 1,
+      "consecutive_failures": 2,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -212,7 +212,7 @@
           },
           "health": "error",
           "last_change": "2026-07-27T23:41:48+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -221,7 +221,7 @@
         "2026-09-26": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -238,7 +238,7 @@
           },
           "health": "error",
           "last_change": "2026-04-28T10:44:33+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -247,7 +247,7 @@
       },
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
-      "last_error": "2026-08-04T09:32:58+00:00",
+      "last_error": "2026-08-04T09:36:46+00:00",
       "last_success_at": "2026-08-04T09:29:29+00:00"
     },
     "marstall": {
@@ -274,7 +274,7 @@
           },
           "health": "healthy",
           "last_change": "2026-04-29T11:31:31+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "unavailable",
           "shift_keys": [],
           "shifts": [],
@@ -300,7 +300,7 @@
           },
           "health": "healthy",
           "last_change": "2026-04-29T11:31:39+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "unavailable",
           "shift_keys": [],
           "shifts": [],
@@ -310,16 +310,16 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:47:23+00:00",
-      "last_success_at": "2026-08-04T09:32:58+00:00"
+      "last_success_at": "2026-08-04T09:36:46+00:00"
     },
     "ochsenbraterei": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 1,
+      "consecutive_failures": 2,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -336,7 +336,7 @@
           },
           "health": "error",
           "last_change": "2026-04-29T11:31:48+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -345,7 +345,7 @@
         "2026-09-26": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -362,7 +362,7 @@
           },
           "health": "error",
           "last_change": "2026-04-29T11:31:55+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -371,17 +371,17 @@
       },
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
-      "last_error": "2026-08-04T09:32:58+00:00",
+      "last_error": "2026-08-04T09:36:46+00:00",
       "last_success_at": "2026-08-04T09:29:50+00:00"
     },
     "paulaner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 1,
+      "consecutive_failures": 2,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -398,7 +398,7 @@
           },
           "health": "error",
           "last_change": "2026-08-03T14:10:47+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -407,7 +407,7 @@
         "2026-09-26": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -424,7 +424,7 @@
           },
           "health": "error",
           "last_change": "2026-08-03T14:02:31+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -433,17 +433,17 @@
       },
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
-      "last_error": "2026-08-04T09:32:58+00:00",
+      "last_error": "2026-08-04T09:36:46+00:00",
       "last_success_at": "2026-08-04T09:30:02+00:00"
     },
     "poschner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 1,
+      "consecutive_failures": 2,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -460,7 +460,7 @@
           },
           "health": "error",
           "last_change": "2026-06-26T13:57:12+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -469,7 +469,7 @@
         "2026-09-26": {
           "alert_sequence": 0,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 2,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -486,7 +486,7 @@
           },
           "health": "error",
           "last_change": "2026-07-16T08:07:23+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
@@ -495,7 +495,7 @@
       },
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
-      "last_error": "2026-08-04T09:32:58+00:00",
+      "last_error": "2026-08-04T09:36:46+00:00",
       "last_success_at": "2026-08-04T09:30:13+00:00"
     },
     "schottenhamel": {
@@ -522,7 +522,7 @@
           },
           "health": "healthy",
           "last_change": "2026-08-03T14:18:25+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "available",
           "shift_keys": [
             "mittag",
@@ -554,7 +554,7 @@
           },
           "health": "healthy",
           "last_change": "2026-08-03T19:14:19+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "available",
           "shift_keys": [
             "mittag"
@@ -568,7 +568,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:48:38+00:00",
-      "last_success_at": "2026-08-04T09:32:58+00:00"
+      "last_success_at": "2026-08-04T09:36:46+00:00"
     },
     "schuetzen": {
       "consecutive_degraded": 0,
@@ -594,7 +594,7 @@
           },
           "health": "healthy",
           "last_change": "2026-04-29T11:32:29+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "unavailable",
           "shift_keys": [],
           "shifts": [],
@@ -620,7 +620,7 @@
           },
           "health": "healthy",
           "last_change": "2026-04-29T11:32:36+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "unavailable",
           "shift_keys": [],
           "shifts": [],
@@ -630,7 +630,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:49:24+00:00",
-      "last_success_at": "2026-08-04T09:32:58+00:00"
+      "last_success_at": "2026-08-04T09:36:46+00:00"
     },
     "weinzelt": {
       "consecutive_degraded": 0,
@@ -656,7 +656,7 @@
           },
           "health": "healthy",
           "last_change": "2026-08-03T06:38:02+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "unavailable",
           "shift_keys": [],
           "shifts": [],
@@ -682,7 +682,7 @@
           },
           "health": "healthy",
           "last_change": "2026-06-29T12:37:59+00:00",
-          "last_check": "2026-08-04T09:32:58+00:00",
+          "last_check": "2026-08-04T09:36:46+00:00",
           "observed_status": "unavailable",
           "shift_keys": [],
           "shifts": [],
@@ -692,8 +692,8 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:50:12+00:00",
-      "last_success_at": "2026-08-04T09:32:58+00:00"
+      "last_success_at": "2026-08-04T09:36:46+00:00"
     }
   },
-  "workflow_last_run_at": "2026-08-04T09:32:58+00:00"
+  "workflow_last_run_at": "2026-08-04T09:36:46+00:00"
 }
