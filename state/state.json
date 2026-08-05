@@ -352,8 +352,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "paulaner",
-  "producer_revision": "8d33897848d75e0b72645df16bdc093cc5265fab",
+  "probe_rotation_cursor": "schuetzen",
+  "producer_revision": "1ba0ffecc99f98adeb7be912310af265f14b5638",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -934,15 +934,15 @@
     },
     "paulaner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 154,
-      "consecutive_unhealthy": 154,
+      "consecutive_failures": 155,
+      "consecutive_unhealthy": 155,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 1,
           "availability_evidence_lost": true,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 18,
+          "consecutive_errors": 19,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -959,7 +959,7 @@
           },
           "health": "error",
           "last_change": "2026-08-05T01:16:46+00:00",
-          "last_check": "2026-08-05T14:16:25+00:00",
+          "last_check": "2026-08-05T14:36:27+00:00",
           "last_reliable_at": "2026-08-05T01:16:46+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -991,7 +991,7 @@
           "availability_evidence_lost": false,
           "baseline_verified": false,
           "consecutive_degraded": 0,
-          "consecutive_errors": 154,
+          "consecutive_errors": 155,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -1008,7 +1008,7 @@
           },
           "health": "error",
           "last_change": "2026-08-03T14:02:31+00:00",
-          "last_check": "2026-08-05T14:16:25+00:00",
+          "last_check": "2026-08-05T14:36:27+00:00",
           "last_reliable_at": null,
           "last_reliable_diagnostics": {},
           "observed_status": "error",
@@ -1020,20 +1020,20 @@
       "failure_incident_kind": "error",
       "failure_incident_open": true,
       "failure_incident_sequence": 1,
-      "last_error": "2026-08-05T14:16:25+00:00",
+      "last_error": "2026-08-05T14:36:27+00:00",
       "last_success_at": "2026-08-04T09:30:02+00:00"
     },
     "poschner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 154,
-      "consecutive_unhealthy": 154,
+      "consecutive_failures": 155,
+      "consecutive_unhealthy": 155,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "availability_evidence_lost": false,
           "baseline_verified": false,
           "consecutive_degraded": 0,
-          "consecutive_errors": 154,
+          "consecutive_errors": 155,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1050,7 +1050,7 @@
           },
           "health": "error",
           "last_change": "2026-06-26T13:57:12+00:00",
-          "last_check": "2026-08-05T14:16:25+00:00",
+          "last_check": "2026-08-05T14:36:27+00:00",
           "last_reliable_at": null,
           "last_reliable_diagnostics": {},
           "observed_status": "error",
@@ -1063,7 +1063,7 @@
           "availability_evidence_lost": false,
           "baseline_verified": false,
           "consecutive_degraded": 0,
-          "consecutive_errors": 154,
+          "consecutive_errors": 155,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -1080,7 +1080,7 @@
           },
           "health": "error",
           "last_change": "2026-07-16T08:07:23+00:00",
-          "last_check": "2026-08-05T14:16:25+00:00",
+          "last_check": "2026-08-05T14:36:27+00:00",
           "last_reliable_at": null,
           "last_reliable_diagnostics": {},
           "observed_status": "error",
@@ -1092,7 +1092,7 @@
       "failure_incident_kind": "error",
       "failure_incident_open": true,
       "failure_incident_sequence": 1,
-      "last_error": "2026-08-05T14:16:25+00:00",
+      "last_error": "2026-08-05T14:36:27+00:00",
       "last_success_at": "2026-08-04T09:30:13+00:00"
     },
     "schottenhamel": {
@@ -1112,7 +1112,7 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 15,
+            "plausible_date_option_count": 14,
             "shift_control_count": 1,
             "shift_control_found": true,
             "shift_count": 1,
@@ -1122,15 +1122,15 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T14:49:41+00:00",
-          "last_check": "2026-08-05T14:16:25+00:00",
-          "last_reliable_at": "2026-08-05T14:16:25+00:00",
+          "last_check": "2026-08-05T14:36:27+00:00",
+          "last_reliable_at": "2026-08-05T14:36:27+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 15,
+            "plausible_date_option_count": 14,
             "shift_control_count": 1,
             "shift_control_found": true,
             "shift_count": 1,
@@ -1159,47 +1159,43 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 15,
-            "shift_control_count": 1,
-            "shift_control_found": true,
-            "shift_count": 1,
-            "target_enabled": true,
-            "target_found": true,
-            "update_confirmed": true
+            "plausible_date_option_count": 14,
+            "shift_control_count": 0,
+            "shift_control_found": false,
+            "shift_count": 0,
+            "target_enabled": null,
+            "target_found": false,
+            "update_confirmed": false
           },
           "health": "healthy",
-          "last_change": "2026-08-05T11:51:25+00:00",
-          "last_check": "2026-08-05T14:16:25+00:00",
-          "last_reliable_at": "2026-08-05T14:16:25+00:00",
+          "last_change": "2026-08-05T14:36:27+00:00",
+          "last_check": "2026-08-05T14:36:27+00:00",
+          "last_reliable_at": "2026-08-05T14:36:27+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 15,
-            "shift_control_count": 1,
-            "shift_control_found": true,
-            "shift_count": 1,
-            "target_enabled": true,
-            "target_found": true,
-            "update_confirmed": true
+            "plausible_date_option_count": 14,
+            "shift_control_count": 0,
+            "shift_control_found": false,
+            "shift_count": 0,
+            "target_enabled": null,
+            "target_found": false,
+            "update_confirmed": false
           },
-          "observed_status": "available",
-          "shift_keys": [
-            "mittag"
-          ],
-          "shifts": [
-            "Mittag"
-          ],
-          "status": "available"
+          "observed_status": "unavailable",
+          "shift_keys": [],
+          "shifts": [],
+          "status": "unavailable"
         }
       },
       "failure_incident_kind": null,
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:48:38+00:00",
-      "last_success_at": "2026-08-05T14:16:25+00:00"
+      "last_success_at": "2026-08-05T14:36:27+00:00"
     },
     "schuetzen": {
       "consecutive_degraded": 0,
@@ -1398,8 +1394,8 @@
       "last_success_at": "2026-08-05T14:21:52+00:00"
     }
   },
-  "workflow_duration_seconds": 84.905,
-  "workflow_finished_at": "2026-08-05T14:32:43+00:00",
-  "workflow_last_run_at": "2026-08-05T14:31:18+00:00",
-  "workflow_started_at": "2026-08-05T14:31:18+00:00"
+  "workflow_duration_seconds": 31.37,
+  "workflow_finished_at": "2026-08-05T14:36:27+00:00",
+  "workflow_last_run_at": "2026-08-05T14:35:56+00:00",
+  "workflow_started_at": "2026-08-05T14:35:56+00:00"
 }
