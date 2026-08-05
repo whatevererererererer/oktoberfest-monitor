@@ -224,30 +224,32 @@
       "total_messages": 1
     },
     "c1612c39377a1cbb29c3ff7c144052c2": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": null,
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-05T07:07:11.692728+00:00",
       "created_at": "2026-08-05T07:07:09+00:00",
       "event_id": "c1612c39377a1cbb29c3ff7c144052c2",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "3d0c28b9-8aeb-445b-8666-a9af8460477c",
       "new_shifts": [],
-      "next_attempt_at": "2026-08-05T07:07:09+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9977,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Ochsenbraterei: error seit 3 Läufen (2026-09-26)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Ochsenbraterei",
       "tent_slug": "ochsenbraterei",
       "total_messages": 1
@@ -291,6 +293,12 @@
       "limit": 10000,
       "observed_at": "2026-08-05T01:16:48.999749+00:00",
       "remaining": 9978,
+      "reset": 1788238800
+    },
+    "monitor_error": {
+      "limit": 10000,
+      "observed_at": "2026-08-05T07:07:11.692728+00:00",
+      "remaining": 9977,
       "reset": 1788238800
     }
   },
