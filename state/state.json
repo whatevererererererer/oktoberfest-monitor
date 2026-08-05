@@ -159,6 +159,40 @@
       "tent_slug": "paulaner",
       "total_messages": 1
     },
+    "87aa8508bd1ce7d45e844dd830ca6385": {
+      "attempts_by_index": {},
+      "booking_url": "https://reservierung.festhalle-schottenhamel.de/reservation/",
+      "burst": false,
+      "completed_at": null,
+      "created_at": "2026-08-05T17:56:19+00:00",
+      "event_id": "87aa8508bd1ce7d45e844dd830ca6385",
+      "iso_date": "2026-09-25",
+      "kind": "availability",
+      "last_error": null,
+      "last_error_class": null,
+      "last_request_id": null,
+      "new_shifts": [
+        "Nachmittag"
+      ],
+      "next_attempt_at": "2026-08-05T17:56:19+00:00",
+      "next_index": 0,
+      "quarantine_reason": null,
+      "quarantined_payload": null,
+      "quota_limit": null,
+      "quota_remaining": null,
+      "quota_reset": null,
+      "rate_limit_deferrals_by_index": {},
+      "reason": "shifts_added",
+      "requeue_count": 0,
+      "shifts": [
+        "Mittag",
+        "Nachmittag"
+      ],
+      "status": "pending",
+      "tent_name": "Schottenhamel-Festhalle",
+      "tent_slug": "schottenhamel",
+      "total_messages": 1
+    },
     "95fa0440d7ae3a897b0e2c6d196e0ccb": {
       "attempts_by_index": {
         "0": 1
@@ -352,8 +386,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "paulaner",
-  "producer_revision": "a9a32a4cf83cc46ce03113e8e3f0e263bee15167",
+  "probe_rotation_cursor": "schuetzen",
+  "producer_revision": "2bc07c316fe2f75070a69b0d0ac4744981b75858",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -934,22 +968,22 @@
     },
     "paulaner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 164,
-      "consecutive_unhealthy": 164,
+      "consecutive_failures": 165,
+      "consecutive_unhealthy": 165,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 1,
           "availability_evidence_lost": true,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 28,
+          "consecutive_errors": 29,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": "shift_update_challenge",
             "health": "error",
             "page_type": "bot",
-            "plausible_date_option_count": 14,
+            "plausible_date_option_count": 13,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -959,7 +993,7 @@
           },
           "health": "error",
           "last_change": "2026-08-05T01:16:46+00:00",
-          "last_check": "2026-08-05T17:36:35+00:00",
+          "last_check": "2026-08-05T17:56:19+00:00",
           "last_reliable_at": "2026-08-05T01:16:46+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -991,7 +1025,7 @@
           "availability_evidence_lost": false,
           "baseline_verified": false,
           "consecutive_degraded": 0,
-          "consecutive_errors": 164,
+          "consecutive_errors": 165,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -1008,7 +1042,7 @@
           },
           "health": "error",
           "last_change": "2026-08-03T14:02:31+00:00",
-          "last_check": "2026-08-05T17:36:35+00:00",
+          "last_check": "2026-08-05T17:56:19+00:00",
           "last_reliable_at": null,
           "last_reliable_diagnostics": {},
           "observed_status": "error",
@@ -1020,20 +1054,20 @@
       "failure_incident_kind": "error",
       "failure_incident_open": true,
       "failure_incident_sequence": 1,
-      "last_error": "2026-08-05T17:36:35+00:00",
+      "last_error": "2026-08-05T17:56:19+00:00",
       "last_success_at": "2026-08-04T09:30:02+00:00"
     },
     "poschner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 164,
-      "consecutive_unhealthy": 164,
+      "consecutive_failures": 165,
+      "consecutive_unhealthy": 165,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "availability_evidence_lost": false,
           "baseline_verified": false,
           "consecutive_degraded": 0,
-          "consecutive_errors": 164,
+          "consecutive_errors": 165,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1050,7 +1084,7 @@
           },
           "health": "error",
           "last_change": "2026-06-26T13:57:12+00:00",
-          "last_check": "2026-08-05T17:36:35+00:00",
+          "last_check": "2026-08-05T17:56:19+00:00",
           "last_reliable_at": null,
           "last_reliable_diagnostics": {},
           "observed_status": "error",
@@ -1063,7 +1097,7 @@
           "availability_evidence_lost": false,
           "baseline_verified": false,
           "consecutive_degraded": 0,
-          "consecutive_errors": 164,
+          "consecutive_errors": 165,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -1080,7 +1114,7 @@
           },
           "health": "error",
           "last_change": "2026-07-16T08:07:23+00:00",
-          "last_check": "2026-08-05T17:36:35+00:00",
+          "last_check": "2026-08-05T17:56:19+00:00",
           "last_reliable_at": null,
           "last_reliable_diagnostics": {},
           "observed_status": "error",
@@ -1092,7 +1126,7 @@
       "failure_incident_kind": "error",
       "failure_incident_open": true,
       "failure_incident_sequence": 1,
-      "last_error": "2026-08-05T17:36:35+00:00",
+      "last_error": "2026-08-05T17:56:19+00:00",
       "last_success_at": "2026-08-04T09:30:13+00:00"
     },
     "schottenhamel": {
@@ -1101,7 +1135,7 @@
       "consecutive_unhealthy": 0,
       "dates": {
         "2026-09-25": {
-          "alert_sequence": 0,
+          "alert_sequence": 1,
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
@@ -1115,15 +1149,15 @@
             "plausible_date_option_count": 14,
             "shift_control_count": 1,
             "shift_control_found": true,
-            "shift_count": 1,
+            "shift_count": 2,
             "target_enabled": true,
             "target_found": true,
             "update_confirmed": true
           },
           "health": "healthy",
-          "last_change": "2026-08-04T14:49:41+00:00",
-          "last_check": "2026-08-05T17:36:35+00:00",
-          "last_reliable_at": "2026-08-05T17:36:35+00:00",
+          "last_change": "2026-08-05T17:56:19+00:00",
+          "last_check": "2026-08-05T17:56:19+00:00",
+          "last_reliable_at": "2026-08-05T17:56:19+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1133,17 +1167,19 @@
             "plausible_date_option_count": 14,
             "shift_control_count": 1,
             "shift_control_found": true,
-            "shift_count": 1,
+            "shift_count": 2,
             "target_enabled": true,
             "target_found": true,
             "update_confirmed": true
           },
           "observed_status": "available",
           "shift_keys": [
-            "mittag"
+            "mittag",
+            "nachmittag"
           ],
           "shifts": [
-            "Mittag"
+            "Mittag",
+            "Nachmittag"
           ],
           "status": "available"
         },
@@ -1169,8 +1205,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-05T14:36:27+00:00",
-          "last_check": "2026-08-05T17:36:35+00:00",
-          "last_reliable_at": "2026-08-05T17:36:35+00:00",
+          "last_check": "2026-08-05T17:56:19+00:00",
+          "last_reliable_at": "2026-08-05T17:56:19+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1195,7 +1231,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:48:38+00:00",
-      "last_success_at": "2026-08-05T17:36:35+00:00"
+      "last_success_at": "2026-08-05T17:56:19+00:00"
     },
     "schuetzen": {
       "consecutive_degraded": 0,
@@ -1394,8 +1430,8 @@
       "last_success_at": "2026-08-05T17:42:02+00:00"
     }
   },
-  "workflow_duration_seconds": 85.028,
-  "workflow_finished_at": "2026-08-05T17:52:29+00:00",
-  "workflow_last_run_at": "2026-08-05T17:51:04+00:00",
-  "workflow_started_at": "2026-08-05T17:51:04+00:00"
+  "workflow_duration_seconds": 26.6,
+  "workflow_finished_at": "2026-08-05T17:56:19+00:00",
+  "workflow_last_run_at": "2026-08-05T17:55:53+00:00",
+  "workflow_started_at": "2026-08-05T17:55:53+00:00"
 }
