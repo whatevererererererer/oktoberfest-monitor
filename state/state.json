@@ -255,8 +255,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "paulaner",
-  "producer_revision": "27ef957a0d3d47b01522c97821f15950fbe1d607",
+  "probe_rotation_cursor": "schuetzen",
+  "producer_revision": "0769175d51144c6c26c00b7507da71b70d5d7d46",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -831,15 +831,15 @@
     },
     "paulaner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 120,
-      "consecutive_unhealthy": 120,
+      "consecutive_failures": 121,
+      "consecutive_unhealthy": 121,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 1,
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 4,
+          "consecutive_errors": 5,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -856,7 +856,7 @@
           },
           "health": "error",
           "last_change": "2026-08-05T01:16:46+00:00",
-          "last_check": "2026-08-05T02:46:42+00:00",
+          "last_check": "2026-08-05T03:06:15+00:00",
           "last_reliable_at": "2026-08-05T01:16:46+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -888,7 +888,7 @@
           "availability_evidence_lost": false,
           "baseline_verified": false,
           "consecutive_degraded": 0,
-          "consecutive_errors": 120,
+          "consecutive_errors": 121,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -905,7 +905,7 @@
           },
           "health": "error",
           "last_change": "2026-08-03T14:02:31+00:00",
-          "last_check": "2026-08-05T02:46:42+00:00",
+          "last_check": "2026-08-05T03:06:15+00:00",
           "last_reliable_at": null,
           "last_reliable_diagnostics": {},
           "observed_status": "error",
@@ -917,20 +917,20 @@
       "failure_incident_kind": "error",
       "failure_incident_open": true,
       "failure_incident_sequence": 1,
-      "last_error": "2026-08-05T02:46:42+00:00",
+      "last_error": "2026-08-05T03:06:15+00:00",
       "last_success_at": "2026-08-04T09:30:02+00:00"
     },
     "poschner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 120,
-      "consecutive_unhealthy": 120,
+      "consecutive_failures": 121,
+      "consecutive_unhealthy": 121,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
           "availability_evidence_lost": false,
           "baseline_verified": false,
           "consecutive_degraded": 0,
-          "consecutive_errors": 120,
+          "consecutive_errors": 121,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -947,7 +947,7 @@
           },
           "health": "error",
           "last_change": "2026-06-26T13:57:12+00:00",
-          "last_check": "2026-08-05T02:46:42+00:00",
+          "last_check": "2026-08-05T03:06:15+00:00",
           "last_reliable_at": null,
           "last_reliable_diagnostics": {},
           "observed_status": "error",
@@ -960,7 +960,7 @@
           "availability_evidence_lost": false,
           "baseline_verified": false,
           "consecutive_degraded": 0,
-          "consecutive_errors": 120,
+          "consecutive_errors": 121,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -977,7 +977,7 @@
           },
           "health": "error",
           "last_change": "2026-07-16T08:07:23+00:00",
-          "last_check": "2026-08-05T02:46:42+00:00",
+          "last_check": "2026-08-05T03:06:15+00:00",
           "last_reliable_at": null,
           "last_reliable_diagnostics": {},
           "observed_status": "error",
@@ -989,7 +989,7 @@
       "failure_incident_kind": "error",
       "failure_incident_open": true,
       "failure_incident_sequence": 1,
-      "last_error": "2026-08-05T02:46:42+00:00",
+      "last_error": "2026-08-05T03:06:15+00:00",
       "last_success_at": "2026-08-04T09:30:13+00:00"
     },
     "schottenhamel": {
@@ -1019,8 +1019,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T14:49:41+00:00",
-          "last_check": "2026-08-05T02:46:42+00:00",
-          "last_reliable_at": "2026-08-05T02:46:42+00:00",
+          "last_check": "2026-08-05T03:06:15+00:00",
+          "last_reliable_at": "2026-08-05T03:06:15+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1066,8 +1066,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T21:11:33+00:00",
-          "last_check": "2026-08-05T02:46:42+00:00",
-          "last_reliable_at": "2026-08-05T02:46:42+00:00",
+          "last_check": "2026-08-05T03:06:15+00:00",
+          "last_reliable_at": "2026-08-05T03:06:15+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1092,7 +1092,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:48:38+00:00",
-      "last_success_at": "2026-08-05T02:46:42+00:00"
+      "last_success_at": "2026-08-05T03:06:15+00:00"
     },
     "schuetzen": {
       "consecutive_degraded": 0,
@@ -1291,8 +1291,8 @@
       "last_success_at": "2026-08-05T02:52:03+00:00"
     }
   },
-  "workflow_duration_seconds": 86.617,
-  "workflow_finished_at": "2026-08-05T03:02:47+00:00",
-  "workflow_last_run_at": "2026-08-05T03:01:20+00:00",
-  "workflow_started_at": "2026-08-05T03:01:20+00:00"
+  "workflow_duration_seconds": 26.724,
+  "workflow_finished_at": "2026-08-05T03:06:15+00:00",
+  "workflow_last_run_at": "2026-08-05T03:05:49+00:00",
+  "workflow_started_at": "2026-08-05T03:05:49+00:00"
 }
