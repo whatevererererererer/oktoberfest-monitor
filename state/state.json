@@ -1,30 +1,32 @@
 {
   "outbox": {
     "0b157214d0004461d9daaac67ed25de6": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": null,
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-05T09:01:58.690590+00:00",
       "created_at": "2026-08-05T09:01:56+00:00",
       "event_id": "0b157214d0004461d9daaac67ed25de6",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "1f50671c-bd08-4001-b876-6712a05aa59a",
       "new_shifts": [],
-      "next_attempt_at": "2026-08-05T09:01:56+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9976,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Hofbräu-Festzelt: error seit 3 Läufen (2026-09-25, 2026-09-26)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Hofbräu-Festzelt",
       "tent_slug": "hofbraeu",
       "total_messages": 1
@@ -326,8 +328,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-08-05T07:07:11.692728+00:00",
-      "remaining": 9977,
+      "observed_at": "2026-08-05T09:01:58.690590+00:00",
+      "remaining": 9976,
       "reset": 1788238800
     }
   },
