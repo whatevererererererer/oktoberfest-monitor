@@ -98,27 +98,29 @@
       "total_messages": 1
     },
     "1fff2ac167fcb323499af95c51d4bbf9": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.festhalle-schottenhamel.de/reservation/",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-05T18:56:26.376678+00:00",
       "created_at": "2026-08-05T18:56:24+00:00",
       "event_id": "1fff2ac167fcb323499af95c51d4bbf9",
       "iso_date": "2026-09-25",
       "kind": "availability",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "bd69daf4-dc62-456c-9102-6f4cb8426363",
       "new_shifts": [
         "Nachmittag"
       ],
-      "next_attempt_at": "2026-08-05T18:56:24+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9973,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "shifts_added",
       "requeue_count": 0,
@@ -126,7 +128,7 @@
         "Mittag",
         "Nachmittag"
       ],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Schottenhamel-Festhalle",
       "tent_slug": "schottenhamel",
       "total_messages": 1
@@ -427,8 +429,8 @@
   "pushover_quota": {
     "availability": {
       "limit": 10000,
-      "observed_at": "2026-08-05T17:56:21.386575+00:00",
-      "remaining": 9974,
+      "observed_at": "2026-08-05T18:56:26.376678+00:00",
+      "remaining": 9973,
       "reset": 1788238800
     },
     "monitor_error": {
