@@ -463,30 +463,32 @@
       "total_messages": 1
     },
     "ef9da88adb6be5a1451b9b2b2c05f630": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": null,
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-06T08:51:20.063068+00:00",
       "created_at": "2026-08-06T08:51:18+00:00",
       "event_id": "ef9da88adb6be5a1451b9b2b2c05f630",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "310ef454-ee5f-4ca4-b8c2-051799d620be",
       "new_shifts": [],
-      "next_attempt_at": "2026-08-06T08:51:18+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9970,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Paulaner Festzelt (Winzerer Fähndl): error seit 3 Läufen (2026-09-26)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Paulaner Festzelt (Winzerer Fähndl)",
       "tent_slug": "paulaner",
       "total_messages": 1
@@ -534,8 +536,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-08-05T09:01:58.690590+00:00",
-      "remaining": 9976,
+      "observed_at": "2026-08-06T08:51:20.063068+00:00",
+      "remaining": 9970,
       "reset": 1788238800
     }
   },
