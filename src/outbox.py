@@ -34,6 +34,7 @@ from .state import (
     parse_iso,
     save,
 )
+from .targets import TARGET_DATE_SET
 
 
 @dataclass(frozen=True)
@@ -159,6 +160,8 @@ def _validate_event(
     if event.kind == "availability":
         if not event.iso_date or not event.booking_url or not event.shifts:
             raise OutboxValidationError("availability_payload_incomplete")
+        if event.iso_date not in TARGET_DATE_SET:
+            raise OutboxValidationError("target_date_disabled")
         if event.reason not in _AVAILABILITY_REASONS:
             raise OutboxValidationError("availability_reason_unknown")
         parsed_url = urlparse(event.booking_url)

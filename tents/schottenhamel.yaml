@@ -3,9 +3,10 @@ name: Schottenhamel-Festhalle
 booking_url: https://reservierung.festhalle-schottenhamel.de/reservation/
 mode: festzelt_os
 enabled: true
-dates: ["2026-09-25", "2026-09-26"]
+dates: ["2026-09-26"]
 notes: |
-  Festzelt-OS SPA. Live check 2026-08-04: both targets are present;
+  Festzelt-OS SPA. Historical live check 2026-08-04: the former Friday and
+  current Saturday targets are present;
   Friday resolves Mittag + Nachmittag and Saturday resolves Mittag.
   The page states that no evening reservations are offered.
 festzelt_os:

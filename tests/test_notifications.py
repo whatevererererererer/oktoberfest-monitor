@@ -30,25 +30,16 @@ class NotificationPolicyTests(unittest.TestCase):
         self.assertTrue(needs_notification_burst("2026-09-26", ["Abend"]))
         self.assertTrue(needs_notification_burst("2026-09-26", ["Ganztag"]))
 
-    def test_friday_mittag_and_nachmittag_are_normal_alerts(self) -> None:
+    def test_disabled_friday_never_uses_a_burst(self) -> None:
         self.assertFalse(needs_notification_burst("2026-09-25", ["Mittag"]))
-        self.assertFalse(needs_notification_burst("2026-09-25", ["Nachmittag"]))
-        self.assertFalse(needs_notification_burst("2026-09-25", ["Mittag", "Nachmittag"]))
-
-    def test_friday_other_shifts_use_a_burst(self) -> None:
-        self.assertTrue(needs_notification_burst("2026-09-25", ["Abend"]))
-        self.assertTrue(needs_notification_burst("2026-09-25", ["Vormittag"]))
+        self.assertFalse(needs_notification_burst("2026-09-25", ["Abend"]))
 
     def test_shift_names_may_include_times(self) -> None:
         self.assertFalse(needs_notification_burst("2026-09-26", ["Mittag (11:00 Uhr)"]))
-        self.assertFalse(needs_notification_burst("2026-09-25", ["Nachmittag 15:30 Uhr"]))
 
     def test_combined_shift_label_is_not_mistaken_for_saturday_mittag_only(self) -> None:
         self.assertTrue(
             needs_notification_burst("2026-09-26", ["Mittag / Nachmittag"])
-        )
-        self.assertFalse(
-            needs_notification_burst("2026-09-25", ["Mittag / Nachmittag"])
         )
 
 

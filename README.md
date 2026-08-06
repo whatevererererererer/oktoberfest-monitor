@@ -1,8 +1,8 @@
 # Oktoberfest 2026 Reservation Monitor
 
-Read-only availability monitor for Friday, **25 September 2026**, and
-Saturday, **26 September 2026**. It never books, submits a reservation form,
-or bypasses a CAPTCHA.
+Read-only availability monitor for Saturday, **26 September 2026**. Friday,
+25 September, is no longer probed or notified. The monitor never books, submits
+a reservation form, or bypasses a CAPTCHA.
 
 The repository contains 19 tent configurations. Eleven portals with validated
 date controls are enabled; eight unsupported, bot-protected, contact-only,
@@ -71,7 +71,7 @@ tent; a removed or disabled cursor target safely restarts there as well.
 
 Festzelt-OS tents in the selected group run sequentially in configuration order
 with a randomized 1–3 second pause before each tent. One browser and one freshly
-navigated page are used per tent; both target dates are checked on that page
+navigated page are used per tent; the Saturday target is checked on that page
 with Playwright's native `select_option`. Date and shift controls are read atomically and
 reacquired after every rerender. Only visible, enabled controls count as
 evidence. Livewire responses are paired with a request whose update payload
@@ -100,7 +100,10 @@ High-attention hits create two groups of four messages:
 The resulting gap sequence is `5, 5, 5, 30, 5, 5, 5`.
 
 - Saturday: every new shift except `Mittag` is high-attention.
-- Friday: every new shift except `Mittag` and `Nachmittag` is high-attention.
+
+Friday events are outside the active target-date policy and are quarantined
+before delivery. This also prevents a previously queued Friday event from being
+sent after the configuration change.
 
 Shift order, case, whitespace, time suffixes, and parenthetical details do not
 create duplicates. A removed shift that later reappears and a true

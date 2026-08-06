@@ -14,6 +14,7 @@ from pydantic import ValidationError
 from src.config import FestzeltOsConfig, TentConfig, load_tents
 from src.fetchers.festzelt_os import SAFARI_MACOS_USER_AGENT, canonical_date, fetch
 from src.fetchers.headless import launch_browser
+from src.targets import TARGET_DATES
 
 
 @dataclass
@@ -1142,9 +1143,10 @@ class FestzeltFetcherTests(unittest.TestCase):
 
 
 class ConfigValidationTests(unittest.TestCase):
-    def test_existing_yaml_files_remain_valid(self) -> None:
+    def test_existing_yaml_files_are_valid_and_saturday_only(self) -> None:
         tents = load_tents(Path(__file__).resolve().parents[1] / "tents")
         self.assertGreaterEqual(len(tents), 1)
+        self.assertTrue(all(tuple(tent.dates) == TARGET_DATES for tent in tents))
 
     def test_unknown_keys_and_missing_mode_block_are_rejected(self) -> None:
         base = {

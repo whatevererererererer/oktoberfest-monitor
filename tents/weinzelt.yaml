@@ -3,7 +3,7 @@ name: Kuffler Weinzelt
 booking_url: https://reservierung.weinzelt.com/reservation
 mode: festzelt_os
 enabled: true
-dates: ["2026-09-25", "2026-09-26"]
+dates: ["2026-09-26"]
 notes: |
   Nuxt.js SPA. Different platform from Festzelt-OS but same select-based
   UI — date <select> with German weekday options + shift <select>.

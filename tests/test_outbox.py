@@ -432,6 +432,9 @@ class OutboxTests(unittest.TestCase):
         self.assertEqual(self.deliver().event_id, "b")
 
     def test_policy_inconsistent_availability_events_are_quarantined(self) -> None:
+        disabled_friday = event("disabled-friday", burst=False)
+        disabled_friday.iso_date = "2026-09-25"
+
         saturday_evening_single = event("evening-single", burst=False)
         saturday_evening_single.shifts = ["Abend"]
         saturday_evening_single.new_shifts = ["Abend"]
@@ -450,6 +453,7 @@ class OutboxTests(unittest.TestCase):
         unknown_reason.reason = "made_up_reason"
 
         cases = [
+            (disabled_friday, "target_date_disabled"),
             (saturday_evening_single, "notification_policy_mismatch"),
             (saturday_noon_burst, "notification_policy_mismatch"),
             (nonexistent_new_shift, "new_shifts_not_in_shifts"),

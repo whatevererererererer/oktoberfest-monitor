@@ -3,7 +3,7 @@ name: Armbrustschützen-Festhalle
 booking_url: https://www.armbrustschuetzenzelt.de/reservierung/reservierungsanfrage/
 mode: html
 enabled: false
-dates: ["2026-09-25", "2026-09-26"]
+dates: ["2026-09-26"]
 notes: |
   Server-rendered, undated Reservierungsanfrage form. Its presence is not
   evidence for either target date and the HTML mode cannot correlate shifts.

@@ -3,7 +3,7 @@ name: Löwenbräu-Festzelt
 booking_url: https://reservierung.loewenbraeuzelt.de/reservierung
 mode: festzelt_os
 enabled: true
-dates: ["2026-09-25", "2026-09-26"]
+dates: ["2026-09-26"]
 notes: |
   Interactive live check 2026-08-04: valid date control with neither target
   present. Unmodified headless Chromium is currently stopped by a bot page;

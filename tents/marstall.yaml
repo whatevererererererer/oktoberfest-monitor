@@ -3,7 +3,7 @@ name: Marstall
 booking_url: https://reservierung.marstall-oktoberfest.de/reservation
 mode: festzelt_os
 enabled: true
-dates: ["2026-09-25", "2026-09-26"]
+dates: ["2026-09-26"]
 notes: |
   Festzelt-OS SPA. Live check 2026-08-04: wizard renders after SPA
   initialization; valid date control, neither target date present.

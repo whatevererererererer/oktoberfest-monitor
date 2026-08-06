@@ -3,7 +3,7 @@ name: Schützen-Festzelt
 booking_url: https://reservierung.schuetzenfestzelt.com/reservation/
 mode: festzelt_os
 enabled: true
-dates: ["2026-09-25", "2026-09-26"]
+dates: ["2026-09-26"]
 notes: |
   Festzelt-OS SPA. Live check 2026-08-04: valid date control currently
   contains only 29./30.09.; neither target date is present.
