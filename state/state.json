@@ -36,7 +36,9 @@
       "total_messages": 1
     },
     "0718208877a7037630c1e24191f78416": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.festhalle-schottenhamel.de/reservation/",
       "burst": true,
       "completed_at": null,
@@ -46,17 +48,17 @@
       "kind": "availability",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "30728539-20a2-4727-9cb4-81d0396df0eb",
       "new_shifts": [
         "Nachmittag"
       ],
-      "next_attempt_at": "2026-08-06T17:48:28+00:00",
-      "next_index": 0,
+      "next_attempt_at": "2026-08-06T17:48:35.120206+00:00",
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9964,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "available",
       "requeue_count": 0,
@@ -656,8 +658,8 @@
   "pushover_quota": {
     "availability": {
       "limit": 10000,
-      "observed_at": "2026-08-05T23:11:58.431182+00:00",
-      "remaining": 9971,
+      "observed_at": "2026-08-06T17:48:30.120206+00:00",
+      "remaining": 9964,
       "reset": 1788238800
     },
     "monitor_error": {
