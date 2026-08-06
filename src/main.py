@@ -258,6 +258,7 @@ def _record_tent_health(
             state=state,
             tent_slug=cfg.slug,
             tent_name=cfg.name,
+            booking_url=cfg.booking_url,
             details=(
                 f"{cfg.name}: {incident_kind} seit {incident_count} Läufen "
                 f"({', '.join(affected)})"

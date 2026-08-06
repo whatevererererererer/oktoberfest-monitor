@@ -110,6 +110,10 @@ create duplicates. A removed shift that later reappears and a true
 unavailable-to-available re-release do create a new event. Message timestamps
 use `Europe/Berlin` explicitly.
 
+Monitor-error messages include the tent's configured official booking URL as
+`Seite manuell prüfen`. The monitor never opens that link or performs a booking
+action; it is only a shortcut for attended inspection by the recipient.
+
 Pushover transport verifies HTTP 200 plus JSON `status=1`, records the request
 ID and quota headers, does not blindly retry ordinary 4xx responses, defers 429
 responses without consuming the ordinary retry budget, and retries 5xx/network
@@ -160,6 +164,26 @@ Run all synthetic tests:
 ```bash
 python -m unittest discover -s tests -v
 ```
+
+### Fresh Windows 11 / visible bot-page checks
+
+The GitHub probe remains headless. A separate Windows workstation sidecar can
+check the three portals with positive historical interactive evidence
+(`fischer-vroni`, `paulaner`, and `poschner`) in visible installed Google Chrome.
+It uses a dedicated persistent profile and writes privacy-safe reports only
+under `%LOCALAPPDATA%\WiesnMonitor`; it never modifies the Git-backed production
+state or sends a notification.
+
+On a fresh Windows 11 PC, follow [`WINDOWS-11-UEBERGABE.md`](WINDOWS-11-UEBERGABE.md).
+The prepared bootstrap entry point is:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\windows\Bootstrap-Windows.ps1
+```
+
+No CAPTCHA, Turnstile, or other bot protection is bypassed. A challenge produces
+the explicit workstation status `needs_manual_action` and can only be completed
+legitimately by the user in the visible browser.
 
 Production delivery is intentionally separate and should normally be invoked
 only by the workflow after its probe checkpoint:
@@ -239,3 +263,6 @@ deployed. Never restore an older `state/state.json` over its Git history.
 - `scripts/checkpoint_state.sh` — fail-closed Git checkpoint
 - `.github/workflows/monitor.yml` — bounded, serialized production flow
 - `tests/` — synthetic fetcher, transition, delivery, and Git-race coverage
+- `src/workstation_probe.py` — visible Windows Chrome sidecar (no production state writes)
+- `scripts/windows/` — idempotent Windows bootstrap, preflight, run, and task helpers
+- `WINDOWS-11-UEBERGABE.md` — complete fresh-PC setup and acceptance runbook

@@ -180,8 +180,13 @@ def _validate_event(
         expected_burst = needs_notification_burst(event.iso_date, event.new_shifts)
         if event.burst != expected_burst:
             raise OutboxValidationError("notification_policy_mismatch")
-    elif event.burst or event.total_messages != 1:
-        raise OutboxValidationError("monitor_error_must_be_single")
+    else:
+        if event.burst or event.total_messages != 1:
+            raise OutboxValidationError("monitor_error_must_be_single")
+        if event.booking_url:
+            parsed_url = urlparse(event.booking_url)
+            if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
+                raise OutboxValidationError("booking_url_invalid")
 
     # Exercise all formatting/date validation before credentials or HTTP are touched.
     try:

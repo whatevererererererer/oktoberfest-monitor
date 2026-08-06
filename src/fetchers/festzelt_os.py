@@ -1402,6 +1402,18 @@ def _navigate(
         )
         return True, _navigation_failure(response)
     except Exception:
+        # A timeout can occur while Chrome is already showing a complete
+        # challenge/error page.  Preserve that visible classification so the
+        # workstation sidecar requests legitimate manual handling (exit 10)
+        # instead of reducing it to a generic navigation failure (exit 20).
+        try:
+            page_type = _page_type(page)
+        except Exception:
+            page_type = "unknown"
+        if page_type in {"bot", "login", "error"}:
+            return True, _UpdateFailure(
+                page_type, f"{page_type}_during_navigation"
+            )
         return False, None
 
 
@@ -1412,10 +1424,17 @@ def _close_page(page) -> None:
         pass
 
 
-def fetch(
-    cfg: FestzeltOsConfig, target_dates: list[str], browser
+def fetch_in_context(
+    cfg: FestzeltOsConfig, target_dates: list[str], context
 ) -> dict[str, ProbeResult]:
-    """Probe target dates without ever submitting a reservation form."""
+    """Probe targets in a caller-owned context without submitting anything.
+
+    Production uses :func:`fetch`, which still creates a fresh Safari-profiled
+    context per tent.  The Windows workstation sidecar supplies a dedicated,
+    persistent, visible Google Chrome context instead.  Keeping ownership with
+    the caller is important: closing that context would discard the attended
+    browser profile and any challenge state the user established legitimately.
+    """
 
     parsed_targets: dict[str, str] = {}
     for target in target_dates:
@@ -1425,6 +1444,70 @@ def fetch(
         parsed_targets[target] = parsed
     target_years = {int(target[:4]) for target in parsed_targets}
     results: dict[str, ProbeResult] = {}
+
+    try:
+        page = context.new_page()
+    except Exception:
+        return {
+            target: ProbeResult(
+                "error",
+                diagnostics=_diag(
+                    "error",
+                    page_type="unknown",
+                    date_control_count=0,
+                    plausible_count=0,
+                    target_found=False,
+                    error_class="page_creation_failed",
+                ),
+            )
+            for target in target_dates
+        }
+    try:
+        navigated, navigation_failure = _navigate(page, cfg)
+        if not navigated:
+            return {
+                target: ProbeResult(
+                    "error",
+                    diagnostics=_diag(
+                        "error",
+                        page_type="unknown",
+                        date_control_count=0,
+                        plausible_count=0,
+                        target_found=False,
+                        error_class="navigation_failed",
+                    ),
+                )
+                for target in target_dates
+            }
+        if navigation_failure is not None:
+            return {
+                target: ProbeResult(
+                    "error",
+                    diagnostics=_diag(
+                        "error",
+                        page_type=navigation_failure.page_type,
+                        date_control_count=0,
+                        plausible_count=0,
+                        target_found=False,
+                        error_class=navigation_failure.error_class,
+                    ),
+                )
+                for target in target_dates
+            }
+        for target in target_dates:
+            # Every probe reacquires the date and shift controls. Its Livewire
+            # monitor accepts only a response paired to this target's request,
+            # so prior target traffic is not evidence.
+            results[target] = _probe_target(page, cfg, target, target_years)
+    finally:
+        _close_page(page)
+    return results
+
+
+def fetch(
+    cfg: FestzeltOsConfig, target_dates: list[str], browser
+) -> dict[str, ProbeResult]:
+    """Production probe using a fresh privacy-isolated browser context."""
 
     try:
         context = browser.new_context(
@@ -1449,62 +1532,6 @@ def fetch(
         }
 
     try:
-        try:
-            page = context.new_page()
-        except Exception:
-            return {
-                target: ProbeResult(
-                    "error",
-                    diagnostics=_diag(
-                        "error",
-                        page_type="unknown",
-                        date_control_count=0,
-                        plausible_count=0,
-                        target_found=False,
-                        error_class="page_creation_failed",
-                    ),
-                )
-                for target in target_dates
-            }
-        try:
-            navigated, navigation_failure = _navigate(page, cfg)
-            if not navigated:
-                return {
-                    target: ProbeResult(
-                        "error",
-                        diagnostics=_diag(
-                            "error",
-                            page_type="unknown",
-                            date_control_count=0,
-                            plausible_count=0,
-                            target_found=False,
-                            error_class="navigation_failed",
-                        ),
-                    )
-                    for target in target_dates
-                }
-            if navigation_failure is not None:
-                return {
-                    target: ProbeResult(
-                        "error",
-                        diagnostics=_diag(
-                            "error",
-                            page_type=navigation_failure.page_type,
-                            date_control_count=0,
-                            plausible_count=0,
-                            target_found=False,
-                            error_class=navigation_failure.error_class,
-                        ),
-                    )
-                    for target in target_dates
-                }
-            for target in target_dates:
-                # Every probe reacquires the date and shift controls. Its
-                # Livewire monitor accepts only a response paired to this
-                # target's request, so prior target traffic is not evidence.
-                results[target] = _probe_target(page, cfg, target, target_years)
-        finally:
-            _close_page(page)
+        return fetch_in_context(cfg, target_dates, context)
     finally:
         context.close()
-    return results

@@ -4,8 +4,10 @@ __pycache__/
 venv/
 .env
 .pytest_cache/
+.test-workstation-*/
 *.egg-info/
 build/
 dist/
 .DS_Store
 .claude/
+work/

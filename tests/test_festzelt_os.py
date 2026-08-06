@@ -12,7 +12,12 @@ from unittest.mock import Mock, patch
 from pydantic import ValidationError
 
 from src.config import FestzeltOsConfig, TentConfig, load_tents
-from src.fetchers.festzelt_os import SAFARI_MACOS_USER_AGENT, canonical_date, fetch
+from src.fetchers.festzelt_os import (
+    SAFARI_MACOS_USER_AGENT,
+    canonical_date,
+    fetch,
+    fetch_in_context,
+)
 from src.fetchers.headless import launch_browser
 from src.targets import TARGET_DATES
 
@@ -463,6 +468,13 @@ class FestzeltFetcherTests(unittest.TestCase):
         self.assertIn("Macintosh; Intel Mac OS X 14_5", SAFARI_MACOS_USER_AGENT)
         self.assertIn("Version/17.5 Safari/605.1.15", SAFARI_MACOS_USER_AGENT)
 
+    def test_caller_owned_visible_context_is_not_closed(self) -> None:
+        context = FakeContext([Scenario([date_select()])], self.clock)
+        result = fetch_in_context(self.cfg, ["2026-09-25"], context)
+        self.assertEqual(result["2026-09-25"].status, "unknown")
+        self.assertFalse(context.closed)
+        self.assertTrue(context.pages[0].closed)
+
     def test_valid_control_without_target_is_unavailable(self) -> None:
         only_other_day = [
             OptionDef("", "Bitte auswählen"),
@@ -803,6 +815,21 @@ class FestzeltFetcherTests(unittest.TestCase):
             [Scenario([date_select(), shift_select(shifts)])]
         )
         self.assertEqual(recovered["2026-09-25"].status, "available")
+
+    def test_navigation_timeout_with_visible_bot_page_is_classified_as_bot(self) -> None:
+        result, context = self.run_fetch(
+            [
+                Scenario(
+                    [],
+                    body="Just a moment... Verify you are human",
+                    navigation_error=True,
+                )
+            ]
+        )
+        probe = result["2026-09-25"]
+        self.assertEqual((probe.status, probe.diagnostics.page_type), ("error", "bot"))
+        self.assertEqual(probe.diagnostics.error_class, "bot_during_navigation")
+        self.assertEqual(context.pages[0].actions, [])
 
     def test_livewire_403_is_a_fast_bot_error_and_listener_is_removed(self) -> None:
         def rejected(page: FakePage, _key: str, _value: str) -> None:

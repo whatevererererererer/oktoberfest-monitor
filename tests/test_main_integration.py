@@ -486,6 +486,10 @@ class MainIntegrationTests(unittest.TestCase):
         self.assertEqual(tent.consecutive_degraded, 3)
         self.assertTrue(tent.failure_incident_open)
         self.assertEqual(len(state.outbox), 1)
+        self.assertEqual(
+            next(iter(state.outbox.values())).booking_url,
+            cfg.booking_url,
+        )
 
         _record_tent_health(
             state=state,
