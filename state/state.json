@@ -35,6 +35,39 @@
       "tent_slug": "schottenhamel",
       "total_messages": 1
     },
+    "0718208877a7037630c1e24191f78416": {
+      "attempts_by_index": {},
+      "booking_url": "https://reservierung.festhalle-schottenhamel.de/reservation/",
+      "burst": true,
+      "completed_at": null,
+      "created_at": "2026-08-06T17:48:28+00:00",
+      "event_id": "0718208877a7037630c1e24191f78416",
+      "iso_date": "2026-09-26",
+      "kind": "availability",
+      "last_error": null,
+      "last_error_class": null,
+      "last_request_id": null,
+      "new_shifts": [
+        "Nachmittag"
+      ],
+      "next_attempt_at": "2026-08-06T17:48:28+00:00",
+      "next_index": 0,
+      "quarantine_reason": null,
+      "quarantined_payload": null,
+      "quota_limit": null,
+      "quota_remaining": null,
+      "quota_reset": null,
+      "rate_limit_deferrals_by_index": {},
+      "reason": "available",
+      "requeue_count": 0,
+      "shifts": [
+        "Nachmittag"
+      ],
+      "status": "pending",
+      "tent_name": "Schottenhamel-Festhalle",
+      "tent_slug": "schottenhamel",
+      "total_messages": 8
+    },
     "09506e7b95e03b14fd6d4d33a3aed135": {
       "attempts_by_index": {
         "0": 1
@@ -618,8 +651,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "paulaner",
-  "producer_revision": "d47d5448411ed8d59ff1740afc0d8d360778d877",
+  "probe_rotation_cursor": "schuetzen",
+  "producer_revision": "444e3eb6c2f5b61e754b1c92e5be31bd4a8c69df",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -1230,8 +1263,8 @@
     },
     "paulaner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 0,
-      "consecutive_unhealthy": 0,
+      "consecutive_failures": 1,
+      "consecutive_unhealthy": 1,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 1,
@@ -1287,24 +1320,24 @@
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 0,
+          "consecutive_errors": 1,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
-            "error_class": null,
-            "health": "healthy",
-            "page_type": "booking",
-            "plausible_date_option_count": 15,
+            "error_class": "shift_update_challenge",
+            "health": "error",
+            "page_type": "bot",
+            "plausible_date_option_count": 14,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
-            "target_enabled": null,
-            "target_found": false,
+            "target_enabled": true,
+            "target_found": true,
             "update_confirmed": false
           },
-          "health": "healthy",
+          "health": "error",
           "last_change": "2026-08-06T00:21:59+00:00",
-          "last_check": "2026-08-06T15:21:59+00:00",
+          "last_check": "2026-08-06T17:48:28+00:00",
           "last_reliable_at": "2026-08-06T15:21:59+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -1320,7 +1353,7 @@
             "target_found": false,
             "update_confirmed": false
           },
-          "observed_status": "unavailable",
+          "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
           "status": "unavailable"
@@ -1329,7 +1362,7 @@
       "failure_incident_kind": null,
       "failure_incident_open": false,
       "failure_incident_sequence": 3,
-      "last_error": "2026-08-06T14:21:50+00:00",
+      "last_error": "2026-08-06T17:48:28+00:00",
       "last_success_at": "2026-08-06T15:21:59+00:00"
     },
     "poschner": {
@@ -1389,8 +1422,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-06T07:31:46+00:00",
-          "last_check": "2026-08-06T15:21:59+00:00",
-          "last_reliable_at": "2026-08-06T15:21:59+00:00",
+          "last_check": "2026-08-06T17:48:28+00:00",
+          "last_reliable_at": "2026-08-06T17:48:28+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1415,7 +1448,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 1,
       "last_error": "2026-08-06T07:11:20+00:00",
-      "last_success_at": "2026-08-06T15:21:59+00:00"
+      "last_success_at": "2026-08-06T17:48:28+00:00"
     },
     "schottenhamel": {
       "consecutive_degraded": 0,
@@ -1470,7 +1503,7 @@
           "status": "available"
         },
         "2026-09-26": {
-          "alert_sequence": 2,
+          "alert_sequence": 3,
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
@@ -1482,17 +1515,17 @@
             "health": "healthy",
             "page_type": "booking",
             "plausible_date_option_count": 15,
-            "shift_control_count": 0,
-            "shift_control_found": false,
-            "shift_count": 0,
-            "target_enabled": null,
-            "target_found": false,
-            "update_confirmed": false
+            "shift_control_count": 1,
+            "shift_control_found": true,
+            "shift_count": 1,
+            "target_enabled": true,
+            "target_found": true,
+            "update_confirmed": true
           },
           "health": "healthy",
-          "last_change": "2026-08-06T10:51:46+00:00",
-          "last_check": "2026-08-06T15:21:59+00:00",
-          "last_reliable_at": "2026-08-06T15:21:59+00:00",
+          "last_change": "2026-08-06T17:48:28+00:00",
+          "last_check": "2026-08-06T17:48:28+00:00",
+          "last_reliable_at": "2026-08-06T17:48:28+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1500,24 +1533,28 @@
             "health": "healthy",
             "page_type": "booking",
             "plausible_date_option_count": 15,
-            "shift_control_count": 0,
-            "shift_control_found": false,
-            "shift_count": 0,
-            "target_enabled": null,
-            "target_found": false,
-            "update_confirmed": false
+            "shift_control_count": 1,
+            "shift_control_found": true,
+            "shift_count": 1,
+            "target_enabled": true,
+            "target_found": true,
+            "update_confirmed": true
           },
-          "observed_status": "unavailable",
-          "shift_keys": [],
-          "shifts": [],
-          "status": "unavailable"
+          "observed_status": "available",
+          "shift_keys": [
+            "nachmittag"
+          ],
+          "shifts": [
+            "Nachmittag"
+          ],
+          "status": "available"
         }
       },
       "failure_incident_kind": null,
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:48:38+00:00",
-      "last_success_at": "2026-08-06T15:21:59+00:00"
+      "last_success_at": "2026-08-06T17:48:28+00:00"
     },
     "schuetzen": {
       "consecutive_degraded": 0,
@@ -1716,8 +1753,8 @@
       "last_success_at": "2026-08-06T15:26:27+00:00"
     }
   },
-  "workflow_duration_seconds": 51.502,
-  "workflow_finished_at": "2026-08-06T17:19:33+00:00",
-  "workflow_last_run_at": "2026-08-06T17:18:42+00:00",
-  "workflow_started_at": "2026-08-06T17:18:42+00:00"
+  "workflow_duration_seconds": 31.574,
+  "workflow_finished_at": "2026-08-06T17:48:28+00:00",
+  "workflow_last_run_at": "2026-08-06T17:47:56+00:00",
+  "workflow_started_at": "2026-08-06T17:47:56+00:00"
 }
