@@ -499,30 +499,32 @@
       "total_messages": 1
     },
     "96cf03ae68223096abc3ec2f761dcb46": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": null,
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-06T23:46:35.676587+00:00",
       "created_at": "2026-08-06T23:46:33+00:00",
       "event_id": "96cf03ae68223096abc3ec2f761dcb46",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "5b883fc6-951e-42f9-b45f-d0976864226c",
       "new_shifts": [],
-      "next_attempt_at": "2026-08-06T23:46:33+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9955,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Fischer-Vroni: error seit 3 Läufen (2026-09-26)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Fischer-Vroni",
       "tent_slug": "fischer-vroni",
       "total_messages": 1
@@ -731,8 +733,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-08-06T19:43:16.215679+00:00",
-      "remaining": 9956,
+      "observed_at": "2026-08-06T23:46:35.676587+00:00",
+      "remaining": 9955,
       "reset": 1788238800
     }
   },
