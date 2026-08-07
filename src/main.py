@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import random
+import re
 import sys
 import time
 from pathlib import Path
@@ -28,8 +29,150 @@ STATE_PATH = ROOT / "state" / "state.json"
 
 FAILURE_THRESHOLD = 3
 PROBE_BATCH_SIZE = 3
+MONITOR_ERROR_MESSAGE_LIMIT = 1024
+
+_ERROR_REASON_LABELS = {
+    "date_and_shift_evidence_unavailable": "Datum und Schichten konnten nicht sicher gemeinsam geprüft werden",
+    "manual_mode": "Dieses Portal benötigt eine manuelle Prüfung",
+    "shift_update_challenge": "Bot-Schutz/Challenge beim Laden der Schichtauswahl",
+    "shift_update_response_not_json": "Schicht-Update lieferte keine gültige JSON-Antwort",
+    "shift_update_response_too_large": "Antwort des Schicht-Updates war unerwartet groß",
+    "shift_update_response_invalid_length": "Länge der Schicht-Update-Antwort war ungültig",
+    "shift_update_response_json_unreadable": "JSON-Antwort des Schicht-Updates war nicht lesbar",
+    "shift_update_response_invalid_json": "Schicht-Update lieferte ungültiges JSON",
+    "shift_update_response_incomplete": "Antwort des Schicht-Updates blieb unvollständig",
+    "shift_update_network_error": "Netzwerkfehler beim Schicht-Update",
+    "navigation_challenge": "Bot-Schutz/Challenge beim Öffnen der Buchungsseite",
+    "navigation_status_unreadable": "HTTP-Status der Buchungsseite war nicht lesbar",
+    "browser_unavailable": "Prüf-Browser konnte nicht gestartet werden",
+    "browser_context_failed": "Browser-Sitzung konnte nicht gestartet werden",
+    "page_creation_failed": "Browserseite konnte nicht erstellt werden",
+    "navigation_failed": "Buchungsseite konnte nicht geladen werden",
+    "probe_exception": "Technischer Fehler während der Portalprüfung",
+    "missing_probe_batch": "Ergebnis des Portal-Prüflaufs fehlte",
+    "missing_probe_result": "Ergebnis für das Zieldatum fehlte",
+    "invalid_probe_result": "Prüfergebnis hatte ein ungültiges Format",
+    "date_control_error": "Datumsauswahl konnte nicht gelesen werden",
+    "date_control_missing": "Datumsauswahl wurde nicht gefunden",
+    "ambiguous_date_control": "Datumsauswahl war nicht eindeutig",
+    "date_control_unstable": "Datumsauswahl blieb während der Prüfung instabil",
+    "date_control_changed": "Datumsauswahl änderte sich während der Prüfung",
+    "control_scan_failed": "Datums- und Schichtauswahl konnten nicht gelesen werden",
+    "date_option_conflict": "Datumsauswahl war widersprüchlich",
+    "date_options_unstable": "Datumsauswahl änderte sich während der Prüfung",
+    "target_option_ambiguous": "Zieldatum war nicht eindeutig",
+    "target_disabled": "Zieldatum war deaktiviert und konnte nicht sicher geprüft werden",
+    "date_selection_failed": "Zieldatum konnte nicht ausgewählt werden",
+    "target_selection_unconfirmed": "Auswahl des Zieldatums wurde nicht bestätigt",
+    "available_without_shifts": "Verfügbarkeit wurde ohne lesbare Schichten gemeldet",
+    "inconsistent_available_diagnostics": "Verfügbarkeitsdaten waren widersprüchlich",
+    "inconsistent_unavailable_diagnostics": "Nichtverfügbarkeitsdaten waren widersprüchlich",
+    "shift_control_missing": "Schichtauswahl wurde nicht gefunden",
+    "ambiguous_shift_control": "Schichtauswahl war nicht eindeutig",
+    "shift_evidence_unavailable": "Schichten konnten nicht sicher belegt werden",
+    "shift_options_empty": "Schichtauswahl war leer oder nicht lesbar",
+    "shift_update_response_unconfirmed": "Aktualisierung der Schichtauswahl wurde nicht bestätigt",
+    "shift_update_unconfirmed": "Aktualisierung der Schichtauswahl blieb unbestätigt",
+    "bot_page": "Bot-Schutz/Challenge statt der Buchungsseite",
+    "login_page": "Login-Seite statt der Buchungsseite",
+    "error_page": "Fehlerseite statt der Buchungsseite",
+    "bot_while_confirming_absence": "Bot-Schutz/Challenge beim Bestätigen der Nichtverfügbarkeit",
+    "login_while_confirming_absence": "Login-Seite beim Bestätigen der Nichtverfügbarkeit",
+    "error_while_confirming_absence": "Fehlerseite beim Bestätigen der Nichtverfügbarkeit",
+    "bot_after_selection": "Bot-Schutz/Challenge nach Auswahl des Zieldatums",
+    "login_after_selection": "Login-Seite nach Auswahl des Zieldatums",
+    "error_after_selection": "Fehlerseite nach Auswahl des Zieldatums",
+    "bot_during_navigation": "Bot-Schutz/Challenge beim Öffnen der Buchungsseite",
+    "login_during_navigation": "Login-Seite beim Öffnen der Buchungsseite",
+    "error_during_navigation": "Fehlerseite beim Öffnen der Buchungsseite",
+}
+_HTTP_ERROR_CLASS = re.compile(r"(navigation|shift_update)_http_([1-5][0-9]{2})")
+_PAGE_TYPE_REASON_LABELS = {
+    "bot": "Bot-Schutz/Challenge auf der Buchungsseite",
+    "login": "Login-Seite statt der Buchungsseite",
+    "error": "Fehlerseite des Buchungsportals",
+    "booking": "Buchungsseite konnte nicht eindeutig ausgewertet werden",
+    "unknown": "Technische Portalprüfung lieferte keinen eindeutigen Seitentyp",
+}
 
 log = logging.getLogger("wiesn")
+
+
+def _http_failure_reason(scope: str, status: int) -> str:
+    target = "Buchungsseite" if scope == "navigation" else "Schicht-Update"
+    if status == 401:
+        return f"{target} verlangte eine Anmeldung (HTTP 401)"
+    if status == 403:
+        return f"Zugriff auf {target} wurde abgelehnt (HTTP 403)"
+    if status == 429:
+        return f"Rate-Limit von {target} wurde erreicht (HTTP 429)"
+    if status >= 500:
+        return f"{target} meldete einen Serverfehler (HTTP {status})"
+    return f"{target} meldete einen HTTP-Fehler ({status})"
+
+
+def _probe_failure_reason(diagnostics: dict[str, object]) -> str:
+    raw_error_class = diagnostics.get("error_class")
+    error_class = raw_error_class if isinstance(raw_error_class, str) else None
+    explanation = _ERROR_REASON_LABELS.get(error_class or "")
+    if explanation is not None:
+        return f"{explanation} (Code: {error_class})"
+    http_match = _HTTP_ERROR_CLASS.fullmatch(error_class or "")
+    if http_match is not None:
+        explanation = _http_failure_reason(
+            http_match.group(1),
+            int(http_match.group(2)),
+        )
+        return f"{explanation} (Code: {error_class})"
+    raw_page_type = diagnostics.get("page_type")
+    page_type = raw_page_type if isinstance(raw_page_type, str) else "unknown"
+    return _PAGE_TYPE_REASON_LABELS.get(
+        page_type,
+        _PAGE_TYPE_REASON_LABELS["unknown"],
+    )
+
+
+def _bounded_monitor_error_message(header: str, reason_lines: list[str]) -> str:
+    if len(header) > MONITOR_ERROR_MESSAGE_LIMIT:
+        return "Wiesn-Monitor: Fehlerdetails konnten nicht sicher formatiert werden."
+
+    message = header
+    omitted = "Weitere Fehlergründe wurden aus Platzgründen ausgelassen."
+    for line in reason_lines:
+        candidate = f"{message}\n{line}"
+        if len(candidate) <= MONITOR_ERROR_MESSAGE_LIMIT:
+            message = candidate
+            continue
+        with_omission = f"{message}\n{omitted}"
+        if len(with_omission) <= MONITOR_ERROR_MESSAGE_LIMIT:
+            message = with_omission
+        break
+    return message
+
+
+def _monitor_error_details(
+    *,
+    cfg: TentConfig,
+    tent_state: TentState,
+    results: list[AppliedProbe],
+    incident_kind: str,
+    incident_count: int,
+) -> str:
+    reason_lines: list[str] = []
+    for iso_date, result in zip(cfg.dates, results, strict=True):
+        if result.observed_status not in {"unknown", "error"}:
+            continue
+        date_state = tent_state.dates.get(iso_date)
+        diagnostics = date_state.diagnostics if date_state is not None else {}
+        reason_lines.append(
+            f"Grund {iso_date}: {_probe_failure_reason(diagnostics)}"
+        )
+
+    incident_label = "Fehler" if incident_kind == "error" else "Prüfung unklar"
+    header = (
+        f"{cfg.name}: {incident_label} seit {incident_count} Läufen"
+    )
+    return _bounded_monitor_error_message(header, reason_lines)
 
 
 def _legacy_probe(status: str, *, source: str) -> ProbeResult:
@@ -249,19 +392,17 @@ def _record_tent_health(
     )
     if opens_incident or escalates_incident:
         tent_state.failure_incident_sequence += 1
-        affected = [
-            date
-            for date, result in zip(cfg.dates, results, strict=True)
-            if result.observed_status in {"unknown", "error"}
-        ]
         enqueue_monitor_error(
             state=state,
             tent_slug=cfg.slug,
             tent_name=cfg.name,
             booking_url=cfg.booking_url,
-            details=(
-                f"{cfg.name}: {incident_kind} seit {incident_count} Läufen "
-                f"({', '.join(affected)})"
+            details=_monitor_error_details(
+                cfg=cfg,
+                tent_state=tent_state,
+                results=results,
+                incident_kind=incident_kind,
+                incident_count=incident_count,
             ),
             incident_number=tent_state.failure_incident_sequence,
             timestamp=timestamp,
