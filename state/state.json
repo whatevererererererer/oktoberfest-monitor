@@ -370,30 +370,32 @@
       "total_messages": 1
     },
     "35bdba89e7097047c6cfad691da382b7": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.fischer-vroni.de/reservation",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-07T17:21:39.110429+00:00",
       "created_at": "2026-08-07T17:21:34+00:00",
       "event_id": "35bdba89e7097047c6cfad691da382b7",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "05eaa662-fc4c-4b63-b395-3d0c86410d57",
       "new_shifts": [],
-      "next_attempt_at": "2026-08-07T17:21:34+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9949,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Fischer-Vroni: Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Fischer-Vroni",
       "tent_slug": "fischer-vroni",
       "total_messages": 1
@@ -921,8 +923,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-08-07T14:41:45.330829+00:00",
-      "remaining": 9950,
+      "observed_at": "2026-08-07T17:21:39.110429+00:00",
+      "remaining": 9949,
       "reset": 1788238800
     }
   },
