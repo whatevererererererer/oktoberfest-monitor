@@ -174,6 +174,35 @@
       "tent_slug": "hofbraeu",
       "total_messages": 1
     },
+    "1c01c8a4da776266c7dda39b6fe942cc": {
+      "attempts_by_index": {},
+      "booking_url": "https://reservierung.fischer-vroni.de/reservation",
+      "burst": false,
+      "completed_at": null,
+      "created_at": "2026-08-07T14:41:42+00:00",
+      "event_id": "1c01c8a4da776266c7dda39b6fe942cc",
+      "iso_date": null,
+      "kind": "monitor_error",
+      "last_error": null,
+      "last_error_class": null,
+      "last_request_id": null,
+      "new_shifts": [],
+      "next_attempt_at": "2026-08-07T14:41:42+00:00",
+      "next_index": 0,
+      "quarantine_reason": null,
+      "quarantined_payload": null,
+      "quota_limit": null,
+      "quota_remaining": null,
+      "quota_reset": null,
+      "rate_limit_deferrals_by_index": {},
+      "reason": "Fischer-Vroni: Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
+      "requeue_count": 0,
+      "shifts": [],
+      "status": "pending",
+      "tent_name": "Fischer-Vroni",
+      "tent_slug": "fischer-vroni",
+      "total_messages": 1
+    },
     "1fff2ac167fcb323499af95c51d4bbf9": {
       "attempts_by_index": {
         "0": 1
@@ -850,8 +879,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "braeurosl",
-  "producer_revision": "d0a3dbea49aff9d4b6bacc82aad75828efb5e6dc",
+  "probe_rotation_cursor": "loewenbraeu",
+  "producer_revision": "af3a4ac45fc94a9b110d5ee1e21401a7286509c2",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -938,8 +967,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:32:26+00:00",
-          "last_check": "2026-08-07T14:21:48+00:00",
-          "last_reliable_at": "2026-08-07T14:21:48+00:00",
+          "last_check": "2026-08-07T14:41:42+00:00",
+          "last_reliable_at": "2026-08-07T14:41:42+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -964,12 +993,12 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 1,
       "last_error": "2026-08-04T15:37:33+00:00",
-      "last_success_at": "2026-08-07T14:21:48+00:00"
+      "last_success_at": "2026-08-07T14:41:42+00:00"
     },
     "fischer-vroni": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 2,
-      "consecutive_unhealthy": 2,
+      "consecutive_failures": 3,
+      "consecutive_unhealthy": 3,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 1,
@@ -1023,14 +1052,14 @@
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 2,
+          "consecutive_errors": 3,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": "shift_update_challenge",
             "health": "error",
             "page_type": "bot",
-            "plausible_date_option_count": 15,
+            "plausible_date_option_count": 14,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -1040,7 +1069,7 @@
           },
           "health": "error",
           "last_change": "2026-08-07T08:46:46+00:00",
-          "last_check": "2026-08-07T14:21:48+00:00",
+          "last_check": "2026-08-07T14:41:42+00:00",
           "last_reliable_at": "2026-08-07T13:41:53+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -1062,10 +1091,10 @@
           "status": "unavailable"
         }
       },
-      "failure_incident_kind": null,
-      "failure_incident_open": false,
-      "failure_incident_sequence": 7,
-      "last_error": "2026-08-07T14:21:48+00:00",
+      "failure_incident_kind": "error",
+      "failure_incident_open": true,
+      "failure_incident_sequence": 8,
+      "last_error": "2026-08-07T14:41:42+00:00",
       "last_success_at": "2026-08-07T13:41:53+00:00"
     },
     "hofbraeu": {
@@ -1138,8 +1167,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:32:26+00:00",
-          "last_check": "2026-08-07T14:21:48+00:00",
-          "last_reliable_at": "2026-08-07T14:21:48+00:00",
+          "last_check": "2026-08-07T14:41:42+00:00",
+          "last_reliable_at": "2026-08-07T14:41:42+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1164,7 +1193,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 2,
       "last_error": "2026-08-06T07:01:57+00:00",
-      "last_success_at": "2026-08-07T14:21:48+00:00"
+      "last_success_at": "2026-08-07T14:41:42+00:00"
     },
     "loewenbraeu": {
       "consecutive_degraded": 0,
@@ -1948,8 +1977,8 @@
       "last_success_at": "2026-08-07T14:36:32+00:00"
     }
   },
-  "workflow_duration_seconds": 33.545,
-  "workflow_finished_at": "2026-08-07T14:36:32+00:00",
-  "workflow_last_run_at": "2026-08-07T14:35:59+00:00",
-  "workflow_started_at": "2026-08-07T14:35:59+00:00"
+  "workflow_duration_seconds": 35.602,
+  "workflow_finished_at": "2026-08-07T14:41:42+00:00",
+  "workflow_last_run_at": "2026-08-07T14:41:07+00:00",
+  "workflow_started_at": "2026-08-07T14:41:07+00:00"
 }
