@@ -788,8 +788,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "braeurosl",
-  "producer_revision": "1e8803b484b2668e274f74e4bc3bbf11fd703ae2",
+  "probe_rotation_cursor": "loewenbraeu",
+  "producer_revision": "4f9e999622844dbbd7ab07ad2ccd108651a5ccad",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -876,8 +876,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:32:26+00:00",
-          "last_check": "2026-08-07T08:26:23+00:00",
-          "last_reliable_at": "2026-08-07T08:26:23+00:00",
+          "last_check": "2026-08-07T08:46:46+00:00",
+          "last_reliable_at": "2026-08-07T08:46:46+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -902,12 +902,12 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 1,
       "last_error": "2026-08-04T15:37:33+00:00",
-      "last_success_at": "2026-08-07T08:26:23+00:00"
+      "last_success_at": "2026-08-07T08:46:46+00:00"
     },
     "fischer-vroni": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 1,
-      "consecutive_unhealthy": 1,
+      "consecutive_failures": 0,
+      "consecutive_unhealthy": 0,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 1,
@@ -961,54 +961,50 @@
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 1,
+          "consecutive_errors": 0,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
-            "error_class": "shift_update_challenge",
-            "health": "error",
-            "page_type": "bot",
-            "plausible_date_option_count": 15,
+            "error_class": null,
+            "health": "healthy",
+            "page_type": "booking",
+            "plausible_date_option_count": 14,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
-            "target_enabled": true,
-            "target_found": true,
+            "target_enabled": null,
+            "target_found": false,
             "update_confirmed": false
           },
-          "health": "error",
-          "last_change": "2026-08-07T08:06:38+00:00",
-          "last_check": "2026-08-07T08:26:23+00:00",
-          "last_reliable_at": "2026-08-07T08:06:38+00:00",
+          "health": "healthy",
+          "last_change": "2026-08-07T08:46:46+00:00",
+          "last_check": "2026-08-07T08:46:46+00:00",
+          "last_reliable_at": "2026-08-07T08:46:46+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 15,
-            "shift_control_count": 1,
-            "shift_control_found": true,
-            "shift_count": 1,
-            "target_enabled": true,
-            "target_found": true,
-            "update_confirmed": true
+            "plausible_date_option_count": 14,
+            "shift_control_count": 0,
+            "shift_control_found": false,
+            "shift_count": 0,
+            "target_enabled": null,
+            "target_found": false,
+            "update_confirmed": false
           },
-          "observed_status": "error",
-          "shift_keys": [
-            "mittag"
-          ],
-          "shifts": [
-            "Mittag"
-          ],
-          "status": "available"
+          "observed_status": "unavailable",
+          "shift_keys": [],
+          "shifts": [],
+          "status": "unavailable"
         }
       },
       "failure_incident_kind": null,
       "failure_incident_open": false,
       "failure_incident_sequence": 6,
       "last_error": "2026-08-07T08:26:23+00:00",
-      "last_success_at": "2026-08-07T08:06:38+00:00"
+      "last_success_at": "2026-08-07T08:46:46+00:00"
     },
     "hofbraeu": {
       "consecutive_degraded": 0,
@@ -1080,8 +1076,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:32:26+00:00",
-          "last_check": "2026-08-07T08:26:23+00:00",
-          "last_reliable_at": "2026-08-07T08:26:23+00:00",
+          "last_check": "2026-08-07T08:46:46+00:00",
+          "last_reliable_at": "2026-08-07T08:46:46+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1106,7 +1102,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 2,
       "last_error": "2026-08-06T07:01:57+00:00",
-      "last_success_at": "2026-08-07T08:26:23+00:00"
+      "last_success_at": "2026-08-07T08:46:46+00:00"
     },
     "loewenbraeu": {
       "consecutive_degraded": 0,
@@ -1890,8 +1886,8 @@
       "last_success_at": "2026-08-07T08:41:47+00:00"
     }
   },
-  "workflow_duration_seconds": 34.761,
-  "workflow_finished_at": "2026-08-07T08:41:47+00:00",
-  "workflow_last_run_at": "2026-08-07T08:41:12+00:00",
-  "workflow_started_at": "2026-08-07T08:41:12+00:00"
+  "workflow_duration_seconds": 46.203,
+  "workflow_finished_at": "2026-08-07T08:46:46+00:00",
+  "workflow_last_run_at": "2026-08-07T08:46:00+00:00",
+  "workflow_started_at": "2026-08-07T08:46:00+00:00"
 }
