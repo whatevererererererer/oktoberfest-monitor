@@ -110,6 +110,12 @@ create duplicates. A removed shift that later reappears and a true
 unavailable-to-available re-release do create a new event. Message timestamps
 use `Europe/Berlin` explicitly.
 
+Monitor-error messages explain the privacy-safe diagnostic class and include
+the tent's configured official booking URL as `Seite manuell prüfen`. Raw page
+content, exception text, cookies, and form values never enter the message. The
+monitor never opens that link or performs a booking action; it is only a
+shortcut for attended inspection by the recipient.
+
 Pushover transport verifies HTTP 200 plus JSON `status=1`, records the request
 ID and quota headers, does not blindly retry ordinary 4xx responses, defers 429
 responses without consuming the ordinary retry budget, and retries 5xx/network

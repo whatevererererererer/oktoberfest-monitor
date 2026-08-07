@@ -71,6 +71,37 @@ class NotificationTransportTests(unittest.TestCase):
         )
         self.assertIn("14:34", payload["message"])
 
+    def test_monitor_error_links_to_manual_booking_page(self) -> None:
+        event = OutboxEvent(
+            event_id="error",
+            kind="monitor_error",
+            tent_slug="test",
+            tent_name="Testzelt",
+            booking_url="https://example.com/book",
+            reason="Probe fehlgeschlagen",
+            created_at="2026-08-04T00:00:00+00:00",
+        )
+
+        payload = build_payload(event)
+
+        self.assertEqual(payload["url"], "https://example.com/book")
+        self.assertEqual(payload["url_title"], "Seite manuell prüfen")
+
+    def test_legacy_monitor_error_without_booking_url_remains_sendable(self) -> None:
+        event = OutboxEvent(
+            event_id="legacy-error",
+            kind="monitor_error",
+            tent_slug="test",
+            tent_name="Testzelt",
+            reason="Probe fehlgeschlagen",
+            created_at="2026-08-04T00:00:00+00:00",
+        )
+
+        payload = build_payload(event)
+
+        self.assertNotIn("url", payload)
+        self.assertNotIn("url_title", payload)
+
     def test_only_durable_outbox_transport_is_exposed(self) -> None:
         self.assertFalse(hasattr(notify, "alert_available"))
         self.assertFalse(hasattr(notify, "alert_error"))

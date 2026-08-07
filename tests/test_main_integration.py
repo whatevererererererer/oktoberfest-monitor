@@ -9,8 +9,9 @@ from types import SimpleNamespace
 from unittest.mock import Mock, call, patch
 
 import src.main as main_module
-from src.events import AppliedProbe
+from src.events import AppliedProbe, apply_probe_result
 from src.main import (
+    _error_probe,
     _legacy_probe,
     _record_tent_health,
     _select_probe_batch,
@@ -475,6 +476,11 @@ class MainIntegrationTests(unittest.TestCase):
         state = State()
         cfg = config("a")
         tent = state.tents.setdefault("a", TentState())
+        degraded_diagnostics = degraded().diagnostics.model_dump(mode="json")
+        tent.dates = {
+            iso_date: TentDateState(diagnostics=dict(degraded_diagnostics))
+            for iso_date in cfg.dates
+        }
         for index in range(3):
             _record_tent_health(
                 state=state,
@@ -486,6 +492,18 @@ class MainIntegrationTests(unittest.TestCase):
         self.assertEqual(tent.consecutive_degraded, 3)
         self.assertTrue(tent.failure_incident_open)
         self.assertEqual(len(state.outbox), 1)
+        self.assertEqual(
+            next(iter(state.outbox.values())).booking_url,
+            cfg.booking_url,
+        )
+        self.assertEqual(
+            next(iter(state.outbox.values())).reason,
+            "Zelt a: Prüfung unklar seit 3 Läufen\n"
+            "Grund 2026-09-25: Schichtauswahl war leer oder nicht lesbar "
+            "(Code: shift_options_empty)\n"
+            "Grund 2026-09-26: Schichtauswahl war leer oder nicht lesbar "
+            "(Code: shift_options_empty)",
+        )
 
         _record_tent_health(
             state=state,
@@ -505,6 +523,163 @@ class MainIntegrationTests(unittest.TestCase):
             timestamp="2026-08-04T08:05:00+00:00",
         )
         self.assertEqual(tent.consecutive_failures, 1)
+
+    def test_monitor_error_explains_bot_challenge_without_leaking_detail(self) -> None:
+        state = State()
+        cfg = config("a")
+        cfg.dates = ["2026-09-26"]
+        tent = state.tents.setdefault("a", TentState())
+        challenge = ProbeResult(
+            "error",
+            diagnostics=ProbeDiagnostics(
+                health="error",
+                page_type="bot",
+                error_class="shift_update_challenge",
+                detail="must-not-appear",
+            ),
+        )
+        tent.dates["2026-09-26"] = TentDateState(
+            diagnostics=challenge.diagnostics.model_dump(mode="json")
+        )
+
+        for index in range(3):
+            _record_tent_health(
+                state=state,
+                cfg=cfg,
+                tent_state=tent,
+                results=[applied(challenge)],
+                timestamp=f"2026-08-07T01:2{index}:00+00:00",
+            )
+
+        event = next(iter(state.outbox.values()))
+        self.assertEqual(event.booking_url, cfg.booking_url)
+        self.assertEqual(
+            event.reason,
+            "Zelt a: Fehler seit 3 Läufen\n"
+            "Grund 2026-09-26: "
+            "Bot-Schutz/Challenge beim Laden der Schichtauswahl "
+            "(Code: shift_update_challenge)",
+        )
+        self.assertNotIn("must-not-appear", event.reason)
+
+    def test_monitor_error_omits_unsafe_diagnostic_code(self) -> None:
+        state = State()
+        cfg = config("a")
+        cfg.dates = ["2026-09-26"]
+        tent = state.tents.setdefault("a", TentState())
+        malformed = AppliedProbe(None, "error", "error")
+        tent.dates["2026-09-26"] = TentDateState(
+            diagnostics={
+                "page_type": "bot",
+                "error_class": "unsafe\nsecret=value",
+            }
+        )
+
+        for index in range(3):
+            _record_tent_health(
+                state=state,
+                cfg=cfg,
+                tent_state=tent,
+                results=[malformed],
+                timestamp=f"2026-08-07T02:2{index}:00+00:00",
+            )
+
+        reason = next(iter(state.outbox.values())).reason
+        self.assertIn("Bot-Schutz/Challenge auf der Buchungsseite", reason)
+        self.assertNotIn("unsafe", reason)
+        self.assertNotIn("secret", reason)
+
+    def test_monitor_error_explains_safe_http_class(self) -> None:
+        state = State()
+        cfg = config("a")
+        cfg.dates = ["2026-09-26"]
+        tent = state.tents.setdefault("a", TentState())
+        blocked = AppliedProbe(None, "error", "error")
+        tent.dates["2026-09-26"] = TentDateState(
+            diagnostics={
+                "page_type": "bot",
+                "error_class": "shift_update_http_403",
+            }
+        )
+
+        for index in range(3):
+            _record_tent_health(
+                state=state,
+                cfg=cfg,
+                tent_state=tent,
+                results=[blocked],
+                timestamp=f"2026-08-07T03:2{index}:00+00:00",
+            )
+
+        reason = next(iter(state.outbox.values())).reason
+        self.assertIn("Schicht-Update wurde abgelehnt (HTTP 403)", reason)
+        self.assertIn("Code: shift_update_http_403", reason)
+
+    def test_monitor_error_uses_diagnostics_from_latest_applied_probe(self) -> None:
+        state = State()
+        cfg = config("a")
+        cfg.dates = ["2026-09-26"]
+        tent = state.tents.setdefault("a", TentState())
+        observations = [
+            _error_probe("browser_unavailable"),
+            _error_probe("browser_unavailable"),
+            ProbeResult(
+                "error",
+                diagnostics=ProbeDiagnostics(
+                    health="error",
+                    page_type="bot",
+                    error_class="shift_update_challenge",
+                ),
+            ),
+        ]
+
+        for index, observation in enumerate(observations):
+            applied_observation = apply_probe_result(
+                state=state,
+                cfg=cfg,
+                tent_state=tent,
+                iso_date="2026-09-26",
+                result=observation,
+                timestamp=f"2026-08-07T04:2{index}:00+00:00",
+            )
+            _record_tent_health(
+                state=state,
+                cfg=cfg,
+                tent_state=tent,
+                results=[applied_observation],
+                timestamp=f"2026-08-07T04:2{index}:00+00:00",
+            )
+
+        reason = next(iter(state.outbox.values())).reason
+        self.assertIn("shift_update_challenge", reason)
+        self.assertNotIn("browser_unavailable", reason)
+
+    def test_monitor_error_message_is_bounded_at_complete_reason_lines(self) -> None:
+        state = State()
+        cfg = config("a")
+        cfg.dates = [f"2026-09-{day:02d}-{index:02d}" for index, day in enumerate(range(1, 31))]
+        tent = state.tents.setdefault("a", TentState())
+        degraded_result = applied(degraded())
+        for iso_date in cfg.dates:
+            tent.dates[iso_date] = TentDateState(
+                diagnostics=degraded().diagnostics.model_dump(mode="json")
+            )
+
+        for index in range(3):
+            _record_tent_health(
+                state=state,
+                cfg=cfg,
+                tent_state=tent,
+                results=[degraded_result for _ in cfg.dates],
+                timestamp=f"2026-08-07T05:2{index}:00+00:00",
+            )
+
+        reason = next(iter(state.outbox.values())).reason
+        self.assertLessEqual(len(reason), 1024)
+        self.assertTrue(
+            reason.endswith("Weitere Fehlergründe wurden aus Platzgründen ausgelassen.")
+        )
+        self.assertNotIn("Grund 2026-09-30-29", reason)
 
     def test_alternating_degraded_and_error_share_unhealthy_streak(self) -> None:
         state = State()

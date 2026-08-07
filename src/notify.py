@@ -170,11 +170,19 @@ def build_payload(event: OutboxEvent, *, now: datetime | None = None) -> dict:
     when = now.astimezone(BERLIN).strftime("%H:%M")
 
     if event.kind == "monitor_error":
-        return {
+        payload = {
             "title": "Wiesn-Monitor: Fehler",
             "message": event.reason[:1024],
             "priority": 0,
         }
+        if event.booking_url:
+            payload.update(
+                {
+                    "url": event.booking_url,
+                    "url_title": "Seite manuell prüfen",
+                }
+            )
+        return payload
 
     if not event.iso_date or not event.booking_url:
         raise ValueError(f"availability event {event.event_id} lacks date/url")

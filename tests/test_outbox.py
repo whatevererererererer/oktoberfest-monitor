@@ -59,6 +59,7 @@ def error_event(event_id: str = "error") -> OutboxEvent:
         kind="monitor_error",
         tent_slug="test",
         tent_name="Testzelt",
+        booking_url="https://example.com/book",
         reason="Probe fehlgeschlagen",
         created_at="2026-08-04T08:00:00+00:00",
         next_attempt_at="2026-08-04T08:00:00+00:00",
@@ -469,6 +470,32 @@ class OutboxTests(unittest.TestCase):
                 sender.assert_not_called()
                 quarantined = self.quarantined(load(self.path))
                 self.assertEqual(quarantined.quarantine_reason, expected_reason)
+
+    def test_monitor_error_with_invalid_booking_url_is_quarantined(self) -> None:
+        item = error_event()
+        item.booking_url = "javascript:alert(1)"
+        self.write(item)
+        sender = Mock(side_effect=self.success)
+
+        outcome = self.deliver(sender)
+
+        self.assertEqual(outcome.status, "quarantined")
+        sender.assert_not_called()
+        self.assertEqual(
+            self.quarantined(load(self.path)).quarantine_reason,
+            "booking_url_invalid",
+        )
+
+    def test_legacy_monitor_error_without_booking_url_remains_deliverable(self) -> None:
+        item = error_event()
+        item.booking_url = None
+        self.write(item)
+
+        outcome = self.deliver()
+
+        self.assertEqual(outcome.status, "delivered")
+        stored = load(self.path).outbox[item.event_id]
+        self.assertEqual((stored.status, stored.next_index), ("delivered", 1))
 
     def test_key_mismatch_is_quarantined_with_minimal_metadata(self) -> None:
         poison = event("original", burst=False)
