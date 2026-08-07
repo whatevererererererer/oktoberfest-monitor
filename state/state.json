@@ -211,34 +211,36 @@
       "total_messages": 1
     },
     "21996d3f5099fb247e757a903097e508": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.fischer-vroni.de/reservation",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-07T08:06:40.756651+00:00",
       "created_at": "2026-08-07T08:06:38+00:00",
       "event_id": "21996d3f5099fb247e757a903097e508",
       "iso_date": "2026-09-26",
       "kind": "availability",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "544b8e6e-2b68-462b-b1d3-e5ab48c3ffd3",
       "new_shifts": [
         "Mittag"
       ],
-      "next_attempt_at": "2026-08-07T08:06:38+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9953,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "available",
       "requeue_count": 0,
       "shifts": [
         "Mittag"
       ],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Fischer-Vroni",
       "tent_slug": "fischer-vroni",
       "total_messages": 1
@@ -791,8 +793,8 @@
   "pushover_quota": {
     "availability": {
       "limit": 10000,
-      "observed_at": "2026-08-06T17:49:31.251641+00:00",
-      "remaining": 9957,
+      "observed_at": "2026-08-07T08:06:40.756651+00:00",
+      "remaining": 9953,
       "reset": 1788238800
     },
     "monitor_error": {
