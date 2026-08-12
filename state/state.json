@@ -466,6 +466,35 @@
       "tent_slug": "schottenhamel",
       "total_messages": 1
     },
+    "5051c237702b08eda97b02ae6a8dc2e4": {
+      "attempts_by_index": {},
+      "booking_url": "https://reservierung.paulanerfestzelt.de/reservierung",
+      "burst": false,
+      "completed_at": null,
+      "created_at": "2026-08-12T09:32:05+00:00",
+      "event_id": "5051c237702b08eda97b02ae6a8dc2e4",
+      "iso_date": null,
+      "kind": "monitor_error",
+      "last_error": null,
+      "last_error_class": null,
+      "last_request_id": null,
+      "new_shifts": [],
+      "next_attempt_at": "2026-08-12T09:32:05+00:00",
+      "next_index": 0,
+      "quarantine_reason": null,
+      "quarantined_payload": null,
+      "quota_limit": null,
+      "quota_remaining": null,
+      "quota_reset": null,
+      "rate_limit_deferrals_by_index": {},
+      "reason": "Paulaner Festzelt (Winzerer Fähndl): Prüfung unklar seit 3 Läufen\nGrund 2026-09-26: Aktualisierung der Schichtauswahl wurde nicht bestätigt (Code: shift_update_response_unconfirmed)",
+      "requeue_count": 0,
+      "shifts": [],
+      "status": "pending",
+      "tent_name": "Paulaner Festzelt (Winzerer Fähndl)",
+      "tent_slug": "paulaner",
+      "total_messages": 1
+    },
     "51f49d8bc667d2ffae533871d5a566b3": {
       "attempts_by_index": {
         "0": 1
@@ -982,8 +1011,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "paulaner",
-  "producer_revision": "672698f42e0430ecfed66f74269aac078a56df12",
+  "probe_rotation_cursor": "schuetzen",
+  "producer_revision": "784863b588cc8527e48363d98bba8f035cfc9abb",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -1593,9 +1622,9 @@
       "last_success_at": "2026-08-12T09:26:43+00:00"
     },
     "paulaner": {
-      "consecutive_degraded": 0,
-      "consecutive_failures": 2,
-      "consecutive_unhealthy": 2,
+      "consecutive_degraded": 1,
+      "consecutive_failures": 0,
+      "consecutive_unhealthy": 3,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 1,
@@ -1650,25 +1679,25 @@
           "alert_sequence": 0,
           "availability_evidence_lost": false,
           "baseline_verified": true,
-          "consecutive_degraded": 0,
-          "consecutive_errors": 2,
+          "consecutive_degraded": 1,
+          "consecutive_errors": 0,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
-            "error_class": "shift_update_challenge",
-            "health": "error",
-            "page_type": "bot",
+            "error_class": "shift_update_response_unconfirmed",
+            "health": "degraded",
+            "page_type": "booking",
             "plausible_date_option_count": 14,
-            "shift_control_count": 0,
-            "shift_control_found": false,
-            "shift_count": 0,
+            "shift_control_count": 1,
+            "shift_control_found": true,
+            "shift_count": 1,
             "target_enabled": true,
             "target_found": true,
-            "update_confirmed": false
+            "update_confirmed": true
           },
-          "health": "error",
+          "health": "degraded",
           "last_change": "2026-08-06T00:21:59+00:00",
-          "last_check": "2026-08-12T09:11:31+00:00",
+          "last_check": "2026-08-12T09:32:05+00:00",
           "last_reliable_at": "2026-08-12T08:26:48+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -1684,15 +1713,15 @@
             "target_found": false,
             "update_confirmed": false
           },
-          "observed_status": "error",
+          "observed_status": "unknown",
           "shift_keys": [],
           "shifts": [],
           "status": "unavailable"
         }
       },
-      "failure_incident_kind": null,
-      "failure_incident_open": false,
-      "failure_incident_sequence": 4,
+      "failure_incident_kind": "degraded",
+      "failure_incident_open": true,
+      "failure_incident_sequence": 5,
       "last_error": "2026-08-12T09:11:31+00:00",
       "last_success_at": "2026-08-12T08:26:48+00:00"
     },
@@ -1753,8 +1782,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-06T07:31:46+00:00",
-          "last_check": "2026-08-12T09:11:31+00:00",
-          "last_reliable_at": "2026-08-12T09:11:31+00:00",
+          "last_check": "2026-08-12T09:32:05+00:00",
+          "last_reliable_at": "2026-08-12T09:32:05+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1779,7 +1808,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 1,
       "last_error": "2026-08-06T07:11:20+00:00",
-      "last_success_at": "2026-08-12T09:11:31+00:00"
+      "last_success_at": "2026-08-12T09:32:05+00:00"
     },
     "schottenhamel": {
       "consecutive_degraded": 0,
@@ -1855,8 +1884,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-11T12:36:38+00:00",
-          "last_check": "2026-08-12T09:11:31+00:00",
-          "last_reliable_at": "2026-08-12T09:11:31+00:00",
+          "last_check": "2026-08-12T09:32:05+00:00",
+          "last_reliable_at": "2026-08-12T09:32:05+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1881,7 +1910,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:48:38+00:00",
-      "last_success_at": "2026-08-12T09:11:31+00:00"
+      "last_success_at": "2026-08-12T09:32:05+00:00"
     },
     "schuetzen": {
       "consecutive_degraded": 0,
@@ -2080,8 +2109,8 @@
       "last_success_at": "2026-08-12T09:16:39+00:00"
     }
   },
-  "workflow_duration_seconds": 48.364,
-  "workflow_finished_at": "2026-08-12T09:26:43+00:00",
-  "workflow_last_run_at": "2026-08-12T09:25:55+00:00",
-  "workflow_started_at": "2026-08-12T09:25:55+00:00"
+  "workflow_duration_seconds": 49.136,
+  "workflow_finished_at": "2026-08-12T09:32:05+00:00",
+  "workflow_last_run_at": "2026-08-12T09:31:15+00:00",
+  "workflow_started_at": "2026-08-12T09:31:15+00:00"
 }
