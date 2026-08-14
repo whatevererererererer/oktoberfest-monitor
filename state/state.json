@@ -1079,8 +1079,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "schuetzen",
-  "producer_revision": "ca614b87f22f32ebb6cab8a783cd797b658f941b",
+  "probe_rotation_cursor": "braeurosl",
+  "producer_revision": "b7be0ff042214dacc2e6ac1c18591f5c64dc5c40",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -2050,8 +2050,8 @@
           },
           "health": "healthy",
           "last_change": "2026-04-29T11:32:36+00:00",
-          "last_check": "2026-08-14T17:36:25+00:00",
-          "last_reliable_at": "2026-08-14T17:36:25+00:00",
+          "last_check": "2026-08-14T17:56:33+00:00",
+          "last_reliable_at": "2026-08-14T17:56:33+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2076,7 +2076,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:49:24+00:00",
-      "last_success_at": "2026-08-14T17:36:25+00:00"
+      "last_success_at": "2026-08-14T17:56:33+00:00"
     },
     "weinzelt": {
       "consecutive_degraded": 0,
@@ -2148,8 +2148,8 @@
           },
           "health": "healthy",
           "last_change": "2026-06-29T12:37:59+00:00",
-          "last_check": "2026-08-14T17:36:25+00:00",
-          "last_reliable_at": "2026-08-14T17:36:25+00:00",
+          "last_check": "2026-08-14T17:56:33+00:00",
+          "last_reliable_at": "2026-08-14T17:56:33+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2174,11 +2174,11 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:50:12+00:00",
-      "last_success_at": "2026-08-14T17:36:25+00:00"
+      "last_success_at": "2026-08-14T17:56:33+00:00"
     }
   },
-  "workflow_duration_seconds": 51.489,
-  "workflow_finished_at": "2026-08-14T17:51:50+00:00",
-  "workflow_last_run_at": "2026-08-14T17:50:59+00:00",
-  "workflow_started_at": "2026-08-14T17:50:59+00:00"
+  "workflow_duration_seconds": 34.494,
+  "workflow_finished_at": "2026-08-14T17:56:33+00:00",
+  "workflow_last_run_at": "2026-08-14T17:55:59+00:00",
+  "workflow_started_at": "2026-08-14T17:55:59+00:00"
 }
