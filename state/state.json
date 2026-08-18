@@ -370,34 +370,36 @@
       "total_messages": 1
     },
     "2e0da2f2b8d6db529cf63529b72e25ac": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://www.muenchner-knoedelei.de/#online-reservierung",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-18T11:01:49.002007+00:00",
       "created_at": "2026-08-18T11:01:46+00:00",
       "event_id": "2e0da2f2b8d6db529cf63529b72e25ac",
       "iso_date": "2026-09-26",
       "kind": "availability",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "1b98ca54-6af0-4b93-8e04-434d26f7f8f9",
       "new_shifts": [
         "Mittag (11:00–14:00, Zelt)"
       ],
-      "next_attempt_at": "2026-08-18T11:01:46+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9943,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "available",
       "requeue_count": 0,
       "shifts": [
         "Mittag (11:00–14:00, Zelt)"
       ],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Münchner Knödelei",
       "tent_slug": "muenchner-knoedelei",
       "total_messages": 1
@@ -1117,8 +1119,8 @@
   "pushover_quota": {
     "availability": {
       "limit": 10000,
-      "observed_at": "2026-08-13T05:51:51.083349+00:00",
-      "remaining": 9944,
+      "observed_at": "2026-08-18T11:01:49.002007+00:00",
+      "remaining": 9943,
       "reset": 1788238800
     },
     "monitor_error": {
