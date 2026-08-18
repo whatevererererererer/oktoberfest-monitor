@@ -1,10 +1,13 @@
 slug: kaefer
 name: Käfer Wiesn-Schänke
-booking_url: https://www.feinkost-kaefer.de/wiesn-schaenke
-mode: manual
-enabled: false
+booking_url: https://wiesnresmittag.kaefer-wiesn.de/
+mode: kaefer
+enabled: true
 dates: ["2026-09-26"]
 notes: |
-  Käfer reservations are predominantly via email/phone. There is no public
-  online availability calendar. Keep this tent in `mode: manual` unless an
-  online booking flow appears in a given year.
+  The official 2026 Angular portal loads a public read-only slot feed. The
+  monitor lets that first-party app supply its public API key, captures only
+  the GET slot response, validates both target-day rows, and never submits.
+kaefer:
+  url_template: https://wiesnresmittag.kaefer-wiesn.de/
+  slot_endpoint: https://app-mittagsreservierung-gwc-001.azurewebsites.net/api/slot

@@ -482,6 +482,32 @@ class EventTransitionTests(unittest.TestCase):
         self.assertIsNone(again.event)
         self.assertEqual(len(self.state.outbox), 1)
 
+    def test_new_adapter_evidence_loss_reconfirms_after_recovery(self) -> None:
+        for error_class in (
+            "event_days_empty",
+            "reservation_form_no_dates",
+            "target_slots_incomplete",
+        ):
+            with self.subTest(error_class=error_class):
+                self.state = State()
+                self.tent = self.state.tents.setdefault("test", TentState())
+                self.tent.dates[self.date] = verified_available("Mittag")
+                degraded = self.apply(
+                    probe("unknown", error_class=error_class),
+                    "2026-08-04T08:00:00+00:00",
+                )
+                self.assertIsNone(degraded.event)
+                self.assertTrue(
+                    self.tent.dates[self.date].availability_evidence_lost
+                )
+                recovered = self.apply(
+                    probe("available", ["Mittag"]),
+                    "2026-08-04T08:01:00+00:00",
+                )
+                self.assertEqual(
+                    recovered.event.reason, "availability_reconfirmed"
+                )
+
     def test_non_shift_degradation_does_not_reconfirm_same_shift(self) -> None:
         self.tent.dates[self.date] = verified_available("Mittag")
         self.apply(
@@ -526,6 +552,20 @@ class EventTransitionTests(unittest.TestCase):
         applied = self.apply(result, "2026-08-04T08:00:00+00:00")
         self.assertEqual((applied.observed_status, applied.health), ("unknown", "degraded"))
         self.assertEqual(self.tent.dates[self.date].status, "unknown")
+
+    def test_structured_confirmed_empty_feed_is_reliable_unavailable(self) -> None:
+        result = structured_probe(
+            "unavailable",
+            [],
+            plausible_date_option_count=0,
+            unavailable_confirmed=True,
+        )
+        applied = self.apply(result, "2026-08-04T08:00:00+00:00")
+        self.assertEqual(
+            (applied.observed_status, applied.health),
+            ("unavailable", "healthy"),
+        )
+        self.assertTrue(self.tent.dates[self.date].baseline_verified)
 
     def test_reliable_observation_updates_separate_provenance(self) -> None:
         diagnostics = structured_probe("available", ["Mittag"])

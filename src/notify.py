@@ -196,18 +196,18 @@ def build_payload(event: OutboxEvent, *, now: datetime | None = None) -> dict:
         )
         shifts_label = ", ".join(ordered) if ordered else "+?"
         title = f"[{shifts_label}] {weekday} {event.tent_name} {de_date}"
-        message = f"Neue Schicht erkannt {when}. Tippen zum Buchen."
+        message = f"Neue Reservierungszeit erkannt {when}. Tippen zum Anfragen."
     else:
         shifts_label = ", ".join(event.shifts)
         if not shifts_label:
             raise ValueError("availability notifications require at least one shift")
         title = f"[{shifts_label}] {weekday} {event.tent_name} {de_date}"
-        message = f"Verfügbarkeit erkannt {when}. Tippen zum Buchen."
+        message = f"Reservierungsanfrage möglich {when}. Tippen zum Öffnen."
     return {
         "title": title,
         "message": message,
         "url": _booking_url_with_date(event.booking_url, event.iso_date),
-        "url_title": "Jetzt reservieren",
+        "url_title": "Reservierung öffnen",
         "priority": 1,
         "sound": "persistent",
     }

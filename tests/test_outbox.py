@@ -471,6 +471,42 @@ class OutboxTests(unittest.TestCase):
                 quarantined = self.quarantined(load(self.path))
                 self.assertEqual(quarantined.quarantine_reason, expected_reason)
 
+    def test_event_is_quarantined_if_tent_was_disabled_before_delivery(self) -> None:
+        item = event("disabled-before-send", burst=False)
+        self.write(item)
+        sender = Mock(side_effect=self.success)
+
+        outcome = deliver_next(
+            self.path,
+            max_wait_seconds=120,
+            sender=sender,
+            now_fn=self.clock.now,
+            sleep_fn=self.clock.sleep,
+            enabled_tent_slugs=frozenset({"another-tent"}),
+        )
+
+        self.assertEqual(outcome.status, "quarantined")
+        sender.assert_not_called()
+        self.assertEqual(
+            self.quarantined(load(self.path)).quarantine_reason,
+            "tent_disabled",
+        )
+
+    def test_enabled_allowlist_does_not_block_monitor_error(self) -> None:
+        item = error_event("disabled-monitor-error")
+        self.write(item)
+
+        outcome = deliver_next(
+            self.path,
+            max_wait_seconds=120,
+            sender=self.success,
+            now_fn=self.clock.now,
+            sleep_fn=self.clock.sleep,
+            enabled_tent_slugs=frozenset(),
+        )
+
+        self.assertEqual(outcome.status, "delivered")
+
     def test_monitor_error_with_invalid_booking_url_is_quarantined(self) -> None:
         item = error_event()
         item.booking_url = "javascript:alert(1)"

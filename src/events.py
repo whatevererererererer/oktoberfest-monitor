@@ -18,12 +18,16 @@ _SHIFT_EVIDENCE_LOSS_CLASSES = frozenset(
     {
         "available_without_shifts",
         "ambiguous_shift_control",
+        "event_days_empty",
+        "event_days_no_matching_tickets",
+        "reservation_form_no_dates",
         "shift_control_missing",
         "shift_evidence_unavailable",
         "shift_options_empty",
         "shift_update_response_unconfirmed",
         "shift_update_unconfirmed",
         "target_selection_unconfirmed",
+        "target_slots_incomplete",
     }
 )
 
@@ -92,12 +96,18 @@ def _structured_reliable_error(
     """
     if not hasattr(result, "diagnostic_dict"):
         return None
+    plausible_count = diagnostics.get("plausible_date_option_count")
+    explicit_empty_feed = (
+        status == "unavailable"
+        and diagnostics.get("target_found") is False
+        and diagnostics.get("unavailable_confirmed") is True
+    )
     common = (
         diagnostics.get("health") == "healthy"
         and diagnostics.get("page_type") == "booking"
         and diagnostics.get("date_control_count") == 1
-        and isinstance(diagnostics.get("plausible_date_option_count"), int)
-        and diagnostics.get("plausible_date_option_count", 0) > 0
+        and isinstance(plausible_count, int)
+        and (plausible_count > 0 or explicit_empty_feed)
         and not diagnostics.get("error_class")
     )
     if not common:
@@ -113,9 +123,17 @@ def _structured_reliable_error(
             and diagnostics.get("shift_count") == len(raw_shifts)
         )
     else:
-        consistent = (
-            diagnostics.get("target_found") is False
-            and diagnostics.get("shift_count", 0) == 0
+        absent_target = diagnostics.get("target_found") is False
+        zero_capacity = (
+            diagnostics.get("target_found") is True
+            and diagnostics.get("target_enabled") is True
+            and diagnostics.get("shift_control_count") == 1
+            and diagnostics.get("shift_control_found") is True
+            and diagnostics.get("update_confirmed") is True
+            and diagnostics.get("unavailable_confirmed") is True
+        )
+        consistent = diagnostics.get("shift_count", 0) == 0 and (
+            absent_target or zero_capacity
         )
     return None if consistent else f"inconsistent_{status}_diagnostics"
 

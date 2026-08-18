@@ -1148,6 +1148,23 @@ class ConfigValidationTests(unittest.TestCase):
         self.assertGreaterEqual(len(tents), 1)
         self.assertTrue(all(tuple(tent.dates) == TARGET_DATES for tent in tents))
 
+    def test_current_inventory_enables_every_automatable_in_scope_tent(self) -> None:
+        tents = load_tents(Path(__file__).resolve().parents[1] / "tents")
+        by_slug = {tent.slug: tent for tent in tents}
+        self.assertEqual(len(tents), 19)
+        self.assertEqual(
+            {tent.slug for tent in tents if not tent.enabled},
+            {"gloeckle-wirt"},
+        )
+        self.assertEqual(by_slug["armbrustschuetzen"].mode, "festzelt_os")
+        self.assertEqual(by_slug["augustiner"].mode, "festzelt_os")
+        self.assertEqual(by_slug["hacker"].mode, "festzelt_os")
+        self.assertEqual(by_slug["kaefer"].mode, "kaefer")
+        self.assertEqual(by_slug["muenchner-knoedelei"].mode, "reservierungsmanager")
+        self.assertEqual(by_slug["ammer"].mode, "reservierungsmanager")
+        self.assertEqual(by_slug["bartls-floesserstadl"].mode, "floesserstadl")
+        self.assertNotIn("muenchner-stubn", by_slug)
+
     def test_unknown_keys_and_missing_mode_block_are_rejected(self) -> None:
         base = {
             "slug": "test",

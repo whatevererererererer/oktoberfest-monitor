@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import date
 from pathlib import Path
 from typing import Literal, Self
@@ -81,11 +82,91 @@ class FestzeltOsConfig(StrictConfigModel):
         return _validate_http_url(value)
 
 
+class KaeferConfig(StrictConfigModel):
+    """Read Käfer's public slot feed through its official browser application."""
+
+    url_template: str
+    slot_endpoint: str
+    wait_until: Literal["load", "domcontentloaded", "networkidle"] = "domcontentloaded"
+    navigation_timeout_ms: int = Field(default=45000, ge=1000, le=120000)
+    slot_timeout_ms: int = Field(default=15000, ge=100, le=60000)
+
+    @field_validator("url_template", "slot_endpoint")
+    @classmethod
+    def valid_url(cls, value: str) -> str:
+        return _validate_http_url(value)
+
+
+class ReservierungsmanagerConfig(StrictConfigModel):
+    """Official Reservierungsmanager widget and its read-only event-day feed."""
+
+    landing_url: str
+    event_days_endpoint: str
+    expected_theme: str
+    include_name_regex: str | None = None
+    exclude_name_regex: str | None = None
+
+    @field_validator("landing_url")
+    @classmethod
+    def valid_landing_url(cls, value: str) -> str:
+        parsed = urlparse(_validate_http_url(value))
+        if parsed.scheme != "https":
+            raise ValueError("widget landing URL must use https")
+        return value
+
+    @field_validator("event_days_endpoint")
+    @classmethod
+    def valid_event_days_endpoint(cls, value: str) -> str:
+        parsed = urlparse(_validate_http_url(value))
+        if parsed.scheme != "https" or parsed.hostname != "api.reservierungsmanager.de":
+            raise ValueError(
+                "event-day endpoint must use https://api.reservierungsmanager.de"
+            )
+        return value
+
+    @field_validator("include_name_regex", "exclude_name_regex")
+    @classmethod
+    def valid_name_regex(cls, value: str | None) -> str | None:
+        if value is not None:
+            try:
+                re.compile(value)
+            except re.error as exc:
+                raise ValueError("invalid ticket-name regex") from exc
+        return value
+
+    @model_validator(mode="after")
+    def paired_name_filters(self) -> Self:
+        if bool(self.include_name_regex) != bool(self.exclude_name_regex):
+            raise ValueError("include/exclude ticket-name regexes must be paired")
+        return self
+
+
+class FloesserstadlConfig(StrictConfigModel):
+    """Server-rendered Squarespace reservation options for Bartls Flößerstadl."""
+
+    url_template: str
+
+    @field_validator("url_template")
+    @classmethod
+    def valid_url(cls, value: str) -> str:
+        return _validate_http_url(value)
+
+
 class TentConfig(StrictConfigModel):
     slug: str
     name: str
     booking_url: str
-    mode: Literal["api", "html", "hash", "headless", "festzelt_os", "manual"]
+    mode: Literal[
+        "api",
+        "html",
+        "hash",
+        "headless",
+        "festzelt_os",
+        "floesserstadl",
+        "kaefer",
+        "reservierungsmanager",
+        "manual",
+    ]
     dates: list[str]
     enabled: bool = True
     notes: str | None = None
@@ -94,6 +175,9 @@ class TentConfig(StrictConfigModel):
     hash: HashConfig | None = None
     headless: HeadlessConfig | None = None
     festzelt_os: FestzeltOsConfig | None = None
+    floesserstadl: FloesserstadlConfig | None = None
+    kaefer: KaeferConfig | None = None
+    reservierungsmanager: ReservierungsmanagerConfig | None = None
 
     @field_validator("booking_url")
     @classmethod

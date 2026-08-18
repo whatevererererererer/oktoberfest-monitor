@@ -1,0 +1,12 @@
+slug: bartls-floesserstadl
+name: Bartls Flößerstadl
+booking_url: https://www.floesserstadl.de/reservierung
+mode: floesserstadl
+enabled: true
+dates: ["2026-09-26"]
+notes: |
+  Bartls Flößerstadl replaced the Münchner Stubn for Wiesn 2026. Its official
+  server-rendered form exposes separate Mittag/Abend date options. The monitor
+  reads that JSON snapshot with one GET and never submits the protected form.
+floesserstadl:
+  url_template: https://www.floesserstadl.de/reservierung

@@ -23,6 +23,10 @@ class ProbeDiagnostics:
     shift_control_found: bool = False
     update_confirmed: bool = False
     shift_count: int = 0
+    # A structured feed may explicitly prove that no relevant target offer
+    # exists, or expose the target while proving that its capacity is zero.
+    # DOM-based Festzelt-OS probes prove absence through plausible date options.
+    unavailable_confirmed: bool = False
     error_class: str | None = None
     detail: str | None = None
 
@@ -84,12 +88,27 @@ class ProbeResult:
             proven_absent = (
                 self.diagnostics.page_type == "booking"
                 and self.diagnostics.date_control_count == 1
-                and self.diagnostics.plausible_date_option_count > 0
                 and not self.diagnostics.target_found
+                and (
+                    self.diagnostics.plausible_date_option_count > 0
+                    or self.diagnostics.unavailable_confirmed
+                )
             )
-            if not proven_absent:
+            proven_zero_capacity = (
+                self.diagnostics.page_type == "booking"
+                and self.diagnostics.date_control_count == 1
+                and self.diagnostics.plausible_date_option_count > 0
+                and self.diagnostics.target_found
+                and self.diagnostics.target_enabled is True
+                and self.diagnostics.shift_control_count == 1
+                and self.diagnostics.shift_control_found
+                and self.diagnostics.update_confirmed
+                and self.diagnostics.shift_count == 0
+                and self.diagnostics.unavailable_confirmed
+            )
+            if not (proven_absent or proven_zero_capacity):
                 raise ValueError(
-                    "unavailable probe results require a valid date control and absent target"
+                    "unavailable probe results require an absent target or confirmed zero capacity"
                 )
 
     def __iter__(self) -> Iterator[object]:

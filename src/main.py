@@ -4,11 +4,14 @@ import argparse
 import json
 import logging
 import os
+import queue
 import random
 import re
 import sys
+import threading
 import time
 from pathlib import Path
+from typing import Callable
 
 import httpx
 
@@ -16,9 +19,12 @@ from .config import TentConfig, load_tents
 from .events import AppliedProbe, apply_probe_result, enqueue_monitor_error
 from .fetchers import api as api_fetcher
 from .fetchers import festzelt_os as festzelt_os_fetcher
+from .fetchers import floesserstadl as floesserstadl_fetcher
 from .fetchers import hash as hash_fetcher
 from .fetchers import headless as headless_fetcher
 from .fetchers import html as html_fetcher
+from .fetchers import kaefer as kaefer_fetcher
+from .fetchers import reservierungsmanager as reservierungsmanager_fetcher
 from .outbox import deliver_next, requeue_dead_letter
 from .probe import ProbeDiagnostics, ProbeResult
 from .state import State, TentState, load, now_iso, save
@@ -30,6 +36,8 @@ STATE_PATH = ROOT / "state" / "state.json"
 FAILURE_THRESHOLD = 3
 PROBE_BATCH_SIZE = 3
 MONITOR_ERROR_MESSAGE_LIMIT = 1024
+FLOESSER_HTTP_WALL_SECONDS = 25.0
+RESERVIERUNGSMANAGER_HTTP_WALL_SECONDS = 65.0
 
 _ERROR_REASON_LABELS = {
     "date_and_shift_evidence_unavailable": "Datum und Schichten konnten nicht sicher gemeinsam geprüft werden",
@@ -85,6 +93,13 @@ _ERROR_REASON_LABELS = {
     "bot_during_navigation": "Bot-Schutz/Challenge beim Öffnen der Buchungsseite",
     "login_during_navigation": "Login-Seite beim Öffnen der Buchungsseite",
     "error_during_navigation": "Fehlerseite beim Öffnen der Buchungsseite",
+    "event_days_schema_invalid": "Reservierungsdaten des Widgets hatten ein unerwartetes Format",
+    "event_days_empty": "Reservierungs-Widget lieferte keine auswertbaren Termine",
+    "event_days_no_matching_tickets": "Reservierungs-Widget lieferte keine eindeutig passenden Zelt-Termine",
+    "slot_schema_invalid": "Käfer-Slotdaten hatten ein unerwartetes Format",
+    "target_slots_incomplete": "Käfer-Slotdaten für das Zieldatum waren unvollständig",
+    "reservation_form_schema_invalid": "Reservierungsformular hatte ein unerwartetes Format",
+    "reservation_form_no_dates": "Reservierungsformular enthielt keine plausiblen Wiesn-Termine",
 }
 _HTTP_ERROR_CLASS = re.compile(r"(navigation|shift_update)_http_([1-5][0-9]{2})")
 _PAGE_TYPE_REASON_LABELS = {
@@ -200,6 +215,46 @@ def _error_probe(error_class: str, detail: str | None = None) -> ProbeResult:
     )
 
 
+def _run_bounded_http_adapter(
+    action: Callable[[], ProbeResult], *, timeout_seconds: float
+) -> ProbeResult:
+    """Bound synchronous HTTP headers with an isolated, daemonized worker.
+
+    HTTPX timeouts are per I/O phase, so a peer can otherwise keep response
+    headers alive indefinitely one byte at a time. The worker never mutates
+    state, and its dedicated client is never reused after a wall-clock timeout.
+    """
+
+    outcome: queue.Queue[tuple[bool, object]] = queue.Queue(maxsize=1)
+
+    def worker() -> None:
+        try:
+            value: object = action()
+            item = (True, value)
+        except Exception as exc:
+            item = (False, exc)
+        try:
+            outcome.put_nowait(item)
+        except queue.Full:
+            pass
+
+    thread = threading.Thread(
+        target=worker,
+        name="bounded-http-probe",
+        daemon=True,
+    )
+    thread.start()
+    try:
+        succeeded, value = outcome.get(timeout=timeout_seconds)
+    except queue.Empty as exc:
+        raise TimeoutError("HTTP probe wall-clock deadline exceeded") from exc
+    if not succeeded:
+        assert isinstance(value, Exception)
+        raise value
+    assert isinstance(value, ProbeResult)
+    return value
+
+
 def _check_one(
     cfg: TentConfig,
     iso_date: str,
@@ -226,6 +281,39 @@ def _check_one(
             return _error_probe("browser_unavailable"), None
         return _legacy_probe(
             headless_fetcher.fetch(cfg.headless, iso_date, browser), source="headless"
+        ), None
+    if cfg.mode == "kaefer":
+        assert cfg.kaefer
+        if browser is None:
+            return _error_probe("browser_unavailable"), None
+        return kaefer_fetcher.fetch(cfg.kaefer, iso_date, browser), None
+    if cfg.mode == "floesserstadl":
+        assert cfg.floesserstadl
+        fetch_function = floesserstadl_fetcher.fetch
+
+        def fetch_floesserstadl() -> ProbeResult:
+            with httpx.Client(timeout=15, follow_redirects=False) as isolated_client:
+                return fetch_function(
+                    cfg.floesserstadl, iso_date, isolated_client
+                )
+
+        return _run_bounded_http_adapter(
+            fetch_floesserstadl,
+            timeout_seconds=FLOESSER_HTTP_WALL_SECONDS,
+        ), None
+    if cfg.mode == "reservierungsmanager":
+        assert cfg.reservierungsmanager
+        fetch_function = reservierungsmanager_fetcher.fetch
+
+        def fetch_reservierungsmanager() -> ProbeResult:
+            with httpx.Client(timeout=15, follow_redirects=False) as isolated_client:
+                return fetch_function(
+                    cfg.reservierungsmanager, iso_date, isolated_client
+                )
+
+        return _run_bounded_http_adapter(
+            fetch_reservierungsmanager,
+            timeout_seconds=RESERVIERUNGSMANAGER_HTTP_WALL_SECONDS,
         ), None
     if cfg.mode == "manual":
         return ProbeResult(
@@ -481,7 +569,7 @@ def probe_run(
 
     # Legacy headless configs retain a separate main-thread browser. Festzelt-OS
     # tents have already been probed sequentially with their own browser above.
-    needs_browser = any(tent.mode == "headless" for tent in tents)
+    needs_browser = any(tent.mode in {"headless", "kaefer"} for tent in tents)
     playwright = None
     browser = None
     if needs_browser:
@@ -551,6 +639,15 @@ def probe_run(
                             timestamp=observation_timestamp,
                         )
                         applied_results.append(applied)
+                        log.info(
+                            "%s/%s observed=%s health=%s shifts=%s diagnostics=%s",
+                            cfg.slug,
+                            iso_date,
+                            applied.observed_status,
+                            applied.health,
+                            list(getattr(result, "shifts", None) or ()),
+                            tent_state.dates[iso_date].diagnostics,
+                        )
                         if cfg.mode == "hash" and new_hash:
                             tent_state.dates[iso_date].diagnostics["content_hash"] = new_hash
 
@@ -615,8 +712,13 @@ def main() -> int:
     if args.deliver_next:
         if args.dry_run:
             parser.error("--deliver-next and --dry-run cannot be combined")
+        enabled_tent_slugs = frozenset(
+            tent.slug for tent in load_tents(TENTS_DIR) if tent.enabled
+        )
         outcome = deliver_next(
-            args.state_path, max_wait_seconds=max(0, args.max_wait_seconds)
+            args.state_path,
+            max_wait_seconds=max(0, args.max_wait_seconds),
+            enabled_tent_slugs=enabled_tent_slugs,
         )
         print(json.dumps(outcome.__dict__, sort_keys=True))
         if outcome.fatal:

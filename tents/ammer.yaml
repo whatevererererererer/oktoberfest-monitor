@@ -1,9 +1,14 @@
 slug: ammer
-name: Ammer Hühner- und Entenbraterei (Oide Wiesn)
-booking_url: https://www.ammer-wiesn.de/reservierung
-mode: manual
-enabled: false
+name: AMMER Hühner- und Entenbraterei
+booking_url: https://ammer-wiesn.de/reservierung/
+mode: reservierungsmanager
+enabled: true
 dates: ["2026-09-26"]
 notes: |
-  EXCLUDED — Ammer is on the Oide Wiesn. User opted out of all Oide
-  Wiesn tents per original scope. Do not enable.
+  AMMER is a regular-Wiesn small tent, not an Oide-Wiesn tent. Its official
+  page embeds a Reservierungsmanager widget. The monitor reads only the public
+  event-day GET feed and restricts results to event IDs embedded by that page.
+reservierungsmanager:
+  landing_url: https://ammer-wiesn.de/reservierung/
+  event_days_endpoint: https://api.reservierungsmanager.de/event-days/get/{event_ids}
+  expected_theme: ammerwiesn

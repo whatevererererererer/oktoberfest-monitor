@@ -4,11 +4,12 @@ Read-only availability monitor for Saturday, **26 September 2026**. Friday,
 25 September, is no longer probed or notified. The monitor never books, submits
 a reservation form, or bypasses a CAPTCHA.
 
-The repository contains 19 tent configurations. Eleven portals with validated
-date controls are enabled; eight unsupported, bot-protected, contact-only,
-widget, or out-of-scope tents remain disabled. Per-run health still reflects
-whether each portal selected for that rotation run permits a date-correlated
-shift update.
+The repository contains 19 current tent configurations. Eighteen portals with
+validated, target-date-specific evidence are enabled; only Glöckle Wirt remains
+manual because its official page offers email contact but no live capacity
+signal. The former Münchner Stubn entry was replaced by its 2026 successor,
+Bartls Flößerstadl. Per-run health reflects whether each selected portal still
+provides date-correlated shift evidence.
 
 ## Runtime model
 
@@ -41,12 +42,12 @@ SHAs and never rebases through the historical state commits.
 
 ## Probe and health invariants
 
-For the active `festzelt_os` mode:
+Every active mode returns the same strict structured result:
 
 - `available`: the target date exists and native select interaction produced
   at least one shift with a confirmed, target-correlated DOM update.
-- `unavailable`: one unambiguous, plausible Oktoberfest date control exists,
-  but the target date is absent.
+- `unavailable`: the validated portal proves either that the target date is
+  absent or, for Käfer's explicit slot feed, that target capacity is zero.
 - `unknown` / degraded: the target exists, but its shift control, options, or
   update cannot be proved.
 - `error`: missing or ambiguous base control, bot/login/error page, timeout,
@@ -61,10 +62,20 @@ Diagnostics are intentionally small: page type, control/option counts,
 target/update evidence, shift count, and an error class. Page HTML, cookies,
 tokens, and form values are never stored.
 
+`festzelt_os` validates a native date selection and its causally paired shift
+update. `reservierungsmanager` extracts the public widget token afresh and uses
+only the official event-day GET; embedded event IDs and optional indoor-only
+filters constrain the result. `kaefer` lets the official browser application
+make its authenticated slot GET, then validates both Saturday rows and their
+capacity fields. `floesserstadl` reads the two server-rendered Mittag/Abend
+select option lists with one GET. None of these adapters submits a reservation,
+and a selectable request slot is evidence that an inquiry can be made, not a
+guaranteed confirmation.
+
 The enabled tents are split into deterministic, non-wrapping groups of at most
 three. The next group's first slug is stored as a durable schema-v3 rotation
 cursor, so an interrupted or uncheckpointed run retries the same group. With
-eleven enabled tents a complete rotation takes four five-minute runs. Tents not
+eighteen enabled tents a complete rotation takes six five-minute runs. Tents not
 selected for a run retain their observations, health, and failure counters
 unchanged. A completed final group advances the cursor back to the first enabled
 tent; a removed or disabled cursor target safely restarts there as well.
@@ -202,10 +213,11 @@ external review artifacts.
 
 ## Tent modes
 
-Active tents use `festzelt_os`. The code retains conservative `api`, `html`,
-`headless`, `hash`, and `manual` support. Marker-based fetchers return `unknown`
-when neither explicit marker matches instead of inferring the opposite; missing
-or empty hash regions are errors. A non-shift mode cannot create an actionable
+Active tents use `festzelt_os`, `reservierungsmanager`, `kaefer`, or
+`floesserstadl`. The code retains conservative `api`, `html`, `headless`,
+`hash`, and `manual` support. Marker-based fetchers return `unknown` when neither
+explicit marker matches instead of inferring the opposite; missing or empty
+hash regions are errors. A legacy/non-shift mode cannot create an actionable
 availability alert until it supplies date-correlated shift evidence.
 
 Do not enable a disabled tent merely because a landing page or generic form is
@@ -236,6 +248,9 @@ deployed. Never restore an older `state/state.json` over its Git history.
 
 - `src/main.py` — probe orchestration and CLI
 - `src/fetchers/festzelt_os.py` — native, evidence-based wizard probe
+- `src/fetchers/reservierungsmanager.py` — public widget event-day adapter
+- `src/fetchers/kaefer.py` — browser-captured, capacity-validated slot feed
+- `src/fetchers/floesserstadl.py` — structured server-form option reader
 - `src/probe.py` — structured probe contract
 - `src/events.py` — transitions, shift identity, stable event creation
 - `src/outbox.py` — one-part delivery and retry cursor

@@ -1,10 +1,16 @@
 slug: muenchner-knoedelei
 name: Münchner Knödelei
-booking_url: https://www.muenchner-knoedelei.de/
-mode: manual
-enabled: false
+booking_url: https://www.muenchner-knoedelei.de/#online-reservierung
+mode: reservierungsmanager
+enabled: true
 dates: ["2026-09-26"]
 notes: |
-  Single-page site with embedded JS reservation widget; initial HTML
-  shows no Wiesn 2026 dates. Needs Playwright or reverse-engineering
-  of the embedded booking widget API.
+  The official page embeds a Reservierungsmanager widget. The monitor extracts
+  its public short-lived widget token on each run and performs only the same
+  read-only event-day GET. Biergarten-only offers are intentionally excluded.
+reservierungsmanager:
+  landing_url: https://muenchner-knoedelei.de/
+  event_days_endpoint: https://api.reservierungsmanager.de/event-days/get/
+  expected_theme: knoedelei
+  include_name_regex: "(?i)im\\s+Zelt"
+  exclude_name_regex: "(?i)Biergarten"

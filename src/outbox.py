@@ -115,6 +115,7 @@ def _validate_event(
     event: OutboxEvent,
     *,
     now: datetime,
+    enabled_tent_slugs: frozenset[str] | None = None,
 ) -> None:
     if not map_key or not event.event_id or map_key != event.event_id:
         raise OutboxValidationError("event_id_key_mismatch")
@@ -158,6 +159,11 @@ def _validate_event(
     )
 
     if event.kind == "availability":
+        if (
+            enabled_tent_slugs is not None
+            and event.tent_slug not in enabled_tent_slugs
+        ):
+            raise OutboxValidationError("tent_disabled")
         if not event.iso_date or not event.booking_url or not event.shifts:
             raise OutboxValidationError("availability_payload_incomplete")
         if event.iso_date not in TARGET_DATE_SET:
@@ -416,6 +422,7 @@ def deliver_next(
     sender: Callable[..., DeliveryResult] = send_event_part,
     now_fn: Callable[[], datetime] = _utc_now,
     sleep_fn: Callable[[float], None] = time.sleep,
+    enabled_tent_slugs: frozenset[str] | None = None,
 ) -> DeliveryOutcome:
     """Deliver at most one message part and atomically checkpoint local progress."""
     state = load(state_path)
@@ -427,7 +434,12 @@ def deliver_next(
         if candidate.status != "pending":
             continue
         try:
-            _validate_event(map_key, candidate, now=now)
+            _validate_event(
+                map_key,
+                candidate,
+                now=now,
+                enabled_tent_slugs=enabled_tent_slugs,
+            )
         except Exception as exc:
             reason = (
                 str(exc)

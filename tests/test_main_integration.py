@@ -3,10 +3,11 @@ from __future__ import annotations
 import os
 import tempfile
 import threading
+import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, call, patch
+from unittest.mock import MagicMock, Mock, call, patch
 
 import src.main as main_module
 from src.events import AppliedProbe, apply_probe_result
@@ -109,6 +110,136 @@ class MainIntegrationTests(unittest.TestCase):
         self.assertEqual(
             result.diagnostics.error_class, "date_and_shift_evidence_unavailable"
         )
+
+    def test_structured_non_festzelt_modes_create_actionable_events(self) -> None:
+        configs = []
+        for slug, mode in (
+            ("bartls", "floesserstadl"),
+            ("kaefer", "kaefer"),
+            ("knoedelei", "reservierungsmanager"),
+        ):
+            configs.append(
+                SimpleNamespace(
+                    slug=slug,
+                    name=f"Zelt {slug}",
+                    booking_url=f"https://example.com/{slug}",
+                    enabled=True,
+                    mode=mode,
+                    dates=["2026-09-26"],
+                    **{mode: SimpleNamespace()},
+                )
+            )
+        self.initial_state([cfg.slug for cfg in configs])
+
+        with self.assertLogs("wiesn", level="INFO") as captured:
+            with (
+                patch("src.main.load_tents", return_value=configs),
+                patch(
+                    "src.main.headless_fetcher.launch_browser",
+                    return_value=(self.playwright, self.browser),
+                ),
+                patch(
+                    "src.main.floesserstadl_fetcher.fetch",
+                    return_value=available("Mittag (11:00–16:30)"),
+                ) as floesserstadl,
+                patch(
+                    "src.main.kaefer_fetcher.fetch",
+                    return_value=available("Mittag (11:30–15:00)"),
+                ) as kaefer,
+                patch(
+                    "src.main.reservierungsmanager_fetcher.fetch",
+                    return_value=available("Mittag (11:00–14:00)"),
+                ) as reservierungsmanager,
+            ):
+                self.assertEqual(probe_run(state_path=self.path, jitter=False), 0)
+
+        state = load(self.path)
+        self.assertEqual(len(state.outbox), 3)
+        self.assertEqual(
+            {event.tent_slug for event in state.outbox.values()},
+            {cfg.slug for cfg in configs},
+        )
+        self.assertTrue(all(not event.burst for event in state.outbox.values()))
+        floesserstadl.assert_called_once()
+        kaefer.assert_called_once()
+        reservierungsmanager.assert_called_once()
+        self.browser.close.assert_called_once_with()
+        self.playwright.stop.assert_called_once_with()
+        joined_logs = "\n".join(captured.output)
+        for slug in ("bartls", "kaefer", "knoedelei"):
+            self.assertIn(
+                f"{slug}/2026-09-26 observed=available health=healthy",
+                joined_logs,
+            )
+
+    def test_http_adapter_wallclock_uses_an_isolated_daemon_client(self) -> None:
+        release = threading.Event()
+        finished = threading.Event()
+        captured_clients = []
+
+        def stuck_fetch(config, iso_date, client):
+            captured_clients.append(client)
+            try:
+                release.wait(1)
+                return available("Mittag")
+            finally:
+                finished.set()
+
+        cfg = SimpleNamespace(
+            mode="floesserstadl",
+            floesserstadl=SimpleNamespace(),
+        )
+        shared_client = Mock()
+        isolated_client = MagicMock()
+        client_context = MagicMock()
+        client_context.__enter__.return_value = isolated_client
+        client_context.__exit__.return_value = False
+        started = time.monotonic()
+        try:
+            with (
+                patch(
+                    "src.main.FLOESSER_HTTP_WALL_SECONDS",
+                    0.05,
+                ),
+                patch(
+                    "src.main.floesserstadl_fetcher.fetch",
+                    side_effect=stuck_fetch,
+                ),
+                patch("src.main.httpx.Client", return_value=client_context),
+            ):
+                with self.assertRaisesRegex(TimeoutError, "wall-clock"):
+                    main_module._check_one(
+                        cfg,
+                        "2026-09-26",
+                        shared_client,
+                        None,
+                    )
+        finally:
+            release.set()
+        self.assertLess(time.monotonic() - started, 0.5)
+        self.assertTrue(finished.wait(1))
+        self.assertEqual(len(captured_clients), 1)
+        self.assertIsNot(captured_clients[0], shared_client)
+        self.assertIs(captured_clients[0], isolated_client)
+        client_context.__exit__.assert_called_once()
+
+    def test_new_adapter_failure_codes_have_operator_facing_explanations(self) -> None:
+        expected = {
+            "event_days_schema_invalid": "Reservierungsdaten des Widgets",
+            "event_days_empty": "keine auswertbaren Termine",
+            "event_days_no_matching_tickets": "keine eindeutig passenden Zelt-Termine",
+            "slot_schema_invalid": "Käfer-Slotdaten",
+            "target_slots_incomplete": "Zieldatum waren unvollständig",
+            "reservation_form_schema_invalid": "Reservierungsformular",
+            "reservation_form_no_dates": "keine plausiblen Wiesn-Termine",
+        }
+        for error_class, fragment in expected.items():
+            with self.subTest(error_class=error_class):
+                reason = main_module._probe_failure_reason(
+                    {"page_type": "booking", "error_class": error_class}
+                )
+                self.assertIn(fragment, reason)
+                self.assertIn(f"Code: {error_class}", reason)
 
     def test_missing_rotation_cursor_safely_restarts_at_first_enabled_tent(self) -> None:
         configs = [config(slug) for slug in ("a", "b", "c", "d")]

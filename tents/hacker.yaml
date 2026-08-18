@@ -1,11 +1,12 @@
 slug: hacker
 name: Hacker-Festzelt
-booking_url: https://reservierung.derhimmelderbayern.de/
-mode: manual
-enabled: false
+booking_url: https://reservierung.derhimmelderbayern.de/reservierung
+mode: festzelt_os
+enabled: true
 dates: ["2026-09-26"]
 notes: |
-  Plain HTTP returns 403 (anti-bot). Playwright also rendered no dates
-  during probe — likely an additional Cloudflare Turnstile/JS challenge
-  blocks headless browsers too. It stays disabled unless the operator can
-  obtain reproducible date-specific evidence without bypassing that protection.
+  The official 2026 page is a Festzelt-OS portal. Browser access may encounter
+  a Cloudflare challenge; the structured fetcher treats that as an error and
+  never bypasses it or mistakes it for unavailability.
+festzelt_os:
+  url_template: https://reservierung.derhimmelderbayern.de/reservierung

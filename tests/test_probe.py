@@ -74,6 +74,37 @@ class ProbeContractTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 ProbeResult("unavailable", shifts=(), diagnostics=invalid)
 
+    def test_unavailable_accepts_confirmed_zero_capacity(self) -> None:
+        diagnostics = available_diagnostics(
+            shift_count=0,
+            unavailable_confirmed=True,
+        )
+        result = ProbeResult(
+            "unavailable", shifts=(), diagnostics=diagnostics
+        )
+        self.assertEqual(result.status, "unavailable")
+
+        with self.assertRaises(ValueError):
+            ProbeResult(
+                "unavailable",
+                shifts=(),
+                diagnostics=available_diagnostics(shift_count=0),
+            )
+
+    def test_unavailable_accepts_confirmed_empty_relevant_feed(self) -> None:
+        diagnostics = ProbeDiagnostics(
+            health="healthy",
+            page_type="booking",
+            date_control_count=1,
+            plausible_date_option_count=0,
+            target_found=False,
+            unavailable_confirmed=True,
+        )
+        result = ProbeResult(
+            "unavailable", shifts=(), diagnostics=diagnostics
+        )
+        self.assertEqual(result.status, "unavailable")
+
 
 if __name__ == "__main__":
     unittest.main()
