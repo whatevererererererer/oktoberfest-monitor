@@ -1017,34 +1017,36 @@
       "total_messages": 1
     },
     "d31fe20f07f5ec677638fd1aa399f5a1": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://www.floesserstadl.de/reservierung",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-18T11:21:21.951629+00:00",
       "created_at": "2026-08-18T11:21:19+00:00",
       "event_id": "d31fe20f07f5ec677638fd1aa399f5a1",
       "iso_date": "2026-09-26",
       "kind": "availability",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "23bfe6c1-8a35-4286-b257-99b9001e2eb8",
       "new_shifts": [
         "Mittag (11:00–16:30)"
       ],
-      "next_attempt_at": "2026-08-18T11:21:19+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9941,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "available",
       "requeue_count": 0,
       "shifts": [
         "Mittag (11:00–16:30)"
       ],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Bartls Flößerstadl",
       "tent_slug": "bartls-floesserstadl",
       "total_messages": 1
@@ -1187,8 +1189,8 @@
   "pushover_quota": {
     "availability": {
       "limit": 10000,
-      "observed_at": "2026-08-18T11:16:50.469087+00:00",
-      "remaining": 9942,
+      "observed_at": "2026-08-18T11:21:21.951629+00:00",
+      "remaining": 9941,
       "reset": 1788238800
     },
     "monitor_error": {
