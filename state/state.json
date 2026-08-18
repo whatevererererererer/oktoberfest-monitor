@@ -1184,8 +1184,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "ammer",
-  "producer_revision": "5f22566c3e7b90466078494f107f92ada32a342e",
+  "probe_rotation_cursor": "bartls-floesserstadl",
+  "producer_revision": "895a5a934117777eb78db46b785235fb7abb18d6",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -1230,8 +1230,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-18T11:16:48+00:00",
-          "last_check": "2026-08-18T12:16:28+00:00",
-          "last_reliable_at": "2026-08-18T12:16:28+00:00",
+          "last_check": "2026-08-18T12:46:24+00:00",
+          "last_reliable_at": "2026-08-18T12:46:24+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1261,7 +1261,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": null,
-      "last_success_at": "2026-08-18T12:16:28+00:00"
+      "last_success_at": "2026-08-18T12:46:24+00:00"
     },
     "armbrustschuetzen": {
       "consecutive_degraded": 0,
@@ -1291,8 +1291,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-18T11:16:48+00:00",
-          "last_check": "2026-08-18T12:16:28+00:00",
-          "last_reliable_at": "2026-08-18T12:16:28+00:00",
+          "last_check": "2026-08-18T12:46:24+00:00",
+          "last_reliable_at": "2026-08-18T12:46:24+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1318,7 +1318,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": null,
-      "last_success_at": "2026-08-18T12:16:28+00:00"
+      "last_success_at": "2026-08-18T12:46:24+00:00"
     },
     "augustiner": {
       "consecutive_degraded": 0,
@@ -1337,7 +1337,7 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 7,
+            "plausible_date_option_count": 8,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -1348,15 +1348,15 @@
           },
           "health": "healthy",
           "last_change": "2026-08-18T11:16:48+00:00",
-          "last_check": "2026-08-18T12:16:28+00:00",
-          "last_reliable_at": "2026-08-18T12:16:28+00:00",
+          "last_check": "2026-08-18T12:46:24+00:00",
+          "last_reliable_at": "2026-08-18T12:46:24+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 7,
+            "plausible_date_option_count": 8,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -1375,7 +1375,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": null,
-      "last_success_at": "2026-08-18T12:16:28+00:00"
+      "last_success_at": "2026-08-18T12:46:24+00:00"
     },
     "bartls-floesserstadl": {
       "consecutive_degraded": 0,
@@ -2715,8 +2715,8 @@
       "last_success_at": "2026-08-18T12:41:49+00:00"
     }
   },
-  "workflow_duration_seconds": 51.362,
-  "workflow_finished_at": "2026-08-18T12:41:49+00:00",
-  "workflow_last_run_at": "2026-08-18T12:40:58+00:00",
-  "workflow_started_at": "2026-08-18T12:40:58+00:00"
+  "workflow_duration_seconds": 33.107,
+  "workflow_finished_at": "2026-08-18T12:46:24+00:00",
+  "workflow_last_run_at": "2026-08-18T12:45:51+00:00",
+  "workflow_started_at": "2026-08-18T12:45:51+00:00"
 }
