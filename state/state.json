@@ -766,27 +766,28 @@
         "3": 1,
         "4": 1,
         "5": 1,
-        "6": 1
+        "6": 1,
+        "7": 1
       },
       "booking_url": "https://ammer-wiesn.de/reservierung/",
       "burst": true,
-      "completed_at": null,
+      "completed_at": "2026-08-20T07:27:21.265722+00:00",
       "created_at": "2026-08-20T07:26:17+00:00",
       "event_id": "885a23eba342e7ed61accd56d55e6c0a",
       "iso_date": "2026-09-26",
       "kind": "availability",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": "35ce4b61-ebc0-40fd-89a3-be029472afd6",
+      "last_request_id": "1ae82cef-75d7-433d-b14d-faa2f345a16d",
       "new_shifts": [
         "Nachmittag (14:30–17:30)"
       ],
-      "next_attempt_at": "2026-08-20T07:27:21.057873+00:00",
-      "next_index": 7,
+      "next_attempt_at": null,
+      "next_index": 8,
       "quarantine_reason": null,
       "quarantined_payload": null,
       "quota_limit": 10000,
-      "quota_remaining": 9934,
+      "quota_remaining": 9933,
       "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "shifts_added",
@@ -795,7 +796,7 @@
         "Mittag (11:00–14:00)",
         "Nachmittag (14:30–17:30)"
       ],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "AMMER Hühner- und Entenbraterei",
       "tent_slug": "ammer",
       "total_messages": 8
@@ -1231,8 +1232,8 @@
   "pushover_quota": {
     "availability": {
       "limit": 10000,
-      "observed_at": "2026-08-20T07:27:16.057873+00:00",
-      "remaining": 9934,
+      "observed_at": "2026-08-20T07:27:21.265722+00:00",
+      "remaining": 9933,
       "reset": 1788238800
     },
     "monitor_error": {
