@@ -1161,30 +1161,32 @@
       "total_messages": 1
     },
     "e06dd5e5eb48e212aa5197d3a1c3689d": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.poschners.de/reservierung",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-21T11:26:25.188823+00:00",
       "created_at": "2026-08-21T11:26:22+00:00",
       "event_id": "e06dd5e5eb48e212aa5197d3a1c3689d",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "c1f6a680-cd3e-4be2-85a4-62717ddeb5c0",
       "new_shifts": [],
-      "next_attempt_at": "2026-08-21T11:26:22+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9931,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Poschner's Hühner- und Entenbraterei: Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Poschner's Hühner- und Entenbraterei",
       "tent_slug": "poschner",
       "total_messages": 1
@@ -1298,8 +1300,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-08-21T11:11:27.784176+00:00",
-      "remaining": 9932,
+      "observed_at": "2026-08-21T11:26:25.188823+00:00",
+      "remaining": 9931,
       "reset": 1788238800
     }
   },
