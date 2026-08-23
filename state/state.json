@@ -789,30 +789,32 @@
       "total_messages": 1
     },
     "81d6c4960f5c8d3d3d14a4109303280b": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://www.floesserstadl.de/reservierung",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-23T03:41:46.731532+00:00",
       "created_at": "2026-08-23T03:41:44+00:00",
       "event_id": "81d6c4960f5c8d3d3d14a4109303280b",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "666ae4e8-f4df-41a3-8b71-109188708c3a",
       "new_shifts": [],
-      "next_attempt_at": "2026-08-23T03:41:44+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9929,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Bartls Flößerstadl: Fehler seit 84 Läufen\nGrund 2026-09-26: Technischer Fehler während der Portalprüfung (Code: probe_exception)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Bartls Flößerstadl",
       "tent_slug": "bartls-floesserstadl",
       "total_messages": 1
@@ -1364,8 +1366,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-08-21T11:26:25.188823+00:00",
-      "remaining": 9931,
+      "observed_at": "2026-08-23T03:41:46.731532+00:00",
+      "remaining": 9929,
       "reset": 1788238800
     }
   },
