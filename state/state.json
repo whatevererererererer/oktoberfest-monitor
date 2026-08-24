@@ -934,30 +934,32 @@
       "total_messages": 1
     },
     "90e0f3115b004a7d6f45124fe02bf05d": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.derhimmelderbayern.de/reservierung",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-24T10:46:18.065987+00:00",
       "created_at": "2026-08-24T10:46:11+00:00",
       "event_id": "90e0f3115b004a7d6f45124fe02bf05d",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "15396a72-0397-4c2f-a50a-7058b82982d4",
       "new_shifts": [],
-      "next_attempt_at": "2026-08-24T10:46:11+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9927,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Hacker-Festzelt: Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Hacker-Festzelt",
       "tent_slug": "hacker",
       "total_messages": 1
@@ -1430,8 +1432,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-08-23T03:41:46.731532+00:00",
-      "remaining": 9929,
+      "observed_at": "2026-08-24T10:46:18.065987+00:00",
+      "remaining": 9927,
       "reset": 1788238800
     }
   },
