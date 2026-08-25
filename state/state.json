@@ -1452,8 +1452,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "ochsenbraterei",
-  "producer_revision": "3c51edd7dcbb5fbef68f85975564c2208b23012f",
+  "probe_rotation_cursor": "schottenhamel",
+  "producer_revision": "93bc3a331efd199d405edde5a8f5e1a02c7bddfc",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -2445,7 +2445,7 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 10,
+            "plausible_date_option_count": 9,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -2456,15 +2456,15 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-08-25T12:56:56+00:00",
-          "last_reliable_at": "2026-08-25T12:56:56+00:00",
+          "last_check": "2026-08-25T13:26:45+00:00",
+          "last_reliable_at": "2026-08-25T13:26:45+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 10,
+            "plausible_date_option_count": 9,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -2483,7 +2483,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 2,
       "last_error": "2026-08-05T16:33:15+00:00",
-      "last_success_at": "2026-08-25T12:56:56+00:00"
+      "last_success_at": "2026-08-25T13:26:45+00:00"
     },
     "paulaner": {
       "consecutive_degraded": 0,
@@ -2551,7 +2551,7 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 11,
+            "plausible_date_option_count": 10,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -2562,15 +2562,15 @@
           },
           "health": "healthy",
           "last_change": "2026-08-06T00:21:59+00:00",
-          "last_check": "2026-08-25T12:56:56+00:00",
-          "last_reliable_at": "2026-08-25T12:56:56+00:00",
+          "last_check": "2026-08-25T13:26:45+00:00",
+          "last_reliable_at": "2026-08-25T13:26:45+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 11,
+            "plausible_date_option_count": 10,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -2589,7 +2589,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 6,
       "last_error": "2026-08-24T10:56:27+00:00",
-      "last_success_at": "2026-08-25T12:56:56+00:00"
+      "last_success_at": "2026-08-25T13:26:45+00:00"
     },
     "poschner": {
       "consecutive_degraded": 0,
@@ -2649,8 +2649,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-06T07:31:46+00:00",
-          "last_check": "2026-08-25T12:56:56+00:00",
-          "last_reliable_at": "2026-08-25T12:56:56+00:00",
+          "last_check": "2026-08-25T13:26:45+00:00",
+          "last_reliable_at": "2026-08-25T13:26:45+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2676,7 +2676,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 2,
       "last_error": "2026-08-24T07:56:30+00:00",
-      "last_success_at": "2026-08-25T12:56:56+00:00"
+      "last_success_at": "2026-08-25T13:26:45+00:00"
     },
     "schottenhamel": {
       "consecutive_degraded": 0,
@@ -2983,8 +2983,8 @@
       "last_success_at": "2026-08-25T13:01:58+00:00"
     }
   },
-  "workflow_duration_seconds": 38.629,
-  "workflow_finished_at": "2026-08-25T13:21:43+00:00",
-  "workflow_last_run_at": "2026-08-25T13:21:05+00:00",
-  "workflow_started_at": "2026-08-25T13:21:05+00:00"
+  "workflow_duration_seconds": 48.1,
+  "workflow_finished_at": "2026-08-25T13:26:45+00:00",
+  "workflow_last_run_at": "2026-08-25T13:25:57+00:00",
+  "workflow_started_at": "2026-08-25T13:25:57+00:00"
 }
