@@ -1551,10 +1551,39 @@
       "tent_name": "Bräurosl",
       "tent_slug": "braeurosl",
       "total_messages": 1
+    },
+    "fd7b0beb51ebb7d1af5ea01e2b620fe4": {
+      "attempts_by_index": {},
+      "booking_url": "https://reservierung.paulanerfestzelt.de/reservierung",
+      "burst": false,
+      "completed_at": null,
+      "created_at": "2026-08-28T01:11:28+00:00",
+      "event_id": "fd7b0beb51ebb7d1af5ea01e2b620fe4",
+      "iso_date": null,
+      "kind": "monitor_error",
+      "last_error": null,
+      "last_error_class": null,
+      "last_request_id": null,
+      "new_shifts": [],
+      "next_attempt_at": "2026-08-28T01:11:28+00:00",
+      "next_index": 0,
+      "quarantine_reason": null,
+      "quarantined_payload": null,
+      "quota_limit": null,
+      "quota_remaining": null,
+      "quota_reset": null,
+      "rate_limit_deferrals_by_index": {},
+      "reason": "Paulaner Festzelt (Winzerer Fähndl): Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
+      "requeue_count": 0,
+      "shifts": [],
+      "status": "pending",
+      "tent_name": "Paulaner Festzelt (Winzerer Fähndl)",
+      "tent_slug": "paulaner",
+      "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "ochsenbraterei",
-  "producer_revision": "82a0d1aa07996b04c8352a9e21de8bcd2b271290",
+  "probe_rotation_cursor": "schottenhamel",
+  "producer_revision": "2046851490554ef85156de8c898ffb184bd84d84",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -2557,8 +2586,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-08-28T00:41:24+00:00",
-          "last_reliable_at": "2026-08-28T00:41:24+00:00",
+          "last_check": "2026-08-28T01:11:28+00:00",
+          "last_reliable_at": "2026-08-28T01:11:28+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2584,12 +2613,12 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 2,
       "last_error": "2026-08-05T16:33:15+00:00",
-      "last_success_at": "2026-08-28T00:41:24+00:00"
+      "last_success_at": "2026-08-28T01:11:28+00:00"
     },
     "paulaner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 2,
-      "consecutive_unhealthy": 2,
+      "consecutive_failures": 3,
+      "consecutive_unhealthy": 3,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 1,
@@ -2645,7 +2674,7 @@
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 2,
+          "consecutive_errors": 3,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2663,7 +2692,7 @@
           },
           "health": "error",
           "last_change": "2026-08-06T00:21:59+00:00",
-          "last_check": "2026-08-28T00:41:24+00:00",
+          "last_check": "2026-08-28T01:11:28+00:00",
           "last_reliable_at": "2026-08-27T23:41:32+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -2686,10 +2715,10 @@
           "status": "unavailable"
         }
       },
-      "failure_incident_kind": null,
-      "failure_incident_open": false,
-      "failure_incident_sequence": 7,
-      "last_error": "2026-08-28T00:41:24+00:00",
+      "failure_incident_kind": "error",
+      "failure_incident_open": true,
+      "failure_incident_sequence": 8,
+      "last_error": "2026-08-28T01:11:28+00:00",
       "last_success_at": "2026-08-27T23:41:32+00:00"
     },
     "poschner": {
@@ -2750,8 +2779,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-06T07:31:46+00:00",
-          "last_check": "2026-08-28T00:41:24+00:00",
-          "last_reliable_at": "2026-08-28T00:41:24+00:00",
+          "last_check": "2026-08-28T01:11:28+00:00",
+          "last_reliable_at": "2026-08-28T01:11:28+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2777,7 +2806,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 2,
       "last_error": "2026-08-24T07:56:30+00:00",
-      "last_success_at": "2026-08-28T00:41:24+00:00"
+      "last_success_at": "2026-08-28T01:11:28+00:00"
     },
     "schottenhamel": {
       "consecutive_degraded": 0,
@@ -3084,8 +3113,8 @@
       "last_success_at": "2026-08-28T00:46:32+00:00"
     }
   },
-  "workflow_duration_seconds": 37.777,
-  "workflow_finished_at": "2026-08-28T01:06:24+00:00",
-  "workflow_last_run_at": "2026-08-28T01:05:46+00:00",
-  "workflow_started_at": "2026-08-28T01:05:46+00:00"
+  "workflow_duration_seconds": 37.409,
+  "workflow_finished_at": "2026-08-28T01:11:28+00:00",
+  "workflow_last_run_at": "2026-08-28T01:10:51+00:00",
+  "workflow_started_at": "2026-08-28T01:10:51+00:00"
 }
