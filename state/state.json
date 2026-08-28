@@ -1553,30 +1553,32 @@
       "total_messages": 1
     },
     "fd7b0beb51ebb7d1af5ea01e2b620fe4": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.paulanerfestzelt.de/reservierung",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-08-28T01:11:30.694626+00:00",
       "created_at": "2026-08-28T01:11:28+00:00",
       "event_id": "fd7b0beb51ebb7d1af5ea01e2b620fe4",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "94212750-91ae-4475-ae80-533cb7cbd5ff",
       "new_shifts": [],
-      "next_attempt_at": "2026-08-28T01:11:28+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9922,
+      "quota_reset": 1788238800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Paulaner Festzelt (Winzerer Fähndl): Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Paulaner Festzelt (Winzerer Fähndl)",
       "tent_slug": "paulaner",
       "total_messages": 1
@@ -1593,8 +1595,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-08-27T19:41:25.051871+00:00",
-      "remaining": 9923,
+      "observed_at": "2026-08-28T01:11:30.694626+00:00",
+      "remaining": 9922,
       "reset": 1788238800
     }
   },
