@@ -1685,8 +1685,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "ammer",
-  "producer_revision": "ca40851a7534502992ed69d0e5a137199e15c8c6",
+  "probe_rotation_cursor": "bartls-floesserstadl",
+  "producer_revision": "5b82db3b60297392c431e64b7af73a3222e9ff83",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -1731,8 +1731,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-20T08:26:15+00:00",
-          "last_check": "2026-08-29T12:01:50+00:00",
-          "last_reliable_at": "2026-08-29T12:01:50+00:00",
+          "last_check": "2026-08-29T12:31:39+00:00",
+          "last_reliable_at": "2026-08-29T12:31:39+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1762,7 +1762,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-27T11:51:38+00:00",
-      "last_success_at": "2026-08-29T12:01:50+00:00"
+      "last_success_at": "2026-08-29T12:31:39+00:00"
     },
     "armbrustschuetzen": {
       "consecutive_degraded": 0,
@@ -1792,8 +1792,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-18T11:16:48+00:00",
-          "last_check": "2026-08-29T12:01:50+00:00",
-          "last_reliable_at": "2026-08-29T12:01:50+00:00",
+          "last_check": "2026-08-29T12:31:39+00:00",
+          "last_reliable_at": "2026-08-29T12:31:39+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1819,7 +1819,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": null,
-      "last_success_at": "2026-08-29T12:01:50+00:00"
+      "last_success_at": "2026-08-29T12:31:39+00:00"
     },
     "augustiner": {
       "consecutive_degraded": 0,
@@ -1849,8 +1849,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-18T11:16:48+00:00",
-          "last_check": "2026-08-29T12:01:50+00:00",
-          "last_reliable_at": "2026-08-29T12:01:50+00:00",
+          "last_check": "2026-08-29T12:31:39+00:00",
+          "last_reliable_at": "2026-08-29T12:31:39+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -1876,7 +1876,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": null,
-      "last_success_at": "2026-08-29T12:01:50+00:00"
+      "last_success_at": "2026-08-29T12:31:39+00:00"
     },
     "bartls-floesserstadl": {
       "consecutive_degraded": 288,
@@ -3216,8 +3216,8 @@
       "last_success_at": "2026-08-29T12:26:37+00:00"
     }
   },
-  "workflow_duration_seconds": 50.111,
-  "workflow_finished_at": "2026-08-29T12:26:37+00:00",
-  "workflow_last_run_at": "2026-08-29T12:25:47+00:00",
-  "workflow_started_at": "2026-08-29T12:25:47+00:00"
+  "workflow_duration_seconds": 35.332,
+  "workflow_finished_at": "2026-08-29T12:31:39+00:00",
+  "workflow_last_run_at": "2026-08-29T12:31:04+00:00",
+  "workflow_started_at": "2026-08-29T12:31:04+00:00"
 }
