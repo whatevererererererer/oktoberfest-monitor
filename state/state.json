@@ -1287,30 +1287,32 @@
       "total_messages": 1
     },
     "9fcb93ba8488e71e8b16c79c98a19533": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.marstall-oktoberfest.de/reservation",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-09-01T07:46:36.800275+00:00",
       "created_at": "2026-09-01T07:46:32+00:00",
       "event_id": "9fcb93ba8488e71e8b16c79c98a19533",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "b8e94f70-2af3-4120-bb27-e11e9a6ac501",
       "new_shifts": [],
-      "next_attempt_at": "2026-09-01T07:46:32+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9999,
+      "quota_reset": 1790830800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Marstall: Fehler seit 3 Läufen\nGrund 2026-09-26: Datumsauswahl wurde nicht gefunden (Code: date_control_missing)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Marstall",
       "tent_slug": "marstall",
       "total_messages": 1
@@ -1818,9 +1820,9 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-08-31T06:31:33.019354+00:00",
-      "remaining": 9916,
-      "reset": 1788238800
+      "observed_at": "2026-09-01T07:46:36.800275+00:00",
+      "remaining": 9999,
+      "reset": 1790830800
     }
   },
   "schema_version": 3,
