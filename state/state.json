@@ -955,7 +955,8 @@
       "attempts_by_index": {
         "0": 1,
         "1": 1,
-        "2": 1
+        "2": 1,
+        "3": 1
       },
       "booking_url": "https://reservierung.derhimmelderbayern.de/reservierung",
       "burst": true,
@@ -966,16 +967,16 @@
       "kind": "availability",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": "f19b0331-17a6-4d16-aaf6-c1494853f9ba",
+      "last_request_id": "63f23f1f-4d8e-46ce-8e4f-1d8d44a844b3",
       "new_shifts": [
         "Frühschoppen"
       ],
-      "next_attempt_at": "2026-09-02T15:32:24.406355+00:00",
-      "next_index": 3,
+      "next_attempt_at": "2026-09-02T15:32:54.736159+00:00",
+      "next_index": 4,
       "quarantine_reason": null,
       "quarantined_payload": null,
       "quota_limit": 10000,
-      "quota_remaining": 9995,
+      "quota_remaining": 9994,
       "quota_reset": 1790830800,
       "rate_limit_deferrals_by_index": {},
       "reason": "available",
@@ -1882,8 +1883,8 @@
   "pushover_quota": {
     "availability": {
       "limit": 10000,
-      "observed_at": "2026-09-02T15:32:19.406355+00:00",
-      "remaining": 9995,
+      "observed_at": "2026-09-02T15:32:24.736159+00:00",
+      "remaining": 9994,
       "reset": 1790830800
     },
     "monitor_error": {
