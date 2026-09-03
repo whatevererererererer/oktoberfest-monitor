@@ -1944,8 +1944,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "bartls-floesserstadl",
-  "producer_revision": "2b9ff596edb1fb617fe0ce7d1384a8c1d3a5ee92",
+  "probe_rotation_cursor": "hacker",
+  "producer_revision": "16e6b9c38f665275e4915753c38e86dff14cd025",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -2138,15 +2138,15 @@
       "last_success_at": "2026-09-03T08:26:21+00:00"
     },
     "bartls-floesserstadl": {
-      "consecutive_degraded": 518,
+      "consecutive_degraded": 519,
       "consecutive_failures": 0,
-      "consecutive_unhealthy": 617,
+      "consecutive_unhealthy": 618,
       "dates": {
         "2026-09-26": {
           "alert_sequence": 1,
           "availability_evidence_lost": false,
           "baseline_verified": true,
-          "consecutive_degraded": 518,
+          "consecutive_degraded": 519,
           "consecutive_errors": 0,
           "diagnostics": {
             "date_control_count": 0,
@@ -2165,7 +2165,7 @@
           },
           "health": "degraded",
           "last_change": "2026-08-18T11:21:19+00:00",
-          "last_check": "2026-09-03T08:01:55+00:00",
+          "last_check": "2026-09-03T08:31:35+00:00",
           "last_reliable_at": "2026-08-21T09:41:30+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -2258,7 +2258,7 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 10,
+            "plausible_date_option_count": 11,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -2269,15 +2269,15 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:32:26+00:00",
-          "last_check": "2026-09-03T08:01:55+00:00",
-          "last_reliable_at": "2026-09-03T08:01:55+00:00",
+          "last_check": "2026-09-03T08:31:35+00:00",
+          "last_reliable_at": "2026-09-03T08:31:35+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 10,
+            "plausible_date_option_count": 11,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -2296,7 +2296,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 3,
       "last_error": "2026-09-03T04:31:20+00:00",
-      "last_success_at": "2026-09-03T08:01:55+00:00"
+      "last_success_at": "2026-09-03T08:31:35+00:00"
     },
     "fischer-vroni": {
       "consecutive_degraded": 0,
@@ -2362,7 +2362,7 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 13,
+            "plausible_date_option_count": 12,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -2373,15 +2373,15 @@
           },
           "health": "healthy",
           "last_change": "2026-08-07T08:46:46+00:00",
-          "last_check": "2026-09-03T08:01:55+00:00",
-          "last_reliable_at": "2026-09-03T08:01:55+00:00",
+          "last_check": "2026-09-03T08:31:35+00:00",
+          "last_reliable_at": "2026-09-03T08:31:35+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 13,
+            "plausible_date_option_count": 12,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -2400,7 +2400,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 9,
       "last_error": "2026-08-27T12:56:21+00:00",
-      "last_success_at": "2026-09-03T08:01:55+00:00"
+      "last_success_at": "2026-09-03T08:31:35+00:00"
     },
     "hacker": {
       "consecutive_degraded": 0,
@@ -3475,8 +3475,8 @@
       "last_success_at": "2026-09-03T08:22:00+00:00"
     }
   },
-  "workflow_duration_seconds": 32.048,
-  "workflow_finished_at": "2026-09-03T08:26:21+00:00",
-  "workflow_last_run_at": "2026-09-03T08:25:49+00:00",
-  "workflow_started_at": "2026-09-03T08:25:49+00:00"
+  "workflow_duration_seconds": 32.847,
+  "workflow_finished_at": "2026-09-03T08:31:35+00:00",
+  "workflow_last_run_at": "2026-09-03T08:31:02+00:00",
+  "workflow_started_at": "2026-09-03T08:31:02+00:00"
 }
