@@ -1877,6 +1877,35 @@
       "tent_slug": "braeurosl",
       "total_messages": 1
     },
+    "f2f550d1539e3ce193c3a847f7ddd359": {
+      "attempts_by_index": {},
+      "booking_url": "https://reservierung.derhimmelderbayern.de/reservierung",
+      "burst": false,
+      "completed_at": null,
+      "created_at": "2026-09-04T13:41:22+00:00",
+      "event_id": "f2f550d1539e3ce193c3a847f7ddd359",
+      "iso_date": null,
+      "kind": "monitor_error",
+      "last_error": null,
+      "last_error_class": null,
+      "last_request_id": null,
+      "new_shifts": [],
+      "next_attempt_at": "2026-09-04T13:41:22+00:00",
+      "next_index": 0,
+      "quarantine_reason": null,
+      "quarantined_payload": null,
+      "quota_limit": null,
+      "quota_remaining": null,
+      "quota_reset": null,
+      "rate_limit_deferrals_by_index": {},
+      "reason": "Hacker-Festzelt: Fehler seit 3 Läufen\nGrund 2026-09-26: Datumsauswahl wurde nicht gefunden (Code: date_control_missing)",
+      "requeue_count": 0,
+      "shifts": [],
+      "status": "pending",
+      "tent_name": "Hacker-Festzelt",
+      "tent_slug": "hacker",
+      "total_messages": 1
+    },
     "f5d5268fb07e19feb7c7155617b7e6df": {
       "attempts_by_index": {
         "0": 1
@@ -1944,8 +1973,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "hacker",
-  "producer_revision": "12e28cfef514b12b7232b107b709a06f37883be8",
+  "probe_rotation_cursor": "loewenbraeu",
+  "producer_revision": "59fc14541ca9897402a61dd37ec5aa4a3c1a2058",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -2404,15 +2433,15 @@
     },
     "hacker": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 2,
-      "consecutive_unhealthy": 2,
+      "consecutive_failures": 3,
+      "consecutive_unhealthy": 3,
       "dates": {
         "2026-09-26": {
           "alert_sequence": 1,
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 2,
+          "consecutive_errors": 3,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -2430,7 +2459,7 @@
           },
           "health": "error",
           "last_change": "2026-09-02T17:06:20+00:00",
-          "last_check": "2026-09-04T13:11:33+00:00",
+          "last_check": "2026-09-04T13:41:22+00:00",
           "last_reliable_at": "2026-09-04T12:11:29+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -2453,10 +2482,10 @@
           "status": "unavailable"
         }
       },
-      "failure_incident_kind": null,
-      "failure_incident_open": false,
-      "failure_incident_sequence": 3,
-      "last_error": "2026-09-04T13:11:33+00:00",
+      "failure_incident_kind": "error",
+      "failure_incident_open": true,
+      "failure_incident_sequence": 4,
+      "last_error": "2026-09-04T13:41:22+00:00",
       "last_success_at": "2026-09-04T12:11:29+00:00"
     },
     "hofbraeu": {
@@ -2530,8 +2559,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:32:26+00:00",
-          "last_check": "2026-09-04T13:11:33+00:00",
-          "last_reliable_at": "2026-09-04T13:11:33+00:00",
+          "last_check": "2026-09-04T13:41:22+00:00",
+          "last_reliable_at": "2026-09-04T13:41:22+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2557,7 +2586,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 2,
       "last_error": "2026-08-06T07:01:57+00:00",
-      "last_success_at": "2026-09-04T13:11:33+00:00"
+      "last_success_at": "2026-09-04T13:41:22+00:00"
     },
     "kaefer": {
       "consecutive_degraded": 0,
@@ -2587,8 +2616,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-18T11:26:17+00:00",
-          "last_check": "2026-09-04T13:11:37+00:00",
-          "last_reliable_at": "2026-09-04T13:11:37+00:00",
+          "last_check": "2026-09-04T13:41:25+00:00",
+          "last_reliable_at": "2026-09-04T13:41:25+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2614,7 +2643,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-09-01T23:16:38+00:00",
-      "last_success_at": "2026-09-04T13:11:37+00:00"
+      "last_success_at": "2026-09-04T13:41:25+00:00"
     },
     "loewenbraeu": {
       "consecutive_degraded": 0,
@@ -3475,8 +3504,8 @@
       "last_success_at": "2026-09-04T13:26:35+00:00"
     }
   },
-  "workflow_duration_seconds": 32.561,
-  "workflow_finished_at": "2026-09-04T13:36:26+00:00",
-  "workflow_last_run_at": "2026-09-04T13:35:53+00:00",
-  "workflow_started_at": "2026-09-04T13:35:53+00:00"
+  "workflow_duration_seconds": 35.984,
+  "workflow_finished_at": "2026-09-04T13:41:25+00:00",
+  "workflow_last_run_at": "2026-09-04T13:40:49+00:00",
+  "workflow_started_at": "2026-09-04T13:40:49+00:00"
 }
