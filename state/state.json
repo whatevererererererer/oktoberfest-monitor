@@ -2006,8 +2006,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "loewenbraeu",
-  "producer_revision": "237f2c39e8a9bf82c905db5543c7fb6367bc117b",
+  "probe_rotation_cursor": "ochsenbraterei",
+  "producer_revision": "23632810e1787a857600626de35b30044c21172d",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -2749,8 +2749,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-09-06T10:06:13+00:00",
-          "last_reliable_at": "2026-09-06T10:06:13+00:00",
+          "last_check": "2026-09-06T10:36:12+00:00",
+          "last_reliable_at": "2026-09-06T10:36:12+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2776,12 +2776,12 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 1,
       "last_error": "2026-08-04T15:37:33+00:00",
-      "last_success_at": "2026-09-06T10:06:13+00:00"
+      "last_success_at": "2026-09-06T10:36:12+00:00"
     },
     "marstall": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 246,
-      "consecutive_unhealthy": 246,
+      "consecutive_failures": 247,
+      "consecutive_unhealthy": 247,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
@@ -2831,7 +2831,7 @@
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 246,
+          "consecutive_errors": 247,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -2849,7 +2849,7 @@
           },
           "health": "error",
           "last_change": "2026-08-26T12:51:23+00:00",
-          "last_check": "2026-09-06T10:06:13+00:00",
+          "last_check": "2026-09-06T10:36:12+00:00",
           "last_reliable_at": "2026-09-01T06:16:24+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -2875,7 +2875,7 @@
       "failure_incident_kind": "error",
       "failure_incident_open": true,
       "failure_incident_sequence": 1,
-      "last_error": "2026-09-06T10:06:13+00:00",
+      "last_error": "2026-09-06T10:36:12+00:00",
       "last_success_at": "2026-09-01T06:16:24+00:00"
     },
     "muenchner-knoedelei": {
@@ -2906,8 +2906,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-18T11:01:46+00:00",
-          "last_check": "2026-09-06T10:06:15+00:00",
-          "last_reliable_at": "2026-09-06T10:06:15+00:00",
+          "last_check": "2026-09-06T10:36:14+00:00",
+          "last_reliable_at": "2026-09-06T10:36:14+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2937,7 +2937,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 1,
       "last_error": "2026-09-05T06:01:41+00:00",
-      "last_success_at": "2026-09-06T10:06:15+00:00"
+      "last_success_at": "2026-09-06T10:36:14+00:00"
     },
     "ochsenbraterei": {
       "consecutive_degraded": 0,
@@ -3537,8 +3537,8 @@
       "last_success_at": "2026-09-06T10:16:43+00:00"
     }
   },
-  "workflow_duration_seconds": 37.128,
-  "workflow_finished_at": "2026-09-06T10:31:43+00:00",
-  "workflow_last_run_at": "2026-09-06T10:31:06+00:00",
-  "workflow_started_at": "2026-09-06T10:31:06+00:00"
+  "workflow_duration_seconds": 34.448,
+  "workflow_finished_at": "2026-09-06T10:36:14+00:00",
+  "workflow_last_run_at": "2026-09-06T10:35:40+00:00",
+  "workflow_started_at": "2026-09-06T10:35:40+00:00"
 }
