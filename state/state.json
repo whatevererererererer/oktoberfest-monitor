@@ -1750,30 +1750,32 @@
       "total_messages": 1
     },
     "de80894ee1dc3e0b2aa6218eec27bc98": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.braeurosl.de/reservation/",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-09-07T12:26:13.279841+00:00",
       "created_at": "2026-09-07T12:26:11+00:00",
       "event_id": "de80894ee1dc3e0b2aa6218eec27bc98",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "466a8af7-37d0-47a8-a5de-6263425cca34",
       "new_shifts": [],
-      "next_attempt_at": "2026-09-07T12:26:11+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9984,
+      "quota_reset": 1790830800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Bräurosl: Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Bräurosl",
       "tent_slug": "braeurosl",
       "total_messages": 1
@@ -2081,8 +2083,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-09-05T15:51:28.007103+00:00",
-      "remaining": 9986,
+      "observed_at": "2026-09-07T12:26:13.279841+00:00",
+      "remaining": 9984,
       "reset": 1790830800
     }
   },
