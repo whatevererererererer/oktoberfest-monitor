@@ -1749,6 +1749,35 @@
       "tent_slug": "armbrustschuetzen",
       "total_messages": 1
     },
+    "de80894ee1dc3e0b2aa6218eec27bc98": {
+      "attempts_by_index": {},
+      "booking_url": "https://reservierung.braeurosl.de/reservation/",
+      "burst": false,
+      "completed_at": null,
+      "created_at": "2026-09-07T12:26:11+00:00",
+      "event_id": "de80894ee1dc3e0b2aa6218eec27bc98",
+      "iso_date": null,
+      "kind": "monitor_error",
+      "last_error": null,
+      "last_error_class": null,
+      "last_request_id": null,
+      "new_shifts": [],
+      "next_attempt_at": "2026-09-07T12:26:11+00:00",
+      "next_index": 0,
+      "quarantine_reason": null,
+      "quarantined_payload": null,
+      "quota_limit": null,
+      "quota_remaining": null,
+      "quota_reset": null,
+      "rate_limit_deferrals_by_index": {},
+      "reason": "Bräurosl: Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
+      "requeue_count": 0,
+      "shifts": [],
+      "status": "pending",
+      "tent_name": "Bräurosl",
+      "tent_slug": "braeurosl",
+      "total_messages": 1
+    },
     "e06dd5e5eb48e212aa5197d3a1c3689d": {
       "attempts_by_index": {
         "0": 1
@@ -2041,8 +2070,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "bartls-floesserstadl",
-  "producer_revision": "5da1f21dd4927b50ec0f338094bb5c47108d0971",
+  "probe_rotation_cursor": "hacker",
+  "producer_revision": "b565c5a89159e08abfc6468fc632a9376cdc0c11",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -2235,15 +2264,15 @@
       "last_success_at": "2026-09-05T14:21:25+00:00"
     },
     "bartls-floesserstadl": {
-      "consecutive_degraded": 717,
+      "consecutive_degraded": 718,
       "consecutive_failures": 0,
-      "consecutive_unhealthy": 816,
+      "consecutive_unhealthy": 817,
       "dates": {
         "2026-09-26": {
           "alert_sequence": 1,
           "availability_evidence_lost": false,
           "baseline_verified": true,
-          "consecutive_degraded": 717,
+          "consecutive_degraded": 718,
           "consecutive_errors": 0,
           "diagnostics": {
             "date_control_count": 0,
@@ -2262,7 +2291,7 @@
           },
           "health": "degraded",
           "last_change": "2026-08-18T11:21:19+00:00",
-          "last_check": "2026-09-07T11:56:09+00:00",
+          "last_check": "2026-09-07T12:26:11+00:00",
           "last_reliable_at": "2026-08-21T09:41:30+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -2297,8 +2326,8 @@
     },
     "braeurosl": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 2,
-      "consecutive_unhealthy": 2,
+      "consecutive_failures": 3,
+      "consecutive_unhealthy": 3,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
@@ -2348,14 +2377,14 @@
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 2,
+          "consecutive_errors": 3,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": "shift_update_challenge",
             "health": "error",
             "page_type": "bot",
-            "plausible_date_option_count": 12,
+            "plausible_date_option_count": 13,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -2366,7 +2395,7 @@
           },
           "health": "error",
           "last_change": "2026-08-04T16:32:26+00:00",
-          "last_check": "2026-09-07T11:56:09+00:00",
+          "last_check": "2026-09-07T12:26:11+00:00",
           "last_reliable_at": "2026-09-07T10:56:21+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -2389,10 +2418,10 @@
           "status": "unavailable"
         }
       },
-      "failure_incident_kind": null,
-      "failure_incident_open": false,
-      "failure_incident_sequence": 3,
-      "last_error": "2026-09-07T11:56:09+00:00",
+      "failure_incident_kind": "error",
+      "failure_incident_open": true,
+      "failure_incident_sequence": 4,
+      "last_error": "2026-09-07T12:26:11+00:00",
       "last_success_at": "2026-09-07T10:56:21+00:00"
     },
     "fischer-vroni": {
@@ -2470,8 +2499,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-07T08:46:46+00:00",
-          "last_check": "2026-09-07T11:56:09+00:00",
-          "last_reliable_at": "2026-09-07T11:56:09+00:00",
+          "last_check": "2026-09-07T12:26:11+00:00",
+          "last_reliable_at": "2026-09-07T12:26:11+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2497,7 +2526,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 9,
       "last_error": "2026-08-27T12:56:21+00:00",
-      "last_success_at": "2026-09-07T11:56:09+00:00"
+      "last_success_at": "2026-09-07T12:26:11+00:00"
     },
     "hacker": {
       "consecutive_degraded": 0,
@@ -3572,8 +3601,8 @@
       "last_success_at": "2026-09-07T12:16:39+00:00"
     }
   },
-  "workflow_duration_seconds": 33.312,
-  "workflow_finished_at": "2026-09-07T12:21:25+00:00",
-  "workflow_last_run_at": "2026-09-07T12:20:52+00:00",
-  "workflow_started_at": "2026-09-07T12:20:52+00:00"
+  "workflow_duration_seconds": 21.69,
+  "workflow_finished_at": "2026-09-07T12:26:11+00:00",
+  "workflow_last_run_at": "2026-09-07T12:25:49+00:00",
+  "workflow_started_at": "2026-09-07T12:25:49+00:00"
 }
