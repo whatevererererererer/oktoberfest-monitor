@@ -1263,30 +1263,32 @@
       "total_messages": 1
     },
     "9206038bf61f79989737becc444b7b26": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.schuetzenfestzelt.com/reservation/",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-09-10T12:32:06.295788+00:00",
       "created_at": "2026-09-10T12:32:03+00:00",
       "event_id": "9206038bf61f79989737becc444b7b26",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "22e36d62-0028-4045-8517-58aa73a36f4b",
       "new_shifts": [],
-      "next_attempt_at": "2026-09-10T12:32:03+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9983,
+      "quota_reset": 1790830800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Schützen-Festzelt: Fehler seit 3 Läufen\nGrund 2026-09-26: Datumsauswahl wurde nicht gefunden (Code: date_control_missing)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Schützen-Festzelt",
       "tent_slug": "schuetzen",
       "total_messages": 1
@@ -2112,8 +2114,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-09-07T12:26:13.279841+00:00",
-      "remaining": 9984,
+      "observed_at": "2026-09-10T12:32:06.295788+00:00",
+      "remaining": 9983,
       "reset": 1790830800
     }
   },
