@@ -2103,8 +2103,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "ammer",
-  "producer_revision": "ce3cf66b4962cf31b4eb2bc24978beba05de5d32",
+  "probe_rotation_cursor": "bartls-floesserstadl",
+  "producer_revision": "2327eb45bfc39d99129d77e897de886bd2201bc8",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -2123,33 +2123,33 @@
   "tents": {
     "ammer": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 0,
-      "consecutive_unhealthy": 0,
+      "consecutive_failures": 1,
+      "consecutive_unhealthy": 1,
       "dates": {
         "2026-09-26": {
           "alert_sequence": 2,
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 0,
+          "consecutive_errors": 1,
           "diagnostics": {
-            "date_control_count": 1,
-            "detail": null,
-            "error_class": null,
-            "health": "healthy",
-            "page_type": "booking",
-            "plausible_date_option_count": 15,
-            "shift_control_count": 1,
-            "shift_control_found": true,
-            "shift_count": 1,
-            "target_enabled": true,
-            "target_found": true,
+            "date_control_count": 0,
+            "detail": "ConnectTimeout",
+            "error_class": "probe_exception",
+            "health": "error",
+            "page_type": "unknown",
+            "plausible_date_option_count": 0,
+            "shift_control_count": 0,
+            "shift_control_found": false,
+            "shift_count": 0,
+            "target_enabled": null,
+            "target_found": false,
             "unavailable_confirmed": false,
-            "update_confirmed": true
+            "update_confirmed": false
           },
-          "health": "healthy",
+          "health": "error",
           "last_change": "2026-08-20T08:26:15+00:00",
-          "last_check": "2026-09-14T19:41:25+00:00",
+          "last_check": "2026-09-14T20:11:47+00:00",
           "last_reliable_at": "2026-09-14T19:41:25+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -2166,7 +2166,7 @@
             "unavailable_confirmed": false,
             "update_confirmed": true
           },
-          "observed_status": "available",
+          "observed_status": "error",
           "shift_keys": [
             "mittag"
           ],
@@ -2179,7 +2179,7 @@
       "failure_incident_kind": null,
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
-      "last_error": "2026-09-13T23:11:50+00:00",
+      "last_error": "2026-09-14T20:11:47+00:00",
       "last_success_at": "2026-09-14T19:41:25+00:00"
     },
     "armbrustschuetzen": {
@@ -2210,8 +2210,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-18T11:16:48+00:00",
-          "last_check": "2026-09-14T19:41:25+00:00",
-          "last_reliable_at": "2026-09-14T19:41:25+00:00",
+          "last_check": "2026-09-14T20:11:47+00:00",
+          "last_reliable_at": "2026-09-14T20:11:47+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -2237,19 +2237,19 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 3,
       "last_error": "2026-08-31T09:01:31+00:00",
-      "last_success_at": "2026-09-14T19:41:25+00:00"
+      "last_success_at": "2026-09-14T20:11:47+00:00"
     },
     "augustiner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 393,
-      "consecutive_unhealthy": 393,
+      "consecutive_failures": 394,
+      "consecutive_unhealthy": 394,
       "dates": {
         "2026-09-26": {
           "alert_sequence": 0,
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 393,
+          "consecutive_errors": 394,
           "diagnostics": {
             "date_control_count": 0,
             "detail": null,
@@ -2267,7 +2267,7 @@
           },
           "health": "error",
           "last_change": "2026-08-18T11:16:48+00:00",
-          "last_check": "2026-09-14T19:41:25+00:00",
+          "last_check": "2026-09-14T20:11:47+00:00",
           "last_reliable_at": "2026-09-05T14:21:25+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -2293,7 +2293,7 @@
       "failure_incident_kind": "error",
       "failure_incident_open": true,
       "failure_incident_sequence": 1,
-      "last_error": "2026-09-14T19:41:25+00:00",
+      "last_error": "2026-09-14T20:11:47+00:00",
       "last_success_at": "2026-09-05T14:21:25+00:00"
     },
     "bartls-floesserstadl": {
@@ -3634,8 +3634,8 @@
       "last_success_at": "2026-09-14T20:06:52+00:00"
     }
   },
-  "workflow_duration_seconds": 52.814,
-  "workflow_finished_at": "2026-09-14T20:06:52+00:00",
-  "workflow_last_run_at": "2026-09-14T20:05:59+00:00",
-  "workflow_started_at": "2026-09-14T20:05:59+00:00"
+  "workflow_duration_seconds": 53.662,
+  "workflow_finished_at": "2026-09-14T20:11:47+00:00",
+  "workflow_last_run_at": "2026-09-14T20:10:53+00:00",
+  "workflow_started_at": "2026-09-14T20:10:53+00:00"
 }
