@@ -247,7 +247,8 @@
         "2": 1,
         "3": 1,
         "4": 1,
-        "5": 1
+        "5": 1,
+        "6": 1
       },
       "booking_url": "https://ammer-wiesn.de/reservierung/",
       "burst": true,
@@ -258,16 +259,16 @@
       "kind": "availability",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": "52fdba32-3380-47ba-9da8-f5a2eed15d72",
+      "last_request_id": "7b31980c-ef87-4ef7-b39f-d7008680525b",
       "new_shifts": [
         "Nachmittag (14:30–17:30)"
       ],
-      "next_attempt_at": "2026-09-15T11:52:29.800372+00:00",
-      "next_index": 6,
+      "next_attempt_at": "2026-09-15T11:52:35.052494+00:00",
+      "next_index": 7,
       "quarantine_reason": null,
       "quarantined_payload": null,
       "quota_limit": 10000,
-      "quota_remaining": 9977,
+      "quota_remaining": 9976,
       "quota_reset": 1790830800,
       "rate_limit_deferrals_by_index": {},
       "reason": "shifts_added",
@@ -2149,8 +2150,8 @@
   "pushover_quota": {
     "availability": {
       "limit": 10000,
-      "observed_at": "2026-09-15T11:52:24.800372+00:00",
-      "remaining": 9977,
+      "observed_at": "2026-09-15T11:52:30.052494+00:00",
+      "remaining": 9976,
       "reset": 1790830800
     },
     "monitor_error": {
