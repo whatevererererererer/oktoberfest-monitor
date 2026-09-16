@@ -1885,6 +1885,39 @@
       "tent_slug": "poschner",
       "total_messages": 1
     },
+    "e09eaeb844d508bfbc125bd6a1c6e6cc": {
+      "attempts_by_index": {},
+      "booking_url": "https://reservierung.festhalle-schottenhamel.de/reservation/",
+      "burst": false,
+      "completed_at": null,
+      "created_at": "2026-09-16T11:21:34+00:00",
+      "event_id": "e09eaeb844d508bfbc125bd6a1c6e6cc",
+      "iso_date": "2026-09-26",
+      "kind": "availability",
+      "last_error": null,
+      "last_error_class": null,
+      "last_request_id": null,
+      "new_shifts": [
+        "Mittag"
+      ],
+      "next_attempt_at": "2026-09-16T11:21:34+00:00",
+      "next_index": 0,
+      "quarantine_reason": null,
+      "quarantined_payload": null,
+      "quota_limit": null,
+      "quota_remaining": null,
+      "quota_reset": null,
+      "rate_limit_deferrals_by_index": {},
+      "reason": "available",
+      "requeue_count": 0,
+      "shifts": [
+        "Mittag"
+      ],
+      "status": "pending",
+      "tent_name": "Schottenhamel-Festhalle",
+      "tent_slug": "schottenhamel",
+      "total_messages": 1
+    },
     "e46d72246545f57026dcef4b925169a4": {
       "attempts_by_index": {
         "0": 1
@@ -2146,8 +2179,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "schottenhamel",
-  "producer_revision": "2c159b4d904f2512258b2340e4c2a76ffe4e89ba",
+  "probe_rotation_cursor": "ammer",
+  "producer_revision": "34cf0a6a8891719e646835d261acc332d0e62a0e",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -3427,7 +3460,7 @@
           "status": "available"
         },
         "2026-09-26": {
-          "alert_sequence": 11,
+          "alert_sequence": 12,
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
@@ -3438,45 +3471,49 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 10,
-            "shift_control_count": 0,
-            "shift_control_found": false,
-            "shift_count": 0,
-            "target_enabled": null,
-            "target_found": false,
+            "plausible_date_option_count": 12,
+            "shift_control_count": 1,
+            "shift_control_found": true,
+            "shift_count": 1,
+            "target_enabled": true,
+            "target_found": true,
             "unavailable_confirmed": false,
-            "update_confirmed": false
+            "update_confirmed": true
           },
           "health": "healthy",
-          "last_change": "2026-09-07T09:16:41+00:00",
-          "last_check": "2026-09-16T10:51:49+00:00",
-          "last_reliable_at": "2026-09-16T10:51:49+00:00",
+          "last_change": "2026-09-16T11:21:34+00:00",
+          "last_check": "2026-09-16T11:21:34+00:00",
+          "last_reliable_at": "2026-09-16T11:21:34+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 10,
-            "shift_control_count": 0,
-            "shift_control_found": false,
-            "shift_count": 0,
-            "target_enabled": null,
-            "target_found": false,
+            "plausible_date_option_count": 12,
+            "shift_control_count": 1,
+            "shift_control_found": true,
+            "shift_count": 1,
+            "target_enabled": true,
+            "target_found": true,
             "unavailable_confirmed": false,
-            "update_confirmed": false
+            "update_confirmed": true
           },
-          "observed_status": "unavailable",
-          "shift_keys": [],
-          "shifts": [],
-          "status": "unavailable"
+          "observed_status": "available",
+          "shift_keys": [
+            "mittag"
+          ],
+          "shifts": [
+            "Mittag"
+          ],
+          "status": "available"
         }
       },
       "failure_incident_kind": null,
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-03T01:48:38+00:00",
-      "last_success_at": "2026-09-16T10:51:49+00:00"
+      "last_success_at": "2026-09-16T11:21:34+00:00"
     },
     "schuetzen": {
       "consecutive_degraded": 0,
@@ -3549,8 +3586,8 @@
           },
           "health": "healthy",
           "last_change": "2026-04-29T11:32:36+00:00",
-          "last_check": "2026-09-16T10:51:49+00:00",
-          "last_reliable_at": "2026-09-16T10:51:49+00:00",
+          "last_check": "2026-09-16T11:21:34+00:00",
+          "last_reliable_at": "2026-09-16T11:21:34+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -3576,7 +3613,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 1,
       "last_error": "2026-09-15T11:46:41+00:00",
-      "last_success_at": "2026-09-16T10:51:49+00:00"
+      "last_success_at": "2026-09-16T11:21:34+00:00"
     },
     "weinzelt": {
       "consecutive_degraded": 0,
@@ -3649,8 +3686,8 @@
           },
           "health": "healthy",
           "last_change": "2026-06-29T12:37:59+00:00",
-          "last_check": "2026-09-16T10:51:49+00:00",
-          "last_reliable_at": "2026-09-16T10:51:49+00:00",
+          "last_check": "2026-09-16T11:21:34+00:00",
+          "last_reliable_at": "2026-09-16T11:21:34+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -3676,11 +3713,11 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 0,
       "last_error": "2026-08-23T13:01:52+00:00",
-      "last_success_at": "2026-09-16T10:51:49+00:00"
+      "last_success_at": "2026-09-16T11:21:34+00:00"
     }
   },
-  "workflow_duration_seconds": 51.429,
-  "workflow_finished_at": "2026-09-16T11:16:58+00:00",
-  "workflow_last_run_at": "2026-09-16T11:16:07+00:00",
-  "workflow_started_at": "2026-09-16T11:16:07+00:00"
+  "workflow_duration_seconds": 39.928,
+  "workflow_finished_at": "2026-09-16T11:21:34+00:00",
+  "workflow_last_run_at": "2026-09-16T11:20:54+00:00",
+  "workflow_started_at": "2026-09-16T11:20:54+00:00"
 }
