@@ -1722,6 +1722,35 @@
       "tent_slug": "fischer-vroni",
       "total_messages": 1
     },
+    "bd9bb4504912b303c247eeb6f4379622": {
+      "attempts_by_index": {},
+      "booking_url": "https://reservierung.poschners.de/reservierung",
+      "burst": false,
+      "completed_at": null,
+      "created_at": "2026-09-18T22:21:27+00:00",
+      "event_id": "bd9bb4504912b303c247eeb6f4379622",
+      "iso_date": null,
+      "kind": "monitor_error",
+      "last_error": null,
+      "last_error_class": null,
+      "last_request_id": null,
+      "new_shifts": [],
+      "next_attempt_at": "2026-09-18T22:21:27+00:00",
+      "next_index": 0,
+      "quarantine_reason": null,
+      "quarantined_payload": null,
+      "quota_limit": null,
+      "quota_remaining": null,
+      "quota_reset": null,
+      "rate_limit_deferrals_by_index": {},
+      "reason": "Poschner's Hühner- und Entenbraterei: Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
+      "requeue_count": 0,
+      "shifts": [],
+      "status": "pending",
+      "tent_name": "Poschner's Hühner- und Entenbraterei",
+      "tent_slug": "poschner",
+      "total_messages": 1
+    },
     "c1612c39377a1cbb29c3ff7c144052c2": {
       "attempts_by_index": {
         "0": 1
@@ -2243,8 +2272,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "ochsenbraterei",
-  "producer_revision": "81790b1b4612be00c227751140bf86c68a70ede0",
+  "probe_rotation_cursor": "schottenhamel",
+  "producer_revision": "b7ed3e1b19a13db772c8d29ad0b12613ee3ac805",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -3247,8 +3276,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-09-18T21:51:30+00:00",
-          "last_reliable_at": "2026-09-18T21:51:30+00:00",
+          "last_check": "2026-09-18T22:21:27+00:00",
+          "last_reliable_at": "2026-09-18T22:21:27+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -3274,7 +3303,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 2,
       "last_error": "2026-08-05T16:33:15+00:00",
-      "last_success_at": "2026-09-18T21:51:30+00:00"
+      "last_success_at": "2026-09-18T22:21:27+00:00"
     },
     "paulaner": {
       "consecutive_degraded": 0,
@@ -3353,8 +3382,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-06T00:21:59+00:00",
-          "last_check": "2026-09-18T21:51:30+00:00",
-          "last_reliable_at": "2026-09-18T21:51:30+00:00",
+          "last_check": "2026-09-18T22:21:27+00:00",
+          "last_reliable_at": "2026-09-18T22:21:27+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -3380,12 +3409,12 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 8,
       "last_error": "2026-09-10T09:56:18+00:00",
-      "last_success_at": "2026-09-18T21:51:30+00:00"
+      "last_success_at": "2026-09-18T22:21:27+00:00"
     },
     "poschner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 2,
-      "consecutive_unhealthy": 2,
+      "consecutive_failures": 3,
+      "consecutive_unhealthy": 3,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
@@ -3422,7 +3451,7 @@
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 2,
+          "consecutive_errors": 3,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -3440,7 +3469,7 @@
           },
           "health": "error",
           "last_change": "2026-08-06T07:31:46+00:00",
-          "last_check": "2026-09-18T21:51:30+00:00",
+          "last_check": "2026-09-18T22:21:27+00:00",
           "last_reliable_at": "2026-09-18T20:52:22+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -3463,10 +3492,10 @@
           "status": "unavailable"
         }
       },
-      "failure_incident_kind": null,
-      "failure_incident_open": false,
-      "failure_incident_sequence": 4,
-      "last_error": "2026-09-18T21:51:30+00:00",
+      "failure_incident_kind": "error",
+      "failure_incident_open": true,
+      "failure_incident_sequence": 5,
+      "last_error": "2026-09-18T22:21:27+00:00",
       "last_success_at": "2026-09-18T20:52:22+00:00"
     },
     "schottenhamel": {
@@ -3774,8 +3803,8 @@
       "last_success_at": "2026-09-18T21:56:45+00:00"
     }
   },
-  "workflow_duration_seconds": 36.796,
-  "workflow_finished_at": "2026-09-18T22:16:27+00:00",
-  "workflow_last_run_at": "2026-09-18T22:15:50+00:00",
-  "workflow_started_at": "2026-09-18T22:15:50+00:00"
+  "workflow_duration_seconds": 35.314,
+  "workflow_finished_at": "2026-09-18T22:21:27+00:00",
+  "workflow_last_run_at": "2026-09-18T22:20:52+00:00",
+  "workflow_started_at": "2026-09-18T22:20:52+00:00"
 }
