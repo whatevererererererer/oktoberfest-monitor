@@ -1940,30 +1940,32 @@
       "total_messages": 1
     },
     "d2d9ba07857e11f263c8ffb878050ea5": {
-      "attempts_by_index": {},
+      "attempts_by_index": {
+        "0": 1
+      },
       "booking_url": "https://reservierung.ochsenbraterei.de/reservierungen",
       "burst": false,
-      "completed_at": null,
+      "completed_at": "2026-09-20T09:56:20.375296+00:00",
       "created_at": "2026-09-20T09:56:18+00:00",
       "event_id": "d2d9ba07857e11f263c8ffb878050ea5",
       "iso_date": null,
       "kind": "monitor_error",
       "last_error": null,
       "last_error_class": null,
-      "last_request_id": null,
+      "last_request_id": "38462948-2edc-44e4-917e-e0ee7ed4632c",
       "new_shifts": [],
-      "next_attempt_at": "2026-09-20T09:56:18+00:00",
-      "next_index": 0,
+      "next_attempt_at": null,
+      "next_index": 1,
       "quarantine_reason": null,
       "quarantined_payload": null,
-      "quota_limit": null,
-      "quota_remaining": null,
-      "quota_reset": null,
+      "quota_limit": 10000,
+      "quota_remaining": 9965,
+      "quota_reset": 1790830800,
       "rate_limit_deferrals_by_index": {},
       "reason": "Ochsenbraterei: Fehler seit 3 Läufen\nGrund 2026-09-26: Bot-Schutz/Challenge beim Laden der Schichtauswahl (Code: shift_update_challenge)",
       "requeue_count": 0,
       "shifts": [],
-      "status": "pending",
+      "status": "delivered",
       "tent_name": "Ochsenbraterei",
       "tent_slug": "ochsenbraterei",
       "total_messages": 1
@@ -2469,8 +2471,8 @@
     },
     "monitor_error": {
       "limit": 10000,
-      "observed_at": "2026-09-20T01:26:28.674006+00:00",
-      "remaining": 9966,
+      "observed_at": "2026-09-20T09:56:20.375296+00:00",
+      "remaining": 9965,
       "reset": 1790830800
     }
   },
