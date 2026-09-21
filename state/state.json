@@ -2460,8 +2460,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "ochsenbraterei",
-  "producer_revision": "d8c242928179b8a9f8a79d909a84fc6795ec4284",
+  "probe_rotation_cursor": "schottenhamel",
+  "producer_revision": "4a144e24c162e7200cf2c5c94ee2c8eabf98634c",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -3464,8 +3464,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-09-21T19:31:48+00:00",
-          "last_reliable_at": "2026-09-21T19:31:48+00:00",
+          "last_check": "2026-09-21T20:01:46+00:00",
+          "last_reliable_at": "2026-09-21T20:01:46+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -3491,7 +3491,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 6,
       "last_error": "2026-09-20T09:56:18+00:00",
-      "last_success_at": "2026-09-21T19:31:48+00:00"
+      "last_success_at": "2026-09-21T20:01:46+00:00"
     },
     "paulaner": {
       "consecutive_degraded": 0,
@@ -3570,8 +3570,8 @@
           },
           "health": "healthy",
           "last_change": "2026-08-06T00:21:59+00:00",
-          "last_check": "2026-09-21T19:31:48+00:00",
-          "last_reliable_at": "2026-09-21T19:31:48+00:00",
+          "last_check": "2026-09-21T20:01:46+00:00",
+          "last_reliable_at": "2026-09-21T20:01:46+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
@@ -3597,12 +3597,12 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 8,
       "last_error": "2026-09-10T09:56:18+00:00",
-      "last_success_at": "2026-09-21T19:31:48+00:00"
+      "last_success_at": "2026-09-21T20:01:46+00:00"
     },
     "poschner": {
       "consecutive_degraded": 0,
-      "consecutive_failures": 0,
-      "consecutive_unhealthy": 0,
+      "consecutive_failures": 1,
+      "consecutive_unhealthy": 1,
       "dates": {
         "2026-09-25": {
           "alert_sequence": 0,
@@ -3639,25 +3639,25 @@
           "availability_evidence_lost": false,
           "baseline_verified": true,
           "consecutive_degraded": 0,
-          "consecutive_errors": 0,
+          "consecutive_errors": 1,
           "diagnostics": {
             "date_control_count": 1,
             "detail": null,
-            "error_class": null,
-            "health": "healthy",
-            "page_type": "booking",
-            "plausible_date_option_count": 10,
+            "error_class": "shift_update_challenge",
+            "health": "error",
+            "page_type": "bot",
+            "plausible_date_option_count": 11,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
-            "target_enabled": null,
-            "target_found": false,
+            "target_enabled": true,
+            "target_found": true,
             "unavailable_confirmed": false,
             "update_confirmed": false
           },
-          "health": "healthy",
+          "health": "error",
           "last_change": "2026-08-06T07:31:46+00:00",
-          "last_check": "2026-09-21T19:31:48+00:00",
+          "last_check": "2026-09-21T20:01:46+00:00",
           "last_reliable_at": "2026-09-21T19:31:48+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
@@ -3674,7 +3674,7 @@
             "unavailable_confirmed": false,
             "update_confirmed": false
           },
-          "observed_status": "unavailable",
+          "observed_status": "error",
           "shift_keys": [],
           "shifts": [],
           "status": "unavailable"
@@ -3683,7 +3683,7 @@
       "failure_incident_kind": null,
       "failure_incident_open": false,
       "failure_incident_sequence": 7,
-      "last_error": "2026-09-21T17:01:52+00:00",
+      "last_error": "2026-09-21T20:01:46+00:00",
       "last_success_at": "2026-09-21T19:31:48+00:00"
     },
     "schottenhamel": {
@@ -3991,8 +3991,8 @@
       "last_success_at": "2026-09-21T19:36:31+00:00"
     }
   },
-  "workflow_duration_seconds": 37.006,
-  "workflow_finished_at": "2026-09-21T19:56:25+00:00",
-  "workflow_last_run_at": "2026-09-21T19:55:48+00:00",
-  "workflow_started_at": "2026-09-21T19:55:48+00:00"
+  "workflow_duration_seconds": 34.784,
+  "workflow_finished_at": "2026-09-21T20:01:46+00:00",
+  "workflow_last_run_at": "2026-09-21T20:01:11+00:00",
+  "workflow_started_at": "2026-09-21T20:01:11+00:00"
 }
