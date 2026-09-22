@@ -2584,8 +2584,8 @@
       "total_messages": 1
     }
   },
-  "probe_rotation_cursor": "ochsenbraterei",
-  "producer_revision": "9b4ffa7312938db784a3ab840c32be92fae5a357",
+  "probe_rotation_cursor": "schottenhamel",
+  "producer_revision": "4be8150fa442fe50013e2533f1e5294c9d66ec3f",
   "pushover_quota": {
     "availability": {
       "limit": 10000,
@@ -3577,7 +3577,7 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 7,
+            "plausible_date_option_count": 6,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -3588,15 +3588,15 @@
           },
           "health": "healthy",
           "last_change": "2026-08-04T16:37:17+00:00",
-          "last_check": "2026-09-22T11:06:31+00:00",
-          "last_reliable_at": "2026-09-22T11:06:31+00:00",
+          "last_check": "2026-09-22T11:36:33+00:00",
+          "last_reliable_at": "2026-09-22T11:36:33+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 7,
+            "plausible_date_option_count": 6,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -3615,7 +3615,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 6,
       "last_error": "2026-09-20T09:56:18+00:00",
-      "last_success_at": "2026-09-22T11:06:31+00:00"
+      "last_success_at": "2026-09-22T11:36:33+00:00"
     },
     "paulaner": {
       "consecutive_degraded": 0,
@@ -3683,7 +3683,7 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 8,
+            "plausible_date_option_count": 9,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -3694,15 +3694,15 @@
           },
           "health": "healthy",
           "last_change": "2026-08-06T00:21:59+00:00",
-          "last_check": "2026-09-22T11:06:31+00:00",
-          "last_reliable_at": "2026-09-22T11:06:31+00:00",
+          "last_check": "2026-09-22T11:36:33+00:00",
+          "last_reliable_at": "2026-09-22T11:36:33+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 8,
+            "plausible_date_option_count": 9,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -3721,7 +3721,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 8,
       "last_error": "2026-09-10T09:56:18+00:00",
-      "last_success_at": "2026-09-22T11:06:31+00:00"
+      "last_success_at": "2026-09-22T11:36:33+00:00"
     },
     "poschner": {
       "consecutive_degraded": 0,
@@ -3770,7 +3770,7 @@
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 6,
+            "plausible_date_option_count": 7,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -3781,15 +3781,15 @@
           },
           "health": "healthy",
           "last_change": "2026-08-06T07:31:46+00:00",
-          "last_check": "2026-09-22T11:06:31+00:00",
-          "last_reliable_at": "2026-09-22T11:06:31+00:00",
+          "last_check": "2026-09-22T11:36:33+00:00",
+          "last_reliable_at": "2026-09-22T11:36:33+00:00",
           "last_reliable_diagnostics": {
             "date_control_count": 1,
             "detail": null,
             "error_class": null,
             "health": "healthy",
             "page_type": "booking",
-            "plausible_date_option_count": 6,
+            "plausible_date_option_count": 7,
             "shift_control_count": 0,
             "shift_control_found": false,
             "shift_count": 0,
@@ -3808,7 +3808,7 @@
       "failure_incident_open": false,
       "failure_incident_sequence": 10,
       "last_error": "2026-09-22T10:06:26+00:00",
-      "last_success_at": "2026-09-22T11:06:31+00:00"
+      "last_success_at": "2026-09-22T11:36:33+00:00"
     },
     "schottenhamel": {
       "consecutive_degraded": 0,
@@ -4115,8 +4115,8 @@
       "last_success_at": "2026-09-22T11:11:37+00:00"
     }
   },
-  "workflow_duration_seconds": 33.73,
-  "workflow_finished_at": "2026-09-22T11:31:33+00:00",
-  "workflow_last_run_at": "2026-09-22T11:30:59+00:00",
-  "workflow_started_at": "2026-09-22T11:30:59+00:00"
+  "workflow_duration_seconds": 45.68,
+  "workflow_finished_at": "2026-09-22T11:36:33+00:00",
+  "workflow_last_run_at": "2026-09-22T11:35:48+00:00",
+  "workflow_started_at": "2026-09-22T11:35:48+00:00"
 }
